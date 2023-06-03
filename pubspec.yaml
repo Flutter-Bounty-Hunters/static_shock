@@ -1,0 +1,8 @@
+name: static_shock_workspace
+
+environment:
+  sdk: '^3.0.0'
+
+dev_dependencies:
+  melos: ^3.0.1
+
