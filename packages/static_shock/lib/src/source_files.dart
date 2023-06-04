@@ -58,6 +58,21 @@ class SourceFiles {
         .where((file) => filter?.passesFilter(file) ?? true);
   }
 
+  Iterable<SourceFile> layouts() {
+    final layoutsDirectory = directory.subDir(["_includes", "layouts"]);
+    if (!layoutsDirectory.existsSync()) {
+      return [];
+    }
+
+    return layoutsDirectory //
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((file) => SourceFile(
+              file,
+              file.path.substring(directory.path.length),
+            ));
+  }
+
   Iterable<SourceFile> components() {
     final componentsDirectory = directory.subDir(["_includes", "components"]);
     if (!componentsDirectory.existsSync()) {

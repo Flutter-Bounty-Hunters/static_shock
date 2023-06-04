@@ -2,33 +2,58 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:front_matter/front_matter.dart' as front_matter;
-import 'package:jinja/jinja.dart';
-import 'package:markdown/markdown.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
-import 'package:static_shock/src/destination_files.dart';
-import 'package:static_shock/src/include_files.dart';
+import 'package:static_shock/src/content/markdown.dart';
+import 'package:static_shock/src/templates/components.dart';
+import 'package:static_shock/src/templates/jinja.dart';
+import 'package:static_shock/src/templates/layouts.dart';
 
 import 'assets.dart';
 import 'files.dart';
 import 'pages.dart';
+import 'pipeline.dart';
+import 'pretty_urls.dart';
 import 'source_files.dart';
 
-class StaticShock {
+final _log = Logger(level: Level.verbose);
+
+class StaticShock implements StaticShockPipeline {
   StaticShock({
     required this.sourceDirectoryRelativePath,
     required this.destinationDirectoryRelativePath,
-    Set<SourcePageLoader> pageLoaders = const {
-      MarkdownSourcePageLoader(),
-      JinjaSourcePageLoader(),
-    },
-    Set<SourceFilter> assetExclusions = const {
-      ExcludePrefixes({"_", "."}),
-    },
-    Set<StaticShockPlugin> plugins = const {},
-  })  : _assetExclusions = assetExclusions,
-        _pageLoaders = pageLoaders,
-        _plugins = plugins;
+    Set<Picker>? pickers,
+    Set<Excluder>? excluders,
+    Set<AssetTransformer>? assetTransformers,
+    Set<PageLoader>? pageLoaders,
+    Set<PageTransformer>? pageTransformers,
+    Set<PageRenderer>? pageRenderers,
+    Set<StaticShockPlugin>? plugins,
+  })  : _pickers = pickers ??
+            {
+              const ExtensionPicker("md"),
+              const ExtensionPicker("jinja"),
+            },
+        _excluders = excluders ??
+            {
+              const FilePrefixExcluder("."),
+            },
+        _assetTransformers = assetTransformers ?? {},
+        _pageLoaders = pageLoaders ??
+            {
+              const MarkdownPageLoader(),
+              const JinjaPageLoader(),
+            },
+        _pageTransformers = pageTransformers ??
+            {
+              const PrettyPathPageTransformer(),
+            },
+        _pageRenderers = pageRenderers ??
+            {
+              const MarkdownPageRenderer(),
+              const JinjaPageRenderer(),
+            },
+        _plugins = plugins ?? {};
 
   final String sourceDirectoryRelativePath;
   final String destinationDirectoryRelativePath;
@@ -38,17 +63,41 @@ class StaticShock {
 
   late Directory destinationDir;
 
-  final _layouts = <Layout>{};
-  final _components = <Component>{};
+  @override
+  void pick(Picker picker) => _pickers.add(picker);
+  late final Set<Picker> _pickers;
 
-  final Set<SourcePageLoader> _pageLoaders;
-  final _pages = <Page>[];
-  PagesIndex? _pagesIndex;
+  @override
+  void exclude(Excluder excluder) => _excluders.add(excluder);
+  late final Set<Excluder> _excluders;
 
-  final Set<SourceFilter> _assetExclusions;
-  final _assetFiles = <Asset>[];
+  @override
+  void transformAssets(AssetTransformer transformer) => _assetTransformers.add(transformer);
+  late final Set<AssetTransformer> _assetTransformers;
 
+  @override
+  void loadPages(PageLoader loader) => _pageLoaders.add(loader);
+  late final Set<PageLoader> _pageLoaders;
+
+  @override
+  void transformPages(PageTransformer transformer) => _pageTransformers.add(transformer);
+  late final Set<PageTransformer> _pageTransformers;
+
+  @override
+  void renderPages(PageRenderer renderer) => _pageRenderers.add(renderer);
+  late final Set<PageRenderer> _pageRenderers;
+
+  void plugin(StaticShockPlugin plugin) => _plugins.add(plugin);
   final Set<StaticShockPlugin> _plugins;
+
+  File _resolveSourceFile(FileRelativePath relativePath) => _sourceDirectory.descFile([relativePath.value]);
+
+  File _resolveDestinationFile(FileRelativePath relativePath) => destinationDir.descFile([relativePath.value]);
+
+  late StaticShockPipelineContext _context;
+  final _files = <FileRelativePath>[];
+  final _pages = <Page>[];
+  final _assets = <Asset>[];
 
   /// Generates a static site from content and assets.
   Future<void> generateSite() async {
@@ -65,32 +114,38 @@ class StaticShock {
 
     _clearDestination();
 
-    //----- Load all mappings from source files to destination files -----
-    await _loadIncludes();
-    _log.info("");
+    //---- Run new pipeline ----
+    _context = StaticShockPipelineContext(_sourceDirectory);
+    _files.clear();
+    _pages.clear();
+    _assets.clear();
 
-    await _loadPages();
-    _log.info("");
+    // Run plugin configuration - we do this first so that plugins can contribute pickers.
+    _applyPlugins();
 
-    _buildPageIndex();
-    _log.info("");
+    // Load layouts and components
+    _loadLayoutsAndComponents();
 
-    final globalData = _createDataForAllPages(sourceFiles);
-    _log.info("");
+    // Pick the files.
+    _pickAllSourceFiles();
 
-    //----- Let plugins configure their desired mappings from source files to destination files ----
-    _log.info(lightYellow.wrap("⚡ Running plugins\n"));
-    for (final plugin in _plugins) {
-      plugin.applyTo(this);
-    }
-    _log.info("");
+    // Load pages and assets.
+    await _loadPagesAndAssets();
 
-    //----- Write the static site files -----
-    await _copyAssets();
-    _log.info("");
+    // Index all the pages so that they're available to the template system.
+    _indexPages();
 
-    await _writePagesToFiles(globalData);
-    _log.info("");
+    // Transform pages.
+    await _transformPages();
+
+    // Transform assets.
+    await _transformAssets();
+
+    // Render pages.
+    await _renderPages();
+
+    // Write pages and assets to their destinations.
+    await _writePagesAndAssetsToFiles();
   }
 
   void _clearDestination() {
@@ -101,371 +156,199 @@ class StaticShock {
     destinationDir.createSync(recursive: true);
   }
 
-  Future<void> _loadIncludes() async {
-    _log.info("⚡ Loading all include files");
-
-    _layouts.clear();
-    _components.clear();
-
-    final layoutsDirectory = sourceFiles.directory.subDir(["_includes", "layouts"]);
-    if (layoutsDirectory.existsSync()) {
-      final layoutFiles = layoutsDirectory.listSync(recursive: true).whereType<File>().toList();
-      for (final file in layoutFiles) {
-        _layouts.add(
-          Layout(
-            sourceFile: SourceFile(file, path.relative(file.path, from: _sourceDirectory.path)),
-            code: file.readAsStringSync(),
-          ),
-        );
-
-        _log.detail("${_layouts.last}");
-      }
-    }
-
-    final componentsDirectory = sourceFiles.directory.subDir(["_includes", "components"]);
-    if (componentsDirectory.existsSync()) {
-      final componentFiles = componentsDirectory.listSync(recursive: true).whereType<File>().toList();
-      for (final file in componentFiles) {
-        _components.add(
-          Component(
-            sourceFile: SourceFile(file, path.relative(file.path, from: _sourceDirectory.path)),
-            code: file.readAsStringSync(),
-          ),
-        );
-
-        _log.detail("${_components.last}");
-      }
+  void _applyPlugins() {
+    for (final plugin in _plugins) {
+      plugin.configure(this, _context);
     }
   }
 
-  Future<void> _loadPages() async {
-    _log.info("⚡ Loading all pages");
+  void _loadLayoutsAndComponents() {
+    _log.info("⚡ Loading layouts and components");
+    for (final sourceFile in sourceFiles.layouts()) {
+      _log.detail("Layout: ${sourceFile.subPath}");
+      _context.putLayout(
+        Layout(
+          FileRelativePath.parse(sourceFile.subPath),
+          sourceFile.file.readAsStringSync(),
+        ),
+      );
+    }
+    for (final sourceFile in sourceFiles.components()) {
+      _log.detail("Component: ${sourceFile.subPath}");
 
-    _pages.clear();
+      final componentContent = front_matter.parse(sourceFile.file.readAsStringSync());
+
+      // TODO: process the component data, e.g., pull out CSS imports
+      _context.putComponent(
+        path.basenameWithoutExtension(sourceFile.subPath),
+        Component(
+          FileRelativePath.parse(sourceFile.subPath),
+          Map.from(componentContent.data),
+          componentContent.content!,
+        ),
+      );
+    }
+    _log.info("");
+  }
+
+  void _pickAllSourceFiles() {
+    _log.info("⚡ Picking files");
     for (final sourceFile in sourceFiles.sourceFiles()) {
-      for (final pageLoader in _pageLoaders) {
-        final page = await pageLoader.load(sourceFile);
-        if (page != null) {
-          _log.detail("Page: ${page.sourceFile.subPath}");
-          _pages.add(page);
+      final relativePath = FileRelativePath.parse(sourceFile.subPath);
+
+      pickerLoop:
+      for (final picker in _pickers) {
+        if (picker.shouldPick(relativePath)) {
+          for (final excluder in _excluders) {
+            if (excluder.shouldExclude(relativePath)) {
+              break pickerLoop;
+            }
+          }
+
+          _log.detail("Picked: $relativePath");
+          _files.add(relativePath);
+
+          // We picked the file. No need to check more pickers.
+          break;
+        }
+      }
+    }
+    _log.info("");
+  }
+
+  Future<void> _loadPagesAndAssets() async {
+    _log.info("⚡ Loading pages and assets");
+
+    pickerLoop:
+    for (final pickedFile in _files) {
+      late AssetContent content;
+
+      final file = _resolveSourceFile(pickedFile);
+      // Try to read as plain text, first.
+      try {
+        final textContent = file.readAsStringSync();
+        content = AssetContent.text(textContent);
+      } catch (exception) {
+        try {
+          // The content wasn't plain text. Try to read as binary.
+          final binary = file.readAsBytesSync();
+          content = AssetContent.binary(binary);
+        } catch (exception) {
+          _log.err("Tried to load asset content but failed: \n$exception");
           continue;
         }
       }
+
+      // Try to interpret the file as a page. If it is a page, load the page.
+      for (final pageLoader in _pageLoaders) {
+        if (!pageLoader.canLoad(pickedFile)) {
+          continue;
+        }
+
+        _log.detail("Loading page: $pickedFile");
+        final page = await pageLoader.loadPage(pickedFile, content.text!);
+        _pages.add(page);
+
+        continue pickerLoop;
+      }
+
+      // The file isn't a page, therefore it must be an asset.
+      _log.detail("Loading asset: $pickedFile");
+      _assets.add(Asset(
+        pickedFile,
+        content,
+        // By default, we assume a direct copy of each asset. Asset transformers
+        // can change this decision later.
+        destinationPath: pickedFile,
+        destinationContent: content,
+      ));
     }
+    _log.info("");
   }
 
-  void _buildPageIndex() {
-    _log.info("⚡ Indexing pages");
-    _pagesIndex = PagesIndex()..addPages(_pages);
-    _log.detail("Indexed ${_pages.length} pages");
+  void _indexPages() {
+    _log.info("⚡ Indexing all loaded pages");
+    _context.pagesIndex.addPages(_pages);
+    _log.info("");
   }
 
-  Map<String, Object?> _createDataForAllPages(SourceFiles sourceSet) {
-    final globalData = <String, Object?>{
-      "components": <String, Object?>{},
-    };
-
-    for (final component in _components) {
-      final name = path.basenameWithoutExtension(component.name);
-      print("Creating factory for component: '$name'");
-      (globalData["components"]! as Map<String, Object?>)[name] = () => component.code;
-    }
-
-    return globalData;
-  }
-
-  Future<void> _writePagesToFiles(Map<String, Object?> globalData) async {
-    _log.info("⚡ Generating content");
-
+  Future<void> _transformPages() async {
+    _log.info("⚡ Transforming pages");
     for (final page in _pages) {
-      final sourceFileOrDirectoryName = page.sourceFile.path.split(Platform.pathSeparator).last;
-      final newPath = '${destinationDir.path}/${page.sourceFile.subPath}$sourceFileOrDirectoryName';
-
-      final parentDirectoryPath = path.dirname(newPath);
-
-      final destFilePath =
-          "${path.basenameWithoutExtension(page.sourceFile.subPath)}${Platform.pathSeparator}index.html";
-      final destFile = File(path.join(parentDirectoryPath, destFilePath));
-
-      destFile.createSync(recursive: true);
-
-      print("Page layout: ${page.data.layout}, for page at: ${page.sourceFile.subPath}");
-      print(" - full path: ${sourceFiles.directory.descFile([page.data.layout!]).path}");
-      final layoutTemplateSource = sourceFiles.directory.descFile([page.data.layout!]).readAsStringSync();
-      final template = Template(layoutTemplateSource);
-      destFile.writeAsStringSync(
-        template.render({
-          ...globalData,
-          ...page.data.toMap(),
-        }),
-      );
+      for (final transformer in _pageTransformers) {
+        await transformer.transformPage(_context, page);
+      }
     }
-
-    print("Done generating content");
+    _log.info("");
   }
 
-  Future<void> _transformMarkdownFile(
-      SourceFile sourceFile, Map<String, Object?> globalData, PagesIndex sourceData, Directory buildRoot) async {
-    final sourceFileOrDirectoryName = sourceFile.path.split(Platform.pathSeparator).last;
-    final newPath = '${buildRoot.path}/${sourceFile.subPath}$sourceFileOrDirectoryName';
-
-    final extension = path.extension(sourceFile.path);
-    if (extension != ".md") {
-      return;
+  Future<void> _transformAssets() async {
+    _log.info("⚡ Transforming assets");
+    for (final asset in _assets) {
+      for (final transformer in _assetTransformers) {
+        await transformer.transformAsset(_context, asset);
+      }
     }
-
-    _log.detail("Copying markdown file '${sourceFile.path}'");
-    late final front_matter.FrontMatterDocument article;
-    try {
-      article = front_matter.parse(
-        sourceFile.file.readAsStringSync(),
-      );
-    } catch (exception) {
-      print("Caught exception while parsing Front Matter: $exception");
-      return;
-    }
-    if (article.data.isEmpty) {
-      _log.detail("Skipping '${sourceFile.path}' because it has no YAML configuration");
-      return;
-    }
-
-    final htmlFileContent = await _transformMarkdownContent(sourceFile, globalData, article, sourceData);
-    if (htmlFileContent == null) {
-      return;
-    }
-
-    final parentDirectoryPath = path.dirname(newPath);
-
-    final destFilePath = "${path.basenameWithoutExtension(sourceFile.subPath)}${Platform.pathSeparator}index.html";
-    final destFile = File(path.join(parentDirectoryPath, destFilePath));
-
-    destFile.createSync(recursive: true);
-    destFile.writeAsStringSync(htmlFileContent);
+    _log.info("");
   }
 
-  Future<String?> _transformMarkdownContent(
-    SourceFile sourceFile,
-    Map<String, Object?> globalData,
-    front_matter.FrontMatterDocument article,
-    PagesIndex sourceData,
-  ) async {
-    if (!article.data.containsKey("layout")) {
-      _log.err("Article is missing a 'layout' front matter property.");
-      return null;
+  Future<void> _renderPages() async {
+    _log.info("⚡ Rendering pages");
+    for (final page in _pages) {
+      for (final renderer in _pageRenderers) {
+        await renderer.renderPage(_context, page);
+      }
     }
-
-    final layoutTemplateFile = File(path.join("website_source", "_includes", "layouts", article.data["layout"]));
-    if (!layoutTemplateFile.existsSync()) {
-      _log.err("No such layout template '${layoutTemplateFile.path}'.");
-    }
-    final layoutTemplateFilePath = layoutTemplateFile.readAsStringSync();
-
-    final contentHtml = markdownToHtml(article.content!);
-
-    final pageData = sourceData.buildDataForPage(globalData, sourceFile.subPath, contentHtml);
-
-    print("Global data components before hydrating layout:");
-    print("$pageData");
-
-    final layoutTemplateSource =
-        sourceFiles.directory.descFile(["_includes", layoutTemplateFilePath]).readAsStringSync();
-    final template = Template(layoutTemplateSource);
-    final hydratedLayout = template.render(
-      pageData,
-    );
-
-    return hydratedLayout;
+    _log.info("");
   }
 
-  Future<void> _transformTemplateSourceFile(Page page, Map<String, Object?> globalData, Directory buildRoot) async {
-    late final front_matter.FrontMatterDocument templateContent;
-    try {
-      templateContent = front_matter.parse(page.sourceFile.file.readAsStringSync());
-    } catch (exception) {
-      print("Caught Front Matter exception while processing template source file: $exception");
-      return;
-    }
-
-    if (!templateContent.data.containsKey("layout")) {
-      _log.err("Template source file is missing a 'layout' front matter property.");
-      return;
-    }
-
-    final layoutTemplateFile = File(path.join("website_source", "_includes", templateContent.data["layout"]));
-    if (!layoutTemplateFile.existsSync()) {
-      _log.err("No such layout template '${layoutTemplateFile.path}'.");
-    }
-    final layoutTemplate = layoutTemplateFile.readAsStringSync();
-
-    final contentHtml = markdownToHtml(templateContent.content!);
-
-    final template = Template(layoutTemplate);
-    final hydratedLayout = template.render(
-      {
-        ...globalData,
-        ...page.data.toMap(),
-        "content": contentHtml,
-      },
-    );
-
-    final sourceFileName = path.basename(page.sourceFile.path);
-    final newPath = '${buildRoot.path}/${page.sourceFile.subPath}$sourceFileName';
-    final parentDirectoryPath = path.dirname(newPath);
-
-    late File destFile;
-    if (sourceFileName.startsWith("index.")) {
-      destFile = File(path.join(parentDirectoryPath, "index.html"));
-    } else {
-      final destFilePath =
-          "${path.basenameWithoutExtension(page.sourceFile.subPath)}${Platform.pathSeparator}index.html";
-      destFile = File(path.join(parentDirectoryPath, destFilePath));
-    }
-
-    destFile.createSync(recursive: true);
-    destFile.writeAsStringSync(hydratedLayout);
-  }
-
-  Future<void> _copyAssets() async {
-    _log.info("⚡ Copying assets");
-    final futures = <Future>[];
-
-    final assets = sourceFiles.sourceEntities(
-      CombineFilters({
-        ..._assetExclusions,
-        const ExcludeExtensions({".md", ".jinja"}),
-      }),
-    );
-
-    for (final sourceEntity in assets) {
-      if (!sourceEntity.entity.existsSync()) {
-        _log.err("Tried to copy non-existent file or directory: '${sourceEntity.subPath}'");
-        exit(ExitCode.ioError.code);
+  Future<void> _writePagesAndAssetsToFiles() async {
+    _log.info("⚡ Writing pages and assets to their final destination");
+    for (final page in _pages) {
+      if (page.destinationPath == null) {
+        throw Exception(
+            "Tried to write a page to its destination, but it has no destination. Page source: ${page.sourcePath}");
+      }
+      if (page.destinationContent == null) {
+        throw Exception(
+            "Tried to write a page to its destination, but it has no content. Page source: ${page.sourcePath}");
       }
 
-      if (sourceEntity is SourceDirectory) {
-        final destDirectory = Directory(_destinationEntity(sourceEntity.subPath));
-        if (!destDirectory.existsSync()) {
-          destDirectory.createSync(recursive: true);
-        }
+      _log.detail("Writing page to destination: ${page.destinationPath}");
+      final destinationFile = _resolveDestinationFile(page.destinationPath!);
+      if (!destinationFile.existsSync()) {
+        destinationFile.createSync(recursive: true);
+      }
+      destinationFile.writeAsStringSync(page.destinationContent!);
+    }
+
+    for (final asset in _assets) {
+      if (asset.destinationPath == null) {
+        throw Exception(
+            "Tried to write an asset to its destination, but it has no destination. Asset source: ${asset.sourcePath}");
+      }
+      if (asset.destinationContent == null) {
+        throw Exception(
+            "Tried to write an asset to its destination, but it has no content. Asset source: ${asset.sourcePath}");
+      }
+
+      _log.detail("Writing asset to destination: ${asset.destinationPath}");
+      final destinationFile = _resolveDestinationFile(asset.destinationPath!);
+      if (!destinationFile.existsSync()) {
+        destinationFile.createSync(recursive: true);
+      }
+
+      final content = asset.destinationContent!;
+      if (content.isText) {
+        destinationFile.writeAsStringSync(content.text!);
       } else {
-        _log.detail("Copying ${sourceEntity.subPath}");
-
-        final destinationFile = File(_destinationEntity(sourceEntity.subPath));
-        if (!destinationFile.existsSync()) {
-          destinationFile.createSync(recursive: true);
-        }
-
-        (sourceEntity as SourceFile).file.copySync(destinationFile.path);
+        destinationFile.writeAsBytesSync(content.binary!);
       }
     }
-
-    await Future.wait(futures);
-  }
-
-  String _destinationEntity(String localPath) {
-    return "$destinationDirectoryRelativePath${Platform.pathSeparator}$localPath";
+    _log.info("");
   }
 }
-
-final _log = Logger(level: Level.verbose);
-
-const defaultAssetExclusions = {
-  ExcludePrefixes({"_", "."})
-};
 
 abstract class StaticShockPlugin {
-  FutureOr<void> applyTo(StaticShock pipeline);
-}
-
-/// Converts source files into [Page]s.
-abstract class SourcePageLoader {
-  // TODO: pass some kind of context into this method so that page generators can access
-  //       global data, like tag searches, and also locate layout and component includes
-  Future<Page?> load(SourceFile sourceFile);
-}
-
-/// Base class for a [SourcePageLoader], which filters out any file whose extension isn't
-/// in the list of extensions given to this class.
-abstract class FileExtensionSourcePageLoader implements SourcePageLoader {
-  const FileExtensionSourcePageLoader(this._extensions);
-
-  final List<String> _extensions;
-
-  @override
-  Future<Page?> load(SourceFile sourceFile) async {
-    final fileExtension = path.extension(sourceFile.path);
-
-    final isDesiredFile = _extensions.contains(fileExtension);
-    if (!isDesiredFile) {
-      return null;
-    }
-
-    return await doLoadPage(sourceFile);
-  }
-
-  Future<Page?> doLoadPage(SourceFile sourceFile);
-}
-
-/// A [SourcePageLoader] that loads page data from Markdown files.
-class MarkdownSourcePageLoader extends FileExtensionSourcePageLoader {
-  const MarkdownSourcePageLoader() : super(const [".md"]);
-
-  @override
-  Future<Page?> doLoadPage(SourceFile sourceFile) async {
-    late final front_matter.FrontMatterDocument markdown;
-    try {
-      markdown = front_matter.parse(sourceFile.file.readAsStringSync());
-    } catch (exception) {
-      _log.err("Caught Front Matter exception while processing markdown source file: $exception");
-      return null;
-    }
-
-    if (!markdown.data.containsKey("layout")) {
-      _log.err("Markdown source file is missing a 'layout' front matter property.");
-      return null;
-    }
-
-    late final String contentHtml;
-    try {
-      contentHtml = markdownToHtml(markdown.content!);
-    } catch (exception) {
-      _log.err("Failed to convert Markdown to HTML for source file: ${sourceFile.subPath} - Exception:\n$exception");
-      return null;
-    }
-
-    final pageData = PageData()
-      ..title = markdown.data["title"] ?? "TODO"
-      ..url = markdown.data["url"] ?? sourceFile.subPath.replaceFirst(path.extension(sourceFile.subPath), "")
-      ..createdAt = markdown.data["createdAt"] ?? DateTime.now()
-      ..layout = '_includes${Platform.pathSeparator}${markdown.data["layout"]}'
-      ..content = contentHtml;
-
-    return Page(
-      sourceFile: sourceFile,
-      data: pageData,
-    );
-  }
-}
-
-/// A [SourcePageLoader] that loads page data from Jinja files.
-///
-/// Jinja is an appropriate source page format when you want to define a page's HTML
-/// content directly, rather than transform non-HTML content (like Markdown) into HTML.
-///
-/// For example: a home page, or contact page, might be good candidates for a Jinja
-/// page definition.
-class JinjaSourcePageLoader extends FileExtensionSourcePageLoader {
-  const JinjaSourcePageLoader() : super(const [".jinja"]);
-
-  @override
-  Future<Page?> doLoadPage(SourceFile sourceFile) async {
-    print("Loading Jinja page: ${sourceFile.subPath}");
-    return Page(
-      sourceFile: sourceFile,
-      data: PageData() //
-        ..layout = sourceFile.subPath.substring(1), // Remove leading "/" to ensure its handled as a local path
-      // TODO: we need to be able to specify a destination file from here, but we don't have access to the StaticShock for the destination
-      // destinationFile: DestinationFile(),
-    );
-  }
+  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {}
 }

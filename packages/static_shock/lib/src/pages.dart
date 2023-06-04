@@ -1,5 +1,21 @@
-import 'destination_files.dart';
-import 'source_files.dart';
+import 'dart:async';
+
+import 'files.dart';
+import 'pipeline.dart';
+
+abstract class PageLoader {
+  bool canLoad(FileRelativePath path);
+
+  FutureOr<Page> loadPage(FileRelativePath path, String content);
+}
+
+abstract class PageTransformer {
+  FutureOr<void> transformPage(StaticShockPipelineContext context, Page page);
+}
+
+abstract class PageRenderer {
+  FutureOr<void> renderPage(StaticShockPipelineContext context, Page page);
+}
 
 class PagesIndex {
   Iterable<Page> get pages => List.from(_pages);
@@ -15,32 +31,17 @@ class PagesIndex {
     _pages.add(page);
   }
 
-  Map<String, dynamic> buildDataForPage(Map<String, dynamic> globalData, String subPath, String contentHtml) {
-    Page? targetPage;
-    for (final page in _pages) {
-      if (page.sourceFile.subPath == subPath) {
-        targetPage = page;
-        break;
-      }
-    }
-
+  Map<String, dynamic> buildPageIndexDataForTemplates() {
     return {
-      ...globalData,
       "pages": {
         "byTag": (String tag) {
-          print("Running tag search: $tag");
-
-          return _pages.where((page) => page.data.hasTag(tag)).map((page) => {
-                "data": {
-                  "title": page.data.title,
-                  "url": page.data.url,
+          return _pages.where((page) => page.hasTag(tag)).map(
+                (page) => {
+                  "data": page.data,
                 },
-              });
+              );
         },
       },
-      if (targetPage != null) //
-        ...targetPage.data.toMap(),
-      "content": contentHtml,
     };
   }
 }
@@ -82,67 +83,53 @@ class PageIndex {
 }
 
 class Page {
-  const Page({
-    required this.sourceFile,
-    required this.data,
-    this.destinationFile,
-  });
+  Page(
+    this.sourcePath,
+    this.sourceContent, {
+    Map<String, dynamic>? data,
+    this.destinationPath,
+    this.destinationContent,
+  }) : data = data ?? {};
 
-  final SourceFile sourceFile;
-  String get extension => sourceFile.extension;
+  final FileRelativePath sourcePath;
+  final String sourceContent;
+  final Map<String, dynamic> data;
 
-  final PageData data;
+  FileRelativePath? destinationPath;
+  String? destinationContent;
 
-  final DestinationFile? destinationFile;
+  // TODO: decide if these properties should exist on Page, or if we should have a PageData sub-object
+  String? get title => data["title"];
 
-  @override
-  String toString() => "[Page] - source: ${sourceFile.subPath}";
+  String? get url => data["url"];
+  set url(String? url) => data["url"] = url;
+
+  bool hasTag(String tag) => tags.contains(tag);
+  List<String> get tags => data["tags"] != null ? List.from(data["tags"]) : [];
+
+  String describe() {
+    return '''Page:
+Source: "$sourcePath"
+Destination: "$destinationPath"
+
+Data: 
+$data
+
+Source Content:
+$sourceContent
+
+Destination Content:
+$destinationContent
+''';
+  }
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is Page && runtimeType == other.runtimeType && sourceFile == other.sourceFile;
+      identical(this, other) || other is Page && runtimeType == other.runtimeType && sourcePath == other.sourcePath;
 
   @override
-  int get hashCode => sourceFile.hashCode;
-}
+  int get hashCode => sourcePath.hashCode;
 
-class PageData {
-  final _data = <String, dynamic>{
-    "tags": <String>[],
-  };
-
-  String? get title => _data["title"];
-  set title(String? title) => _data["title"] = title;
-
-  // TODO: is this a full URL? or sub-path? add appropriate comment, and maybe rename
-  String? get url => _data["url"];
-  set url(String? url) => _data["url"];
-
-  // TODO: is this the layout file path, or the layout content? add appropriate comment
-  String? get layout => _data["layout"];
-  set layout(String? layout) => _data["layout"] = layout;
-
-  bool hasTag(String tag) => tags.contains(tag);
-  bool hasTags(Set<String> tags) => tags.containsAll(tags);
-  Set<String> get tags => _data["tags"];
-  set tags(Set<String> tags) => _data["tags"] = tags;
-  void addTag(String tag) => tags.add(tag);
-  void removeTag(String tag) => tags.remove(tag);
-
-  DateTime? get createdAt => _data["createdAt"];
-  set createdAt(DateTime? createdAt) => _data["createdAt"] = createdAt;
-
-  DateTime? get updatedAt => _data["updatedAt"];
-  set updatedAt(DateTime? updatedAt) => _data["updatedAt"] = updatedAt;
-
-  String? get content => _data["content"];
-  set content(String? content) => _data["content"] = content;
-
-  // TODO: components
-  //  - need to be accessible via ["components"] for template, and that needs to return a render function
-  //  - probably also want people to be able to add components to this set?
-
-  Object? operator [](String key) => _data[key];
-
-  Map<String, dynamic> toMap() => Map.from(_data);
+  @override
+  String toString() => "[Page] - source: $sourcePath, destination: $destinationPath";
 }
