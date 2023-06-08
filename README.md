@@ -18,3 +18,9 @@ To demo your static site, run a local server from your project directory, using 
 
     shock serve
 
+## Packages
+Packages in this repository:
+
+ * `/packages/static_shock_cli`: project that implements the Static Shock CLI tool.
+ * `/packages/static_shock`: the core of Static Shock, which builds static websites.
+ * `/packages/static_shock_docs`: the website for Static Shock documentation.
