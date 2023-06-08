@@ -1,0 +1,72 @@
+@import "theme";
+
+html, body {
+  margin: 0;
+  padding: 0;
+
+  background: $primary;
+}
+
+.navbar {
+  background: $primary;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  .navbar-brand {
+    .name {
+      padding-left: 16px;
+
+      color: $accent;
+      font-size: 18px;
+    }
+  }
+}
+
+.inner-page #hero {
+  padding: 64px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  .message {
+
+    .title {
+      display: block;
+
+      color: WHITE;
+      font-size: 64px;
+      font-weight: bold;
+
+      text-align: center;
+    }
+
+    .subtitle {
+      display: block;
+
+      color: $accent;
+      font-size: 42px;
+      font-weight: bold;
+
+      text-align: center;
+    }
+  }
+}
+
+#footer {
+  background: $primaryLight;
+
+  padding: 1.5em;
+
+  color: #5E666B;
+  text-align: center;
+
+  .heart {
+    color: RED;
+  }
+
+  a {
+    color: $accent;
+
+    &:hover {
+      color: $accentLight;
+    }
+  }
+}

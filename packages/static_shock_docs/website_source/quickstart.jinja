@@ -1,9 +1,12 @@
+---
+title: quickstart
+---
 <!doctype html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{{ title }}</title>
+    <title>Static Shock</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
@@ -21,12 +24,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/dart.min.js"></script>
     <script>hljs.highlightAll();</script>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" type="text/css">
+
     <link rel="stylesheet" href="/styles/theme.css">
+    <link rel="stylesheet" href="/styles/base_layout.css">
+    <link rel="stylesheet" href="/styles/homepage.css">
   </head>
 
-  <body>
+  <body class="inner-page">
     <main>
-      {{ content }}
+      {{ components.navbar({"title": title}) }}
+
+      {{
+        components.innerPageHeader({
+          "title": "Quickstart",
+          "subtitle": "Start assembling a Static Shock website"
+        })
+      }}
+
+      <section id="content">
+        <hr>
+      </section>
     </main>
+
+    <footer>
+      {{ components.footer() }}
+    </footer>
   </body>
 </html>

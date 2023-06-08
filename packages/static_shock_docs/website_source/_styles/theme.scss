@@ -1,0 +1,46 @@
+/* @import "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.6.0/build/styles/github.min.css"; */
+@import "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.6.0/build/styles/androidstudio.min.css";
+/* @import "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.6.0/build/styles/github-dark.min.css"; */
+/* @import "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.6.0/build/styles/gradient-dark.min.css"; */
+
+$primary      : #151B1F;
+$primaryLight : #1B2227;
+// $primaryDark  : #1B2227;
+
+$accent       : #FFE500;
+$accentLight  : #FFFF33;
+
+@font-face {
+  font-family: marketFresh;
+  src: url(/fonts/market-fresh/Market-Fresh.ttf);
+}
+
+@font-face {
+  font-family: marketFresh;
+  font-weight: bold;
+  src: url(/fonts/market-fresh/Market-Fresh-Bold.ttf);
+}
+
+html, body {
+  color: WHITE;
+}
+
+.accent-text {
+  color: $accent;
+}
+
+// pre {
+//   margin-top: 2em;
+//   margin-bottom: 2em;
+//
+//   padding: 5em 3em;
+//
+//   background: rgb(207,36,36);
+//   background: linear-gradient(331deg, rgba(207,36,36,1) 0%, rgba(255,182,143,1) 100%);
+// }
+//
+// pre > code {
+//   padding: 2em !important;
+//
+//   border-radius: 8px;
+// }

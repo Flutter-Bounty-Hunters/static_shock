@@ -184,7 +184,9 @@ class StaticShock implements StaticShockPipeline {
         Component(
           FileRelativePath.parse(sourceFile.subPath),
           Map.from(componentContent.data),
-          componentContent.content!,
+          // If there's no Front Matter, then `content` will be `null`. In that case, assume
+          // everything is a Jinja template, and pass the full `value`.
+          componentContent.content ?? componentContent.value,
         ),
       );
     }

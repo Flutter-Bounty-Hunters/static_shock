@@ -31,7 +31,7 @@ class JinjaPageLoader implements PageLoader {
 
     return Page(
       path,
-      jinja.content ?? "",
+      jinja.content ?? content,
       data: {...jinja.data},
       destinationPath: path.copyWith(extension: "html"),
     );
@@ -43,10 +43,21 @@ class JinjaPageRenderer implements PageRenderer {
 
   @override
   FutureOr<void> renderPage(StaticShockPipelineContext context, Page page) async {
+    if (page.sourcePath.extension.toLowerCase() == "jinja") {
+      _renderJinjaContent(context, page);
+    } else {
+      _renderJinjaLayout(context, page);
+    }
+  }
+
+  void _renderJinjaContent(StaticShockPipelineContext context, Page page) {
+    _log.detail("Rendering Jinja layout page (${page.sourcePath})");
+    _renderJinjaToContent(context, page, page.sourceContent);
+  }
+
+  void _renderJinjaLayout(StaticShockPipelineContext context, Page page) {
     final layoutPathString = page.data["layout"] as String?;
     if (layoutPathString == null || layoutPathString.isEmpty) {
-      _log.err(
-          "Tried to apply a layout template to page (${page.sourcePath}) but the page is missing a \"layout\" front matter property.");
       return;
     }
 
@@ -65,13 +76,29 @@ class JinjaPageRenderer implements PageRenderer {
     }
 
     _log.detail("Applying Jinja layout template (${layout.path}) to page (${page.sourcePath})");
+    _renderJinjaToContent(context, page, layout.value);
+  }
 
+  void _renderJinjaToContent(StaticShockPipelineContext context, Page page, String templateSource) {
     // Generate the layout, filled with content and data.
-    final template = Template(layout.value);
+    final template = Template(templateSource);
 
-    final componentsLookup = <String, String Function()>{};
+    final componentsLookup = <String, String Function(Map<Object?, Object?>)>{};
     for (final entry in context.components.entries) {
-      componentsLookup[entry.key] = () => entry.value.content;
+      componentsLookup[entry.key] = ([Map<Object?, Object?>? vars]) {
+        if (vars != null) {
+          for (final varEntry in vars.entries) {
+            String replaceBrackets = varEntry.value as String;
+            replaceBrackets = replaceBrackets.replaceAll("<", "&lt;");
+            replaceBrackets = replaceBrackets.replaceAll(">", "&gt;");
+            vars[varEntry.key] = replaceBrackets;
+          }
+        }
+
+        final template = Template(entry.value.content);
+        String component = template.render(vars?.cast() ?? {});
+        return component;
+      };
     }
 
     final hydratedLayout = template.render({
