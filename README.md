@@ -1,6 +1,8 @@
 # Static Shock
 A static site generator, written in dart.
 
+For documentation, visit [staticshock.io](https://staticshock.io)
+
 ## Quickstart
 Generate a new Static Shock project with `static_shock_cli`:
 
