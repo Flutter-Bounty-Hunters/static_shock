@@ -12,11 +12,11 @@ StaticShock _createSite() {
   return StaticShock(
     // Relative path to source files, which are copied or transformed.
     // This is where you place your Markdown, templates, images, Sass, etc.
-    sourceDirectoryRelativePath: "website_source",
+    sourceDirectoryRelativePath: "source",
 
     // Relative path to where all the final files are copied or created.
     // This is what you deploy to your webserver.
-    destinationDirectoryRelativePath: "website_build",
+    destinationDirectoryRelativePath: "build",
 
     // Relative paths to directories and files that should be copied directly
     // from the source files to the destination files.

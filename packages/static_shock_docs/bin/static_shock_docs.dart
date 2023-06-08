@@ -3,8 +3,8 @@ import 'package:static_shock/static_shock.dart';
 Future<void> main(List<String> arguments) async {
   // Configure the static website generator.
   final staticShock = StaticShock(
-    sourceDirectoryRelativePath: "website_source",
-    destinationDirectoryRelativePath: "website_build",
+    sourceDirectoryRelativePath: "source",
+    destinationDirectoryRelativePath: "build",
   )
     // ..pick(DirectoryPicker.parse("fonts"))
     ..pick(DirectoryPicker.parse("images"))

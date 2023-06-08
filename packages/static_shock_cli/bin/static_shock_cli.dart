@@ -91,7 +91,7 @@ class ServeCommand extends Command {
         .addMiddleware(logRequests()) //
         .addHandler(
           createStaticHandler(
-            'website_build',
+            'build',
             defaultDocument: 'index.html',
           ),
         );

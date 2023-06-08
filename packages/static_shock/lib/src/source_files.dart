@@ -111,7 +111,7 @@ abstract class SourceEntity {
 
   /// A partial source directory path, which begins at the root source directory.
   ///
-  /// "/Users/admin/documents/my_project/website_source/my_dir/" becomes
+  /// "/Users/admin/documents/my_project/source/my_dir/" becomes
   /// "/my_dir".
   final String subPath;
 
