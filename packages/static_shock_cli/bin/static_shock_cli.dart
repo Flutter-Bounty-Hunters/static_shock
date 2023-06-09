@@ -6,19 +6,16 @@ import 'package:shelf_static/shelf_static.dart';
 
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
-import 'package:static_shock/static_shock.dart';
 
 final _log = Logger(level: Level.verbose);
 
 void main(List<String> arguments) {
-  final runner = CommandRunner("shock", "A static site generator, written in Dart.")
+  CommandRunner("shock", "A static site generator, written in Dart.")
     ..addCommand(CreateCommand())
     ..addCommand(BuildCommand())
     ..addCommand(ServeCommand())
     ..addCommand(ValidateCommand())
     ..run(arguments);
-
-  // TODO:
 }
 
 class CreateCommand extends Command {

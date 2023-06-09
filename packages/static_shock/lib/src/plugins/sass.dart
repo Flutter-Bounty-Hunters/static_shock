@@ -2,10 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
-import 'package:static_shock/src/pipeline.dart';
-import 'package:static_shock/static_shock.dart';
 import 'package:path/path.dart' as path;
 import 'package:sass/sass.dart' as sass;
+import 'package:static_shock/static_shock.dart';
 
 final _log = Logger(level: Level.verbose);
 
@@ -21,7 +20,6 @@ class StaticShockSass implements StaticShockPlugin {
     );
   }
 
-  @override
   FutureOr<void> applyTo(StaticShock shock) async {
     _log.info("⚡ Compiling Sass to CSS");
 

@@ -1,16 +1,13 @@
 name: static_shock
 description: A static site generator for Dart.
-version: 0.0.1
+version: 0.0.1-dev.1
 repository: https://github.com/flutter-bounty-hunters/static_shock
 
 environment:
-  sdk: '>=2.19.6 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  front_matter:
-    git:
-      url: https://github.com/maks/front-matter.git
-      ref: null-safety
+  fbh_front_matter: ^0.0.1
   jinja: ^0.4.2
   markdown: ^7.0.2
   mason_logger: ^0.2.5

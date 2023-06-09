@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:front_matter/front_matter.dart' as front_matter;
+import 'package:fbh_front_matter/fbh_front_matter.dart' as front_matter;
 import 'package:jinja/jinja.dart';
 import 'package:mason_logger/mason_logger.dart';
 

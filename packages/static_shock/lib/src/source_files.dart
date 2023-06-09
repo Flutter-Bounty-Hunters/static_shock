@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:path/path.dart' as dart_path;
-import 'package:path/path.dart';
 import 'package:static_shock/static_shock.dart';
 
 class SourceFiles {
