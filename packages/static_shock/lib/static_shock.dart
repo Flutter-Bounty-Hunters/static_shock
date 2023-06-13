@@ -10,9 +10,8 @@ export 'src/templates/components.dart';
 export 'src/source_files.dart';
 export 'src/files.dart';
 
-// ----- Default content and template -------
-export 'src/content/markdown.dart';
-export 'src/templates/jinja.dart';
-
 // ----- Plugins -----
+export 'src/plugins/markdown.dart';
+export 'src/plugins/jinja.dart';
+export 'src/plugins/pretty_urls.dart';
 export 'src/plugins/sass.dart';

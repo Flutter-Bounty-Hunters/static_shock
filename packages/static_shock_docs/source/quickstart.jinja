@@ -1,34 +1,24 @@
 ---
-title: quickstart
+title: Quickstart
 ---
 <!doctype html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Static Shock</title>
+    <title>{{ title }} | Static Shock</title>
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
-    <link rel="icon" type="image/x-icon" href="/images/favicon/favicon.ico">
-    <link rel="manifest" href="/images/favicon/site.webmanifest">
-    <meta name="msapplication-TileColor" content="#da532c">
-    <meta name="theme-color" content="#ffffff">
+    {{ components.favicon() }}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    {{ components.bootstrapJs() }}
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/dart.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    {{ components.highlightJs() }}
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" type="text/css">
+    {{ components.fontAwesome() }}
 
     <link rel="stylesheet" href="/styles/theme.css">
     <link rel="stylesheet" href="/styles/base_layout.css">
-    <link rel="stylesheet" href="/styles/homepage.css">
+    <link rel="stylesheet" href="/styles/inner_page.css">
   </head>
 
   <body class="inner-page">
@@ -43,7 +33,47 @@ title: quickstart
       }}
 
       <section id="content">
-        <hr>
+        <h2>Activate the Static Shock CLI</h2>
+        <p>The Static Shock CLI tool helps you quickly generate new projects, and locally server your static site. You don't need to use this tool, but it's the fastest and easiest way to get started.</p>
+        <pre>
+          <code language="sh" class="language-sh">
+dart pub global activate static_shock_cli
+          </code>
+        </pre>
+
+        <p>Verify that Static Shock was activated</p>
+        <pre>
+          <code language="sh" class="language-sh">
+which shock
+          </code>
+        </pre>
+
+        <h2>Generate a new project</h2>
+        <p>Use the Static Shock CLI tool to generate a new project. You can also create the files manually, if you'd like.</p>
+        <pre>
+          <code language="sh" class="language-sh">
+shock create
+          </code>
+        </pre>
+
+        <h2>Build your static site</h2>
+        <p>Every Static Shock project is a regular Dart project. The script that builds your static site is in the `/bin` directory. Build your static site to ensure that everything is configured correctly.</p>
+        <pre>
+          <code language="sh" class="language-sh">
+dart run bin/my_project.dart
+          </code>
+        </pre>
+
+        <h2>Serve your site locally</h2>
+        <p>To verify your static site locally, you need to run a local web server. The Static Shock CLI can do this for you.</p>
+        <pre>
+          <code language="sh" class="language-sh">
+shock serve
+          </code>
+        </pre>
+
+        <p>Static Shock does not currently rebuild your site while you're serving it. If you make changes while serving your static site locally, you'll need to explicitly re-build your static site. You don't need to stop the local server when you re-build.</p>
+
       </section>
     </main>
 

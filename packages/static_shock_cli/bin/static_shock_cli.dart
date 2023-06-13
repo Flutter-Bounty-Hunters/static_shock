@@ -27,7 +27,7 @@ class CreateCommand extends Command {
 
   @override
   Future<void> run() async {
-    _log.info("Creating a new Static Stock project...");
+    _log.info("Creating a new Static Shock project...");
 
     final workingDirectory = Directory.current;
     _log.detail("Current directory: ${workingDirectory.path}");

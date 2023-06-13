@@ -89,6 +89,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  fbh_front_matter:
+    dependency: transitive
+    description:
+      name: fbh_front_matter
+      sha256: "18b2f355326ff2b7ebd64eb1d969c091895ffa755ab55ede5de68f59cf115024"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   file:
     dependency: transitive
     description:
@@ -97,15 +105,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.4"
-  front_matter:
-    dependency: transitive
-    description:
-      path: "."
-      ref: null-safety
-      resolved-ref: f39f3c8f9e2b6027dce125691984737c7b27d417
-      url: "https://github.com/maks/front-matter.git"
-    source: git
-    version: "1.1.0"
   frontend_server_client:
     dependency: transitive
     description:
@@ -360,7 +359,7 @@ packages:
       path: "../static_shock"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "0.0.1-dev.1"
   stream_channel:
     dependency: transitive
     description:

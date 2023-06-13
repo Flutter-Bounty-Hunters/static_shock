@@ -2,8 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:static_shock/src/pipeline.dart';
+import 'package:static_shock/src/static_shock.dart';
 
-import 'pages.dart';
+import '../pages.dart';
+
+class PrettyUrlsPlugin implements StaticShockPlugin {
+  const PrettyUrlsPlugin();
+
+  @override
+  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+    pipeline.transformPages(const PrettyPathPageTransformer());
+  }
+}
 
 /// Prettify the destination page path by making the page an index.html within
 /// a directory named after the page:

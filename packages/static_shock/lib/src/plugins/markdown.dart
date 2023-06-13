@@ -7,8 +7,20 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
+import 'package:static_shock/src/static_shock.dart';
 
 final _log = Logger(level: Level.verbose);
+
+class MarkdownPlugin implements StaticShockPlugin {
+  const MarkdownPlugin();
+
+  @override
+  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+    pipeline.pick(const ExtensionPicker("md"));
+    pipeline.loadPages(const MarkdownPageLoader());
+    pipeline.renderPages(const MarkdownPageRenderer());
+  }
+}
 
 class MarkdownPageLoader implements PageLoader {
   const MarkdownPageLoader();

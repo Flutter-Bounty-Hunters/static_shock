@@ -4,24 +4,32 @@ import 'dart:io';
 import 'package:fbh_front_matter/fbh_front_matter.dart' as front_matter;
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
-import 'package:static_shock/src/content/markdown.dart';
 import 'package:static_shock/src/templates/components.dart';
-import 'package:static_shock/src/templates/jinja.dart';
 import 'package:static_shock/src/templates/layouts.dart';
 
 import 'assets.dart';
 import 'files.dart';
 import 'pages.dart';
 import 'pipeline.dart';
-import 'pretty_urls.dart';
 import 'source_files.dart';
 
 final _log = Logger(level: Level.verbose);
 
+/// The core of Static Shock.
+///
+/// The [StaticShock] object configures all static site generator features, and then
+/// generates the static site.
+///
+/// Methods like [pick], [exclude], [transformAssets], [loadPages], [transformPages],
+/// and [renderPages] can be used to configure website generation.
+///
+/// [plugin] can be used to configure website generation from 3rd party code.
+///
+/// [generateSite] generates the static site in the destination directory.
 class StaticShock implements StaticShockPipeline {
   StaticShock({
-    required this.sourceDirectoryRelativePath,
-    required this.destinationDirectoryRelativePath,
+    this.sourceDirectoryRelativePath = "source",
+    this.destinationDirectoryRelativePath = "build",
     Set<Picker>? pickers,
     Set<Excluder>? excluders,
     Set<AssetTransformer>? assetTransformers,
@@ -29,70 +37,79 @@ class StaticShock implements StaticShockPipeline {
     Set<PageTransformer>? pageTransformers,
     Set<PageRenderer>? pageRenderers,
     Set<StaticShockPlugin>? plugins,
-  })  : _pickers = pickers ??
-            {
-              const ExtensionPicker("md"),
-              const ExtensionPicker("jinja"),
-            },
+  })  : _pickers = pickers ?? {},
         _excluders = excluders ??
             {
               const FilePrefixExcluder("."),
             },
         _assetTransformers = assetTransformers ?? {},
-        _pageLoaders = pageLoaders ??
-            {
-              const MarkdownPageLoader(),
-              const JinjaPageLoader(),
-            },
-        _pageTransformers = pageTransformers ??
-            {
-              const PrettyPathPageTransformer(),
-            },
-        _pageRenderers = pageRenderers ??
-            {
-              const MarkdownPageRenderer(),
-              const JinjaPageRenderer(),
-            },
+        _pageLoaders = pageLoaders ?? {},
+        _pageTransformers = pageTransformers ?? {},
+        _pageRenderers = pageRenderers ?? {},
         _plugins = plugins ?? {};
 
+  /// Path of the source directory, relative to the Static Shock project directory.
   final String sourceDirectoryRelativePath;
+
+  /// Path of the destination directory, relative to the Static Shock project directory.
   final String destinationDirectoryRelativePath;
 
   late Directory _sourceDirectory;
-  late SourceFiles sourceFiles;
+  late SourceFiles _sourceFiles;
 
-  late Directory destinationDir;
+  late Directory _destinationDir;
 
+  /// Adds the given [picker] to the pipeline, which selects files that will
+  /// be pushed through the pipeline.
   @override
   void pick(Picker picker) => _pickers.add(picker);
   late final Set<Picker> _pickers;
 
+  /// Adds the given [excluder] to the pipeline, which prevents files from entering
+  /// the pipeline, even when they're picked by a [Picker].
   @override
   void exclude(Excluder excluder) => _excluders.add(excluder);
   late final Set<Excluder> _excluders;
 
+  /// Adds the given [AssetTransformer] to the pipeline, which copies, alters, and
+  /// saves assets from the source set to the build set.
   @override
   void transformAssets(AssetTransformer transformer) => _assetTransformers.add(transformer);
   late final Set<AssetTransformer> _assetTransformers;
 
+  /// Adds the given [PageLoader] to the pipeline, which reads desired files into
+  /// [Page] objects, which may then be processed by [PageTransformer]s and
+  /// [PageRenderer]s.
   @override
   void loadPages(PageLoader loader) => _pageLoaders.add(loader);
   late final Set<PageLoader> _pageLoaders;
 
+  /// Adds the given [PageTransformer] to the pipeline, which alters [Page]s loaded
+  /// by [PageLoader]s, before the [Page] is rendered by a [PageRenderer].
   @override
   void transformPages(PageTransformer transformer) => _pageTransformers.add(transformer);
   late final Set<PageTransformer> _pageTransformers;
 
+  /// Adds the given [PageRenderer] to the pipeline, which takes a [Page] and serializes
+  /// that [Page] to an HTML page in the build set.
   @override
   void renderPages(PageRenderer renderer) => _pageRenderers.add(renderer);
   late final Set<PageRenderer> _pageRenderers;
 
+  /// Adds the given [StaticShockPlugin] to the pipeline, which is given the opportunity
+  /// to configure the Static Shock pipeline however it wants.
+  ///
+  /// Direct usage of Static Shock can use methods like [pick], [exclude], [transformAssets],
+  /// and [loadPages] to control website generation.
+  ///
+  /// Third party code, which is distributed in isolation, must implement a plugin to
+  /// configure a Static Shock pipeline.
   void plugin(StaticShockPlugin plugin) => _plugins.add(plugin);
   final Set<StaticShockPlugin> _plugins;
 
   File _resolveSourceFile(FileRelativePath relativePath) => _sourceDirectory.descFile([relativePath.value]);
 
-  File _resolveDestinationFile(FileRelativePath relativePath) => destinationDir.descFile([relativePath.value]);
+  File _resolveDestinationFile(FileRelativePath relativePath) => _destinationDir.descFile([relativePath.value]);
 
   late StaticShockPipelineContext _context;
   final _files = <FileRelativePath>[];
@@ -100,12 +117,18 @@ class StaticShock implements StaticShockPipeline {
   final _assets = <Asset>[];
 
   /// Generates a static site from content and assets.
+  ///
+  /// The site begins with a source set of files, and generates final static web files
+  /// in a build set.
+  ///
+  /// The default source set location is "/source", and the default build set location
+  /// is "/build".
   Future<void> generateSite() async {
     _log.info(lightYellow.wrap("\n⚡ Generating a static site with Static Shock!\n"));
 
     _sourceDirectory = Directory.current.subDir([sourceDirectoryRelativePath]);
 
-    sourceFiles = SourceFiles(
+    _sourceFiles = SourceFiles(
       directory: _sourceDirectory,
       excludedPaths: {
         "/_includes",
@@ -149,11 +172,11 @@ class StaticShock implements StaticShockPipeline {
   }
 
   void _clearDestination() {
-    destinationDir = Directory.current.subDir([destinationDirectoryRelativePath]);
-    if (destinationDir.existsSync()) {
-      destinationDir.deleteSync(recursive: true);
+    _destinationDir = Directory.current.subDir([destinationDirectoryRelativePath]);
+    if (_destinationDir.existsSync()) {
+      _destinationDir.deleteSync(recursive: true);
     }
-    destinationDir.createSync(recursive: true);
+    _destinationDir.createSync(recursive: true);
   }
 
   void _applyPlugins() {
@@ -164,7 +187,7 @@ class StaticShock implements StaticShockPipeline {
 
   void _loadLayoutsAndComponents() {
     _log.info("⚡ Loading layouts and components");
-    for (final sourceFile in sourceFiles.layouts()) {
+    for (final sourceFile in _sourceFiles.layouts()) {
       _log.detail("Layout: ${sourceFile.subPath}");
       _context.putLayout(
         Layout(
@@ -173,7 +196,7 @@ class StaticShock implements StaticShockPipeline {
         ),
       );
     }
-    for (final sourceFile in sourceFiles.components()) {
+    for (final sourceFile in _sourceFiles.components()) {
       _log.detail("Component: ${sourceFile.subPath}");
 
       final componentContent = front_matter.parse(sourceFile.file.readAsStringSync());
@@ -195,7 +218,7 @@ class StaticShock implements StaticShockPipeline {
 
   void _pickAllSourceFiles() {
     _log.info("⚡ Picking files");
-    for (final sourceFile in sourceFiles.sourceFiles()) {
+    for (final sourceFile in _sourceFiles.sourceFiles()) {
       final relativePath = FileRelativePath.parse(sourceFile.subPath);
 
       pickerLoop:
@@ -351,6 +374,23 @@ class StaticShock implements StaticShockPipeline {
   }
 }
 
+/// A Static Shock plugin.
+///
+/// A plugin is a mechanism that allows Static Shock configuration to be shared
+/// independently from Static Shock. A [StaticShockPlugin] receives the same
+/// configuration opportunities as a Static Shock app, but in a self-contained
+/// structure. Namely, Static Shock calls [configure] on every plugin that's
+/// registered with the [StaticShock] object.
+///
+/// A plugin can add [Picker]s, [Excluder]s, [AssetTransformer]s, [PageLoader]s,
+/// [PageTransformer]s, [PageRenderer]s, etc.
+///
+/// To promote the robustness of the plugin API, Static Shock implements its own
+/// default generation behavior through plugins that are shipped with Static Shock.
+/// These plugins include markdown page generation, jinja pages and templates, and
+/// pretty URLs.
 abstract class StaticShockPlugin {
+  /// Configures the [pipeline] to add new features that are associated with
+  /// this plugin.
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {}
 }

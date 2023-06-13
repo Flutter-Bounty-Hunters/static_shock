@@ -8,8 +8,20 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
+import 'package:static_shock/src/static_shock.dart';
 
 final _log = Logger(level: Level.verbose);
+
+class JinjaPlugin implements StaticShockPlugin {
+  const JinjaPlugin();
+
+  @override
+  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+    pipeline.pick(const ExtensionPicker("jinja"));
+    pipeline.loadPages(const JinjaPageLoader());
+    pipeline.renderPages(const JinjaPageRenderer());
+  }
+}
 
 class JinjaPageLoader implements PageLoader {
   const JinjaPageLoader();
