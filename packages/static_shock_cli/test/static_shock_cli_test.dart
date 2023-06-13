@@ -24,7 +24,7 @@ void main() {
       // File("${testOutputDirectory.path}${Platform.pathSeparator}my_test_file_$randomNumber.txt").createSync();
 
       for (final entity in testSamplesDirectory.listSync(recursive: true)) {
-        print("${entity.path}");
+        print(entity.path);
       }
       print("");
 
@@ -50,7 +50,7 @@ void main() {
 
       print("Generation is complete. Files:");
       for (final entity in testOutputDirectory.listSync(recursive: true)) {
-        print("${entity.path}");
+        print(entity.path);
       }
     });
   });

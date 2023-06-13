@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
-import 'package:path/path.dart' as path;
 import 'package:sass/sass.dart' as sass;
 import 'package:static_shock/static_shock.dart';
 
