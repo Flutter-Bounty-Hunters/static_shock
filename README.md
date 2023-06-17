@@ -26,3 +26,13 @@ Packages in this repository:
  * `/packages/static_shock_cli`: project that implements the Static Shock CLI tool.
  * `/packages/static_shock`: the core of Static Shock, which builds static websites.
  * `/packages/static_shock_docs`: the website for Static Shock documentation.
+
+## Development
+This repository is a mono-repo. To work with it, you need Melos available on your path:
+
+    dart pub global activate melos
+
+When you first open the root of the project for development, bootstrap Melos:
+
+    melos bootstrap
+

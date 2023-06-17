@@ -7,6 +7,9 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/static_shock_docs/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/static_shock_docs/build" />
       <excludeFolder url="file://$MODULE_DIR$/packages/static_shock_docs/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/build" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />

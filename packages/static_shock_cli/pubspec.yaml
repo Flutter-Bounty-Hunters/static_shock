@@ -1,6 +1,6 @@
 name: static_shock_cli
 description: CLI for Static Shock - a static site generator, written in Dart.
-version: 0.0.1-dev.2
+version: 0.0.1-dev.3
 repository: https://github.com/flutter-bounty-hunters/static_shock
 
 environment:
@@ -18,10 +18,6 @@ dependencies:
   mason_logger: ^0.2.5
   shelf: ^1.4.1
   shelf_static: ^1.1.2
-
-dependency_overrides:
-  static_shock:
-    path: ../static_shock
 
 dev_dependencies:
   lints: ^2.0.0
