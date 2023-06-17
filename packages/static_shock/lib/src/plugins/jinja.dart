@@ -113,7 +113,7 @@ class JinjaPageRenderer implements PageRenderer {
       };
     }
 
-    final hydratedLayout = template.render({
+    final pageData = {
       ...page.data,
       "content": page.destinationContent ?? page.sourceContent,
       ...context.pagesIndex.buildPageIndexDataForTemplates(),
@@ -121,7 +121,9 @@ class JinjaPageRenderer implements PageRenderer {
         // Maps component name to a factory method: "footer": () -> "<div>...</div>"
         ...componentsLookup,
       },
-    });
+    };
+
+    final hydratedLayout = template.render(pageData);
 
     // Set the page's final content to the newly hydrated layout, and set the extension to HTML.
     page.destinationContent = hydratedLayout;

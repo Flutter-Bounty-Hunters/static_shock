@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Build Docs Website" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
+    <option name="filePath" value="$PROJECT_DIR$/packages/static_shock_docs/bin/static_shock_docs.dart" />
+    <method v="2" />
+  </configuration>
+</component>
