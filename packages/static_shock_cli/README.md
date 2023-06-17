@@ -41,3 +41,10 @@ To bundle a Brick directory into a single file, use:
 
     mason bundle path/to/brick/directory
 
+Mason uses Mustache templates to insert values in source file content and file names. Static Shock
+uses Jinja templates, which also use "{{" and "}}" to insert values. Jinja brackets inside
+of Mason templates need to use "mustache case" syntax to keep Mason from processing the Jinja
+variables:
+
+    {{#mustacheCase}} myVar {{/mustacheCase}}
+

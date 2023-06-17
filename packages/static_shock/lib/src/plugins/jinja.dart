@@ -94,7 +94,6 @@ class JinjaPageRenderer implements PageRenderer {
   void _renderJinjaToContent(StaticShockPipelineContext context, Page page, String templateSource) {
     // Generate the layout, filled with content and data.
     final template = Template(templateSource);
-    _log.detail(templateSource);
 
     final componentsLookup = <String, String Function(Map<Object?, Object?>)>{};
     for (final entry in context.components.entries) {
@@ -123,11 +122,6 @@ class JinjaPageRenderer implements PageRenderer {
         ...componentsLookup,
       },
     };
-
-    _log.detail("  Page data:");
-    for (final entry in pageData.entries) {
-      _log.detail("    - ${entry.key} -> ${entry.value}");
-    }
 
     final hydratedLayout = template.render(pageData);
 
