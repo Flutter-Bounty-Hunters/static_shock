@@ -29,19 +29,22 @@ class DirectoryPicker implements Picker {
 }
 
 class FilePicker implements Picker {
-  const FilePicker(this._fileName);
+  FilePicker.parse(String path) : _pathMatcher = FileRelativePath.parse(path);
 
-  final RelativePath _fileName;
+  const FilePicker(this._pathMatcher);
+
+  final RelativePath _pathMatcher;
 
   @override
-  bool shouldPick(FileRelativePath path) => path.value.endsWith(_fileName.value);
+  bool shouldPick(FileRelativePath path) => path.value.endsWith(_pathMatcher.value);
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is FilePicker && runtimeType == other.runtimeType && _fileName == other._fileName;
+      identical(this, other) ||
+      other is FilePicker && runtimeType == other.runtimeType && _pathMatcher == other._pathMatcher;
 
   @override
-  int get hashCode => _fileName.hashCode;
+  int get hashCode => _pathMatcher.hashCode;
 }
 
 class ExtensionPicker implements Picker {

@@ -1,12 +1,9 @@
----
-title: Guides
----
 <!doctype html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{{ Guides }} | Static Shock</title>
+    <title>{{ title }} | Static Shock</title>
 
     {{ components.favicon() }}
 
@@ -19,22 +16,24 @@ title: Guides
     <link rel="stylesheet" href="/styles/theme.css">
     <link rel="stylesheet" href="/styles/base_layout.css">
     <link rel="stylesheet" href="/styles/inner_page.css">
+    <link rel="stylesheet" href="/styles/guides.css">
   </head>
 
   <body class="inner-page">
     <main>
       {{ components.navbar({"title": title}) }}
 
-      {{
-        components.innerPageHeader({
-          "title": "Guides",
-          "subtitle": "Accomplish common goals"
-        })
-      }}
-
-      <section id="content">
-        <h2>COMING SOON!</h2>
-      </section>
+      <div style="height: 200px;">&nbsp;</div>
+      <div class="row" style="max-width: 1000px; margin: auto;">
+        <nav class="fixed gap-2" style="width: 225px;">
+          {% for menuItem in docs_menu %}
+            <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
+          {% endfor %}
+        </nav>
+        <section class="col">
+          {{ content }}
+        </section>
+      </div>
     </main>
 
     <footer>
