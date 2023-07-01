@@ -3,22 +3,24 @@ import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
+import 'package:pub_updater/pub_updater.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 
 final _log = Logger(level: Level.verbose);
 
-void main(List<String> arguments) {
+Future<void> main(List<String> arguments) async {
+  // Run the desired command.
   CommandRunner("shock", "A static site generator, written in Dart.")
     ..addCommand(CreateCommand())
-    // ..addCommand(BuildCommand())
     ..addCommand(ServeCommand())
-    // ..addCommand(ValidateCommand())
+    ..addCommand(UpgradeCommand())
+    ..addCommand(VersionCommand())
     ..run(arguments);
 }
 
-class CreateCommand extends Command {
+class CreateCommand extends Command with PubVersionCheck {
   @override
   final name = "create";
 
@@ -27,6 +29,8 @@ class CreateCommand extends Command {
 
   @override
   Future<void> run() async {
+    await super.run();
+
     _log.info("Creating a new Static Shock project...");
 
     final workingDirectory = Directory.current;
@@ -80,20 +84,7 @@ class CreateCommand extends Command {
   }
 }
 
-// class BuildCommand extends Command {
-//   @override
-//   final name = "build";
-//
-//   @override
-//   final description = "Builds a deployable static website by copying and transforming all source files.";
-//
-//   @override
-//   Future<void> run() async {
-//     // TODO: run a shell command that runs the main dart file in the current directory
-//   }
-// }
-
-class ServeCommand extends Command {
+class ServeCommand extends Command with PubVersionCheck {
   @override
   final name = "serve";
 
@@ -102,6 +93,8 @@ class ServeCommand extends Command {
 
   @override
   Future<void> run() async {
+    await super.run();
+
     print("Serving a static site!");
 
     var handler = const Pipeline() //
@@ -122,16 +115,83 @@ class ServeCommand extends Command {
   }
 }
 
-// class ValidateCommand extends Command {
-//   @override
-//   final name = "validate";
-//
-//   @override
-//   final description = "Inspects the current working directory and validates its structure as a Static Shock project.";
-//
-//   @override
-//   Future<void> run() async {
-//     // TODO:
-//     print("Validating Static Shock project!");
-//   }
-// }
+class UpgradeCommand extends Command {
+  @override
+  final name = "upgrade";
+
+  @override
+  final description = "Upgrades your version of static_shock_cli to the latest from Pub.";
+
+  @override
+  Future<void> run() async {
+    final pubUpdater = PubUpdater();
+
+    _log.info("Checking for newer versions of static_shock_cli...");
+    final isUpToDate = await pubUpdater.isUpToDate(packageName: "static_shock_cli", currentVersion: packageVersion);
+    if (isUpToDate) {
+      _log.info("No updates available.\n");
+      return;
+    }
+
+    final newestVersion = await pubUpdater.getLatestVersion("static_shock_cli");
+    _log.info(
+        "New version of ${lightYellow.wrap("static_shock_cli")} is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}");
+
+    _log.info("Updating your static_shock_cli package to version ${lightGreen.wrap(newestVersion)}...");
+    await pubUpdater.update(packageName: "static_shock_cli");
+    _log.info("Done upgrading static_shock_cli. Your current version is $packageVersion.");
+  }
+}
+
+class VersionCommand extends Command {
+  @override
+  String get name => "version";
+
+  @override
+  String get description => "Tells you your current version of static_shock_cli, and checks for newer versions on Pub.";
+
+  @override
+  Future<void> run() async {
+    _log.info(
+        "Your current version of ${lightYellow.wrap("static_shock_cli")} is: ${lightYellow.wrap(packageVersion)}");
+
+    _log.detail("Checking for newer versions of static_shock_cli on Pub...");
+    final pubUpdater = PubUpdater();
+    final isUpToDate = await pubUpdater.isUpToDate(packageName: "static_shock_cli", currentVersion: packageVersion);
+    if (isUpToDate) {
+      _log.info("You're up to date!\n");
+      return;
+    }
+
+    final newestVersion = await pubUpdater.getLatestVersion("static_shock_cli");
+    _log.info("A new version is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}\n");
+  }
+}
+
+/// Mixin that checks Pub for a new version.
+///
+/// This mixin only notifies the user - it doesn't run an upgrade.
+///
+/// [Command]s that mixin this behavior should begin their [run] method by
+/// calling the mixin's [run] method:
+///
+///     await super.run();
+///
+///
+mixin PubVersionCheck on Command {
+  @override
+  Future<void> run() async {
+    final pubUpdater = PubUpdater();
+
+    _log.detail("Checking for newer versions of static_shock_cli...");
+    final isUpToDate = await pubUpdater.isUpToDate(packageName: "static_shock_cli", currentVersion: packageVersion);
+    if (isUpToDate) {
+      _log.info("No updates available.\n");
+      return;
+    }
+
+    final newestVersion = await pubUpdater.getLatestVersion("static_shock_cli");
+    _log.info(
+        "New version of ${lightYellow.wrap("static_shock_cli")} is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}\n");
+  }
+}
