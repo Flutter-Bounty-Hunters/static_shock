@@ -1,3 +1,6 @@
+## 0.0.1-dev.5 - July 1, 2023
+Added version checks to notify users when newer versions of the CLI are available.
+
 ## 0.0.1-dev.4 - June 17, 2023
 Fixed "new project" Mason template variable syntax.
 

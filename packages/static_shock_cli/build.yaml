@@ -3,4 +3,4 @@ targets:
     builders:
       build_version:
         options:
-          output: lib/version.dart
+          output: lib/src/version.dart
