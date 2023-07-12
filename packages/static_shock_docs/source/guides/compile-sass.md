@@ -14,6 +14,8 @@ docs_menu:
     id: use-remote-css-and-js
   - title: Create RSS Feed
     id: create-rss-feed
+  - title: Examples
+    id: examples
 ---
 # Compile Sass
 Sass (also known as SCSS) is a format for defining CSS in a more convenient and extensible way.
