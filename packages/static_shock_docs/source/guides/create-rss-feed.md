@@ -14,6 +14,8 @@ docs_menu:
     id: use-remote-css-and-js
   - title: Create RSS Feed
     id: create-rss-feed
+  - title: Examples
+    id: examples
 ---
 # Create RSS Feed
 TODO:

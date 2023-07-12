@@ -1,5 +1,5 @@
 ---
-title: Display Directory of Pages
+title: Examples
 layout: layouts/guides.jinja
 docs_menu:
   - title: Add a Page
@@ -17,5 +17,7 @@ docs_menu:
   - title: Examples
     id: examples
 ---
-# Display Directory of Pages
-TODO:
+
+# Examples
+
+- [finisher.dart:](https://github.com/Flutter-Bounty-Hunters/static_shock/tree/main/example/finisher/bin/finisher.dart) add a custom "finisher" to the pipeline, which is run after the site is generated and the index of generated pages and components is produced

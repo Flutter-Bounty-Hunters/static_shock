@@ -14,6 +14,8 @@ docs_menu:
     id: use-remote-css-and-js
   - title: Create RSS Feed
     id: create-rss-feed
+  - title: Examples
+    id: examples
 ---
 # Copy Images, CSS, JS
 A static site typically contains many assets. An asset is a file served by a web server, which isn't a page.
