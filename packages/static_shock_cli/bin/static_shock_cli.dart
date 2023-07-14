@@ -7,6 +7,7 @@ import 'package:pub_updater/pub_updater.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
+import 'package:yaml/yaml.dart';
 
 final _log = Logger(level: Level.verbose);
 
@@ -14,6 +15,7 @@ Future<void> main(List<String> arguments) async {
   // Run the desired command.
   CommandRunner("shock", "A static site generator, written in Dart.")
     ..addCommand(CreateCommand())
+    ..addCommand(BuildCommand())
     ..addCommand(ServeCommand())
     ..addCommand(UpgradeCommand())
     ..addCommand(VersionCommand())
@@ -81,6 +83,49 @@ class CreateCommand extends Command with PubVersionCheck {
 
     // Decode the file's bytes into a Mason bundle. Return it.
     return await MasonBundle.fromUniversalBundle(file.readAsBytesSync());
+  }
+}
+
+class BuildCommand extends Command {
+  @override
+  final name = "build";
+
+  @override
+  final description = "Builds a Static Shock website when run at the top-level of a Static Shock project.";
+
+  @override
+  Future<void> run() async {
+    _log.info("Building a Static Shock website.");
+
+    final pubspecFile = File("pubspec.yaml");
+    if (!pubspecFile.existsSync()) {
+      _log.err("Couldn't find pubspec.yaml. This must not be a Static Shock project.");
+      return;
+    }
+
+    final pubspec = loadYaml(pubspecFile.readAsStringSync());
+    final packageName = pubspec["name"] as String?;
+    if (packageName == null || packageName.isEmpty) {
+      _log.err("Couldn't find the project's package name in pubspec.yaml.");
+      return;
+    }
+
+    final packageNameExecutable = File("bin${Platform.pathSeparator}$packageName.dart");
+    final mainExecutable = File("bin${Platform.pathSeparator}main.dart");
+    if (!packageNameExecutable.existsSync() && !mainExecutable.existsSync()) {
+      _log.err("Couldn't find the project's executable. Please check your /bin directory.");
+      return;
+    }
+
+    final executableFile = packageNameExecutable.existsSync() ? packageNameExecutable : mainExecutable;
+
+    _log.detail("Running Static Shock executable: ${executableFile.path}");
+    final result = await Process.run(
+      'dart',
+      [executableFile.path],
+    );
+    stdout.write(result.stdout);
+    stderr.write(result.stderr);
   }
 }
 
