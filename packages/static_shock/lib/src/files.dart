@@ -81,10 +81,13 @@ class FilePrefixExcluder implements Excluder {
   int get hashCode => _prefix.hashCode;
 }
 
-class RelativePath {
+abstract class RelativePath {
   const RelativePath(this.value);
 
   final String value;
+
+  /// The list of directory names that comprise this path.
+  List<String> get directories;
 
   @override
   bool operator ==(Object other) =>
@@ -99,6 +102,9 @@ class RelativePath {
 
 class DirectoryRelativePath extends RelativePath {
   const DirectoryRelativePath(super.value);
+
+  @override
+  List<String> get directories => value.split(Platform.pathSeparator).where((item) => item.isNotEmpty).toList();
 }
 
 class FileRelativePath implements RelativePath {
@@ -141,6 +147,9 @@ class FileRelativePath implements RelativePath {
   final String directoryPath;
   final String filename;
   final String extension;
+
+  @override
+  List<String> get directories => directoryPath.split(Platform.pathSeparator).where((item) => item.isNotEmpty).toList();
 
   FileRelativePath copyWith({
     String? directoryPath,

@@ -1,19 +1,6 @@
 ---
 title: Copy Assets
 layout: layouts/guides.jinja
-docs_menu:
-  - title: Add a Page
-    id: add-a-page
-  - title: Copy CSS, JS, Images
-    id: copy-assets
-  - title: Compile Sass
-    id: compile-sass
-  - title: Display a Menu in a Page
-    id: display-a-menu-in-a-page
-  - title: Use Remote CSS and JS
-    id: use-remote-css-and-js
-  - title: Create RSS Feed
-    id: create-rss-feed
 ---
 # Copy Images, CSS, JS
 A static site typically contains many assets. An asset is a file served by a web server, which isn't a page.

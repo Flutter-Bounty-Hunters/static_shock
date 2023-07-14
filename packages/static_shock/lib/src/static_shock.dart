@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:fbh_front_matter/fbh_front_matter.dart' as front_matter;
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
+import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/finishers.dart';
 import 'package:static_shock/src/templates/components.dart';
 import 'package:static_shock/src/templates/layouts.dart';
@@ -124,6 +125,7 @@ class StaticShock implements StaticShockPipeline {
   File _resolveDestinationFile(FileRelativePath relativePath) => _destinationDir.descFile([relativePath.value]);
 
   late StaticShockPipelineContext _context;
+  late DataIndex _dataIndex;
   final _files = <FileRelativePath>[];
   final _pages = <Page>[];
   final _assets = <Asset>[];
@@ -160,6 +162,9 @@ class StaticShock implements StaticShockPipeline {
 
     // Load layouts and components
     _loadLayoutsAndComponents();
+
+    // Collect all data in _data.yaml files in the source set.
+    _dataIndex = await indexSourceData(_sourceFiles);
 
     // Pick the files.
     _pickAllSourceFiles();
@@ -288,6 +293,10 @@ class StaticShock implements StaticShockPipeline {
 
         _log.detail("Loading page: $pickedFile");
         final page = await pageLoader.loadPage(pickedFile, content.text!);
+
+        final inheritedData = _dataIndex.getForPath(page.sourcePath);
+        page.data.addEntries(inheritedData.entries);
+
         _pages.add(page);
 
         continue pickerLoop;
