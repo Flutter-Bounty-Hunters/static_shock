@@ -33,6 +33,8 @@ class SourceFiles {
 
   /// Returns all directories in the source directory, except excluded paths.
   Iterable<SourceDirectory> sourceDirectories([SourceFilter? filter]) {
+    final rootDirectory = SourceDirectory(directory, "/");
+
     return directory
         .listSync(recursive: true) //
         .whereType<Directory>()
@@ -41,7 +43,9 @@ class SourceFiles {
               subDirectory.path.substring(directory.path.length),
             ))
         .where((directory) => !_isExcluded(directory.subPath))
-        .where((file) => filter?.passesFilter(file) ?? true);
+        .where((file) => filter?.passesFilter(file) ?? true)
+        .toList()
+      ..insert(0, rootDirectory);
   }
 
   /// Returns all files in the source directory, except excluded paths.
