@@ -1,5 +1,5 @@
 ---
-title: Display Directory of Pages
+title: Display a Menu in a Page
 layout: layouts/guides.jinja
 docs_menu:
   - title: Add a Page
@@ -8,12 +8,14 @@ docs_menu:
     id: copy-assets
   - title: Compile Sass
     id: compile-sass
-  - title: Display Directory of Pages
-    id: display-directory-of-pages
+  - title: Display a Menu in a Page
+    id: display-a-menu-in-a-page
   - title: Use Remote CSS and JS
     id: use-remote-css-and-js
   - title: Create RSS Feed
     id: create-rss-feed
 ---
-# Display Directory of Pages
-TODO:
+# Display a Menu in a Page
+<div class="alert alert-danger" role="alert">
+  TODO: Create a guide for displaying a menu within a page
+</div>

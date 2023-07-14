@@ -30,6 +30,10 @@ html, body {
   color: $accent;
 }
 
+p + h2 {
+  margin-top: 48px;
+}
+
 // pre {
 //   margin-top: 2em;
 //   margin-bottom: 2em;
@@ -39,9 +43,7 @@ html, body {
 //   background: rgb(207,36,36);
 //   background: linear-gradient(331deg, rgba(207,36,36,1) 0%, rgba(255,182,143,1) 100%);
 // }
-//
-// pre > code {
-//   padding: 2em !important;
-//
-//   border-radius: 8px;
-// }
+
+pre > code {
+  margin: 8px 0;
+}

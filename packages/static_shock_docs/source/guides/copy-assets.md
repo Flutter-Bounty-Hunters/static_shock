@@ -8,8 +8,8 @@ docs_menu:
     id: copy-assets
   - title: Compile Sass
     id: compile-sass
-  - title: Display Directory of Pages
-    id: display-directory-of-pages
+  - title: Display a Menu in a Page
+    id: display-a-menu-in-a-page
   - title: Use Remote CSS and JS
     id: use-remote-css-and-js
   - title: Create RSS Feed
@@ -35,3 +35,10 @@ final staticShock = StaticShock()
   ..pick(DirectoryPicker.parse("images"))
   ..pick(DirectoryPicker.parse("scripts"));
 ```
+
+<div class="alert alert-danger" role="alert">
+  TODO: Create hooks for transforms in the asset pipeline
+</div>
+<div class="alert alert-danger" role="alert">
+  TODO: Write guide for how to transform assets
+</div>

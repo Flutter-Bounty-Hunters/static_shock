@@ -8,12 +8,19 @@ docs_menu:
     id: copy-assets
   - title: Compile Sass
     id: compile-sass
-  - title: Display Directory of Pages
-    id: display-directory-of-pages
+  - title: Display a Menu in a Page
+    id: display-a-menu-in-a-page
   - title: Use Remote CSS and JS
     id: use-remote-css-and-js
   - title: Create RSS Feed
     id: create-rss-feed
 ---
 # Create RSS Feed
-TODO:
+
+<div class="alert alert-danger" role="alert">
+  TODO: Implement an RSS plugin
+</div>
+
+<div class="alert alert-danger" role="alert">
+  TODO: Write a guide for generating an RSS feed
+</div>

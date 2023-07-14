@@ -25,12 +25,12 @@
 
       <div style="height: 200px;">&nbsp;</div>
       <div class="row" style="max-width: 1000px; margin: auto;">
-        <nav class="fixed gap-2" style="width: 225px;">
+        <nav class="guides-menu fixed gap-2" style="width: 225px;">
           {% for menuItem in docs_menu %}
             <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
           {% endfor %}
         </nav>
-        <section class="col">
+        <section class="guide-content col">
           {{ content }}
         </section>
       </div>
