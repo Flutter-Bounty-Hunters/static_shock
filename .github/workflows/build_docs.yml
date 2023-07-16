@@ -1,0 +1,48 @@
+name: Build and deploy documentation website
+on:
+  push:
+    branches:
+      main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/static_shock_docs
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup a Dart environment
+      - uses: dart-lang/setup-dart@v1
+
+      # Download all the packages that the app uses
+      - run: dart pub get
+
+      # Build the static site
+      - run: dart run bin/static_shock_docs.dart
+
+      # Zip and upload the static site.
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./packages/static_shock_docs/build
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
