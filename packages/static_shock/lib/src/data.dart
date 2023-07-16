@@ -4,6 +4,16 @@ import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/source_files.dart';
 import 'package:yaml/yaml.dart';
 
+/// Loads data that might be needed by one or more pages.
+///
+/// All [DataLoader]s run before any assets or pages are loaded.
+abstract class DataLoader {
+  /// Loads data from any desired data source and returns it.
+  ///
+  /// The returned data will be made available to all pages.
+  Future<Map<String, Object>> loadData();
+}
+
 /// Inspects all [sourceFiles] for files called `_data.yaml`, accumulates the content of those
 /// files into a [DataIndex], and returns that [DataIndex].
 Future<DataIndex> indexSourceData(SourceFiles sourceFiles) async {

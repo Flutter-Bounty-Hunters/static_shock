@@ -15,5 +15,6 @@ export 'src/files.dart';
 export 'src/plugins/markdown.dart';
 export 'src/plugins/jinja.dart';
 export 'src/plugins/pretty_urls.dart';
+export 'src/plugins/pub_package.dart';
 export 'src/plugins/rss.dart';
 export 'src/plugins/sass.dart';
