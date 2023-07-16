@@ -34,6 +34,7 @@ class StaticShock implements StaticShockPipeline {
     this.destinationDirectoryRelativePath = "build",
     Set<Picker>? pickers,
     Set<Excluder>? excluders,
+    Set<DataLoader>? dataLoaders,
     Set<AssetTransformer>? assetTransformers,
     Set<PageLoader>? pageLoaders,
     Set<PageTransformer>? pageTransformers,
@@ -45,6 +46,7 @@ class StaticShock implements StaticShockPipeline {
             {
               const FilePrefixExcluder("."),
             },
+        _dataLoaders = dataLoaders ?? {},
         _assetTransformers = assetTransformers ?? {},
         _pageLoaders = pageLoaders ?? {},
         _pageTransformers = pageTransformers ?? {},
@@ -74,6 +76,12 @@ class StaticShock implements StaticShockPipeline {
   @override
   void exclude(Excluder excluder) => _excluders.add(excluder);
   late final Set<Excluder> _excluders;
+
+  /// Adds the given [DataLoader] to the pipeline, which loads external data before
+  /// any assets or pages are loaded.
+  @override
+  void loadData(DataLoader dataLoader) => _dataLoaders.add(dataLoader);
+  late final Set<DataLoader> _dataLoaders;
 
   /// Adds the given [AssetTransformer] to the pipeline, which copies, alters, and
   /// saves assets from the source set to the build set.
@@ -169,6 +177,9 @@ class StaticShock implements StaticShockPipeline {
     // Pick the files.
     _pickAllSourceFiles();
 
+    // Load all external data that will be injected into all pages.
+    await _loadExternalData();
+
     // Load pages and assets.
     await _loadPagesAndAssets();
 
@@ -260,6 +271,15 @@ class StaticShock implements StaticShockPipeline {
       }
     }
     _log.info("");
+  }
+
+  Future<void> _loadExternalData() async {
+    final globalData = <String, Object>{};
+    for (final loader in _dataLoaders) {
+      final loadedData = await loader.loadData();
+      globalData.addAll(loadedData);
+    }
+    _dataIndex.mergeAtPath(DirectoryRelativePath("/"), globalData);
   }
 
   Future<void> _loadPagesAndAssets() async {

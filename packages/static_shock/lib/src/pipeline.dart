@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/finishers.dart';
 import 'package:static_shock/src/templates/components.dart';
@@ -24,6 +25,10 @@ abstract class StaticShockPipeline {
   ///       .exclude(FilePicker.parse("**/.DS_Store");
   ///
   void exclude(Excluder excluder);
+
+  /// Adds the given [DataLoader] to the pipeline, which loads external data before
+  /// any assets or pages are loaded.
+  void loadData(DataLoader dataLoader);
 
   /// Adds the given [AssetTransformer] to the pipeline, which copies, alters, and
   /// saves assets from the source set to the build set.
