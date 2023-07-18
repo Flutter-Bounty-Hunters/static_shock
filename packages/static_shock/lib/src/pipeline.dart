@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/finishers.dart';
@@ -58,7 +59,13 @@ abstract class StaticShockPipeline {
 /// Information and file system access that's provided to various pipeline actors
 /// and also provided to plugins.
 class StaticShockPipelineContext {
-  StaticShockPipelineContext(this._sourceDirectory);
+  StaticShockPipelineContext(this.log, this._sourceDirectory);
+
+  /// The shared [Logger] for all CLI output.
+  ///
+  /// Plugins should log messages with this [Logger] so that verbosity output level
+  /// can be centrally controlled.
+  final Logger log;
 
   final Directory _sourceDirectory;
 

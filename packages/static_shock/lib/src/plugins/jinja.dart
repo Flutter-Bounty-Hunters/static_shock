@@ -10,21 +10,21 @@ import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 
-final _log = Logger(level: Level.verbose);
-
 class JinjaPlugin implements StaticShockPlugin {
   const JinjaPlugin();
 
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
     pipeline.pick(const ExtensionPicker("jinja"));
-    pipeline.loadPages(const JinjaPageLoader());
-    pipeline.renderPages(const JinjaPageRenderer());
+    pipeline.loadPages(JinjaPageLoader(context.log));
+    pipeline.renderPages(JinjaPageRenderer(context.log));
   }
 }
 
 class JinjaPageLoader implements PageLoader {
-  const JinjaPageLoader();
+  const JinjaPageLoader(this._log);
+
+  final Logger _log;
 
   @override
   bool canLoad(FileRelativePath path) {
@@ -51,7 +51,9 @@ class JinjaPageLoader implements PageLoader {
 }
 
 class JinjaPageRenderer implements PageRenderer {
-  const JinjaPageRenderer();
+  const JinjaPageRenderer(this._log);
+
+  final Logger _log;
 
   @override
   FutureOr<void> renderPage(StaticShockPipelineContext context, Page page) async {

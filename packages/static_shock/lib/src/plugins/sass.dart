@@ -4,8 +4,6 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:sass/sass.dart' as sass;
 import 'package:static_shock/static_shock.dart';
 
-final _log = Logger(level: Level.verbose);
-
 class SassPlugin implements StaticShockPlugin {
   const SassPlugin();
 
@@ -15,7 +13,7 @@ class SassPlugin implements StaticShockPlugin {
       ..pick(ExtensionPicker("sass"))
       ..pick(ExtensionPicker("scss"))
       ..transformAssets(
-        const SassAssetTransformer(),
+        SassAssetTransformer(context.log),
       );
   }
 }
@@ -23,7 +21,9 @@ class SassPlugin implements StaticShockPlugin {
 class SassAssetTransformer implements AssetTransformer {
   static const _extensions = ["sass", "scss"];
 
-  const SassAssetTransformer();
+  const SassAssetTransformer(this._log);
+
+  final Logger _log;
 
   @override
   FutureOr<void> transformAsset(StaticShockPipelineContext context, Asset asset) async {
