@@ -1,6 +1,7 @@
 @import "theme";
 
 .guides-menu {
+  width: 300px;
   margin-right: 24px;
 }
 
@@ -16,6 +17,8 @@ h1 {
 
   padding: 8px 16px;
 
+  font-size: 16px;
+  line-height: 1.2em;
   text-align: left;
 
   &:hover {

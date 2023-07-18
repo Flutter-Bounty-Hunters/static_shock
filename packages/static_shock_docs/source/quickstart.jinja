@@ -36,14 +36,14 @@ title: Quickstart
         <h2>Activate the Static Shock CLI</h2>
         <p>The Static Shock CLI tool helps you quickly generate new projects, and locally server your static site. You don't need to use this tool, but it's the fastest and easiest way to get started.</p>
         <pre>
-          <code language="sh" class="language-sh">
+          <code language="sh" class="language-plaintext">
 dart pub global activate static_shock_cli
           </code>
         </pre>
 
         <p>Verify that Static Shock was activated</p>
         <pre>
-          <code language="sh" class="language-sh">
+          <code language="sh" class="language-plaintext">
 which shock
           </code>
         </pre>
@@ -51,7 +51,7 @@ which shock
         <h2>Generate a new project</h2>
         <p>Use the Static Shock CLI tool to generate a new project. You can also create the files manually, if you'd like.</p>
         <pre>
-          <code language="sh" class="language-sh">
+          <code language="sh" class="language-plaintext">
 shock create
           </code>
         </pre>
@@ -59,15 +59,22 @@ shock create
         <h2>Build your static site</h2>
         <p>Every Static Shock project is a regular Dart project. The script that builds your static site is in the `/bin` directory. Build your static site to ensure that everything is configured correctly.</p>
         <pre>
-          <code language="sh" class="language-sh">
+          <code language="sh" class="language-plaintext">
 dart run bin/my_project.dart
+          </code>
+        </pre>
+
+        <p>As a shortcut, you can run the following command instead of `dart run`.</p>
+        <pre>
+          <code language="sh" class="language-plaintext">
+shock build
           </code>
         </pre>
 
         <h2>Serve your site locally</h2>
         <p>To verify your static site locally, you need to run a local web server. The Static Shock CLI can do this for you.</p>
         <pre>
-          <code language="sh" class="language-sh">
+          <code language="sh" class="language-plaintext">
 shock serve
           </code>
         </pre>

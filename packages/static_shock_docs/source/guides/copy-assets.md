@@ -1,6 +1,5 @@
 ---
 title: Copy Assets
-layout: layouts/guides.jinja
 ---
 # Copy Images, CSS, JS
 A static site typically contains many assets. An asset is a file served by a web server, which isn't a page.

@@ -1,6 +1,5 @@
 ---
 title: Display a Menu in a Page
-layout: layouts/guides.jinja
 ---
 # Display a Menu in a Page
 <div class="alert alert-danger" role="alert">

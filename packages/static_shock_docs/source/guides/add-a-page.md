@@ -1,6 +1,5 @@
 ---
 title: Add a Page
-layout: layouts/guides.jinja
 ---
 # Add a Page
 A page is a URL-addressable web page.

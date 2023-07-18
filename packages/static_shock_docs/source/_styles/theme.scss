@@ -11,6 +11,8 @@ $primaryLighter : #203035;
 $accent       : #FFE500;
 $accentLight  : #FFFF33;
 
+$inlineCode : $accent;
+
 @font-face {
   font-family: marketFresh;
   src: url(/fonts/market-fresh/Market-Fresh.ttf);
@@ -24,6 +26,9 @@ $accentLight  : #FFFF33;
 
 html, body {
   color: WHITE;
+
+  font-size: 20px;
+  height: 1.4em;
 }
 
 .accent-text {
@@ -32,6 +37,10 @@ html, body {
 
 p + h2 {
   margin-top: 48px;
+}
+
+code {
+  color: $inlineCode;
 }
 
 // pre {

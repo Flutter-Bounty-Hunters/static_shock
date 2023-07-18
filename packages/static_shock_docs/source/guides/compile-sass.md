@@ -1,6 +1,5 @@
 ---
 title: Compile Sass
-layout: layouts/guides.jinja
 ---
 # Compile Sass
 Sass (also known as SCSS) is a format for defining CSS in a more convenient and extensible way.

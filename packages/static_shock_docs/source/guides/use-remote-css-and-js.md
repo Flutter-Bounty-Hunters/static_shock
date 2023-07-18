@@ -1,6 +1,5 @@
 ---
 title: Use Remote CSS and JS
-layout: layouts/guides.jinja
 ---
 # Use Remote CSS and JS
 <div class="alert alert-danger" role="alert">

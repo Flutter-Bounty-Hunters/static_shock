@@ -1,6 +1,5 @@
 ---
 title: Create RSS Feed
-layout: layouts/guides.jinja
 ---
 # Create RSS Feed
 
