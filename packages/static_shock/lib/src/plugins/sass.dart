@@ -11,20 +11,19 @@ class SassPlugin implements StaticShockPlugin {
 
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
-    pipeline.transformAssets(
-      const SassAssetTransformer(
-        DirectoryRelativePath("styles/"),
-      ),
-    );
+    pipeline
+      ..pick(ExtensionPicker("sass"))
+      ..pick(ExtensionPicker("scss"))
+      ..transformAssets(
+        const SassAssetTransformer(),
+      );
   }
 }
 
 class SassAssetTransformer implements AssetTransformer {
   static const _extensions = ["sass", "scss"];
 
-  const SassAssetTransformer(this._outputDirectory);
-
-  final DirectoryRelativePath _outputDirectory;
+  const SassAssetTransformer();
 
   @override
   FutureOr<void> transformAsset(StaticShockPipelineContext context, Asset asset) async {
@@ -34,7 +33,7 @@ class SassAssetTransformer implements AssetTransformer {
     }
 
     asset.destinationPath = asset.destinationPath!.copyWith(
-      directoryPath: _outputDirectory.value,
+      // directoryPath: _outputDirectory.value,
       extension: "css",
     );
     asset.destinationContent = AssetContent.text(
