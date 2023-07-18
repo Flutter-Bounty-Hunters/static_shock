@@ -9,21 +9,21 @@ import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 
-final _log = Logger(level: Level.verbose);
-
 class MarkdownPlugin implements StaticShockPlugin {
   const MarkdownPlugin();
 
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
     pipeline.pick(const ExtensionPicker("md"));
-    pipeline.loadPages(const MarkdownPageLoader());
-    pipeline.renderPages(const MarkdownPageRenderer());
+    pipeline.loadPages(MarkdownPageLoader(context.log));
+    pipeline.renderPages(MarkdownPageRenderer(context.log));
   }
 }
 
 class MarkdownPageLoader implements PageLoader {
-  const MarkdownPageLoader();
+  const MarkdownPageLoader(this._log);
+
+  final Logger _log;
 
   @override
   bool canLoad(FileRelativePath path) {
@@ -50,7 +50,9 @@ class MarkdownPageLoader implements PageLoader {
 }
 
 class MarkdownPageRenderer implements PageRenderer {
-  const MarkdownPageRenderer();
+  const MarkdownPageRenderer(this._log);
+
+  final Logger _log;
 
   @override
   FutureOr<void> renderPage(StaticShockPipelineContext context, Page page) async {

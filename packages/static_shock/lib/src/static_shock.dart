@@ -160,7 +160,7 @@ class StaticShock implements StaticShockPipeline {
     _clearDestination();
 
     //---- Run new pipeline ----
-    _context = StaticShockPipelineContext(_sourceDirectory);
+    _context = StaticShockPipelineContext(_log, _sourceDirectory);
     _files.clear();
     _pages.clear();
     _assets.clear();
