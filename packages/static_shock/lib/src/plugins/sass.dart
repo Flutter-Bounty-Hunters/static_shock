@@ -33,7 +33,6 @@ class SassAssetTransformer implements AssetTransformer {
     }
 
     asset.destinationPath = asset.destinationPath!.copyWith(
-      // directoryPath: _outputDirectory.value,
       extension: "css",
     );
     asset.destinationContent = AssetContent.text(
