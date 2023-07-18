@@ -1,8 +1,12 @@
 @import "theme";
 
 .guides-menu {
-  width: 300px;
+  width: 250px;
   margin-right: 24px;
+}
+
+.guide-content {
+  max-width: 750px;
 }
 
 h1 {
