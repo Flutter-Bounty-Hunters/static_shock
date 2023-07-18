@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fbh_front_matter/fbh_front_matter.dart' as front_matter;
-import 'package:html/parser.dart';
 import 'package:jinja/jinja.dart';
 import 'package:mason_logger/mason_logger.dart';
-
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
