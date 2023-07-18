@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fbh_front_matter/fbh_front_matter.dart' as front_matter;
 import 'package:jinja/jinja.dart';
 import 'package:mason_logger/mason_logger.dart';
-
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
+import 'package:yaml/yaml.dart';
 
 class JinjaPlugin implements StaticShockPlugin {
   const JinjaPlugin();
@@ -33,18 +32,27 @@ class JinjaPageLoader implements PageLoader {
 
   @override
   FutureOr<Page> loadPage(FileRelativePath path, String content) {
-    late final front_matter.FrontMatterDocument jinja;
-    try {
-      jinja = front_matter.parse(content);
-    } catch (exception) {
-      _log.err("Caught exception while parsing Front Matter for page ($path):\n$exception");
-      rethrow;
+    final frontMatter = <String, Object>{};
+    var trimmedContent = content.trim();
+    if (trimmedContent.startsWith("<!--")) {
+      // The very first piece of content is an HTML comment. It might be front matter.
+      // Try to parse it as YAML front matter.
+      final comment = trimmedContent.substring("<!--".length, trimmedContent.indexOf("-->")).trim();
+      trimmedContent = trimmedContent.substring(trimmedContent.indexOf("-->") + 3).trim();
+
+      final yaml = loadYaml(comment) as YamlMap;
+      for (final entry in yaml.entries) {
+        if (entry.key is! String) {
+          continue;
+        }
+        frontMatter[entry.key] = entry.value;
+      }
     }
 
     return Page(
       path,
-      jinja.content ?? content,
-      data: {...jinja.data},
+      trimmedContent,
+      data: {...frontMatter},
       destinationPath: path.copyWith(extension: "html"),
     );
   }
