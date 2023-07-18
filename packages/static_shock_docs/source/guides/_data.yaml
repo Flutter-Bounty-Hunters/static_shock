@@ -10,6 +10,8 @@ docs_menu:
     id: display-a-menu-in-a-page
   - title: Use Remote CSS and JS
     id: use-remote-css-and-js
+  - title: Create a Plugin
+    id: create-a-plugin
   - title: Create RSS Feed
     id: create-rss-feed
   - title: Deploy to GitHub Pages
