@@ -69,9 +69,9 @@ Page URL paths are based on directory structure. Create directories that match y
 Inside the Jinja file, add Front Matter configuration, to tell Static Shock how to generate the final page. Also, add HTML and Jinja template content, which will directly translate into the final HTML for the page.
 
 ```html
----
+<!--
 title: Contact Us
----
+-->
 <!doctype html>
 <html lang="en">
   <head>
