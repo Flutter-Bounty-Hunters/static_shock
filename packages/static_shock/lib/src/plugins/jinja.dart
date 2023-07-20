@@ -23,6 +23,7 @@ class JinjaPlugin implements StaticShockPlugin {
 class JinjaPageLoader implements PageLoader {
   const JinjaPageLoader(this._log);
 
+  // ignore: unused_field
   final Logger _log;
 
   @override

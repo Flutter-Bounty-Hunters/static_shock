@@ -1,3 +1,13 @@
+## 0.0.1 - July 19, 2023
+First non-preview release.
+
+Commands:
+ * `shock create`
+ * `shock build`
+ * `shock serve`
+ * `shock version`
+ * `shock upgrade`
+
 ## 0.0.1-dev.5 - July 1, 2023
 Added version checks to notify users when newer versions of the CLI are available.
 

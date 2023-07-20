@@ -567,7 +567,7 @@ packages:
       path: "../static_shock"
       relative: true
     source: path
-    version: "0.0.1-dev.2"
+    version: "0.0.1"
   stream_channel:
     dependency: transitive
     description:
@@ -665,7 +665,7 @@ packages:
     source: hosted
     version: "11.7.1"
   watcher:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: watcher
       sha256: "3d2ad6751b3c16cf07c7fca317a1413b3f26530319181b37e3b9039b84fc01d8"

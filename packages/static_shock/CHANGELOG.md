@@ -1,3 +1,23 @@
+## 0.0.1 - July 19, 2023
+First non-preview release.
+
+Pipeline pieces:
+ * Pickers
+ * Excluders
+ * DataLoaders
+ * AssetTransformer
+ * PageLoaders
+ * PageTransformers
+ * PageRenderers
+ * Finishers
+
+Plugins:
+ * Jinja Templates
+ * Markdown
+ * Pretty URLs
+ * Sass
+ * Pub Packages
+
 ## 0.0.1-dev.2 - June 12, 2023
 Cleaned up project for alpha testing:
 
