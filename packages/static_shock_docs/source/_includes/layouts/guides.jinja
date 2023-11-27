@@ -23,15 +23,18 @@
     <main>
       {{ components.navbar({"title": title}) }}
 
+      <!-- Push all content down, providing padding near the top of the screen -->
       <div style="height: 200px;">&nbsp;</div>
+
+      <!-- Primary page content -->
       <div class="container">
-        <div class="d-flex flex-nowrap" style="max-width: 1000px; margin: auto;">
-          <nav class="guides-menu">
+        <div class="row">
+          <nav class="col-3 d-none d-md-block">
             {% for menuItem in docs_menu %}
               <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
             {% endfor %}
           </nav>
-          <section class="guide-content w-100">
+          <section class="col-md-9 col-12">
             {{ content }}
           </section>
         </div>
