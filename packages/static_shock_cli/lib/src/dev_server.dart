@@ -132,7 +132,7 @@ class StaticShockDevServer {
   FutureOr<Response> Function(Request) _createStaticSiteServerHandler() {
     return const Pipeline() //
         .addMiddleware(logRequests()) //
-        .addMiddleware(injectDevServerWebSocket(() => _port))
+        .addMiddleware(_injectDevServerWebSocket(() => _port))
         .addHandler(
           createStaticHandler(
             'build',
@@ -227,7 +227,7 @@ class StaticShockDevServer {
 /// a full page refresh so that the page is running the latest version from the server. This
 /// is kind of a like an automatic "hot restart" for every HTML page that this dev server
 /// serves.
-Middleware injectDevServerWebSocket(int Function() getPort, {void Function(String message, bool isError)? logger}) =>
+Middleware _injectDevServerWebSocket(int Function() getPort, {void Function(String message, bool isError)? logger}) =>
     (innerHandler) {
       return (request) async {
         final response = await innerHandler(request);
