@@ -46,6 +46,12 @@ class StaticShockDevServer {
   /// Whether another website build is desired after the one that's currently in-progress.
   bool isAnotherBuildQueued = false;
 
+  /// Starts a development mode web server.
+  ///
+  /// The dev server serves static assets, as expected. It also intercepts all HTML webpages
+  /// and injects JavaScript that causes a page refresh whenever the site is rebuilt.
+  ///
+  /// To stop the dev server, call [stop].
   Future<void> run({
     required int port,
     bool findAnOpenPort = false,
@@ -93,6 +99,7 @@ class StaticShockDevServer {
         .listen(_onSourceFileChange);
   }
 
+  /// Stops a dev server that was started with [run].
   Future<void> stop() async {
     if (!_isServing) {
       return;
