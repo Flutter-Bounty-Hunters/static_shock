@@ -1,13 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
-import 'package:mason/mason.dart';
+import 'package:mason/mason.dart' hide packageVersion;
 import 'package:pub_updater/pub_updater.dart';
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:shelf_static/shelf_static.dart';
-import 'package:yaml/yaml.dart';
+import 'package:static_shock_cli/static_shock_cli.dart';
 
 final _log = Logger(level: Level.verbose);
 
@@ -96,40 +94,26 @@ class BuildCommand extends Command {
   @override
   Future<void> run() async {
     _log.info("Building a Static Shock website.");
-
-    final pubspecFile = File("pubspec.yaml");
-    if (!pubspecFile.existsSync()) {
-      _log.err("Couldn't find pubspec.yaml. This must not be a Static Shock project.");
-      return;
-    }
-
-    final pubspec = loadYaml(pubspecFile.readAsStringSync());
-    final packageName = pubspec["name"] as String?;
-    if (packageName == null || packageName.isEmpty) {
-      _log.err("Couldn't find the project's package name in pubspec.yaml.");
-      return;
-    }
-
-    final packageNameExecutable = File("bin${Platform.pathSeparator}$packageName.dart");
-    final mainExecutable = File("bin${Platform.pathSeparator}main.dart");
-    if (!packageNameExecutable.existsSync() && !mainExecutable.existsSync()) {
-      _log.err("Couldn't find the project's executable. Please check your /bin directory.");
-      return;
-    }
-
-    final executableFile = packageNameExecutable.existsSync() ? packageNameExecutable : mainExecutable;
-
-    _log.detail("Running Static Shock executable: ${executableFile.path}");
-    final result = await Process.run(
-      'dart',
-      [executableFile.path],
-    );
-    stdout.write(result.stdout);
-    stderr.write(result.stderr);
+    await buildWebsite();
   }
 }
 
 class ServeCommand extends Command with PubVersionCheck {
+  ServeCommand() {
+    argParser
+      ..addOption(
+        "port",
+        abbr: "p",
+        defaultsTo: "4000",
+        help: "The port used to serve the Static Shock website via localhost.",
+      )
+      ..addFlag(
+        "findOpenPort",
+        defaultsTo: true,
+        help: "When flag is set, Static Stock looks for open ports if the desired port isn't available.",
+      );
+  }
+
   @override
   final name = "serve";
 
@@ -140,23 +124,35 @@ class ServeCommand extends Command with PubVersionCheck {
   Future<void> run() async {
     await super.run();
 
-    print("Serving a static site!");
+    // Run a website build just in case the user has never built, or hasn't built recently.
+    _log.info("Building website.");
+    try {
+      final result = await buildWebsite();
+      if (result == null) {
+        _log.err("Failed to build website, therefore not starting the dev server.");
+        return;
+      }
+    } catch (exception) {
+      _log.err("Failed to build website, therefore not starting the dev server.");
+      return;
+    }
 
-    var handler = const Pipeline() //
-        .addMiddleware(logRequests()) //
-        .addHandler(
-          createStaticHandler(
-            'build',
-            defaultDocument: 'index.html',
-          ),
-        );
+    if (!Directory("./build").existsSync()) {
+      _log.err("Failed to serve website - Couldn't find the build directory for the Static Shock website.");
+      return;
+    }
 
-    var server = await shelf_io.serve(handler, 'localhost', 4000);
+    final port = int.tryParse(argResults!["port"]);
+    if (port == null) {
+      _log.err("Tried to serve the website at an invalid port: '${argResults!["port"]}'");
+      return;
+    }
+    final isPortSearchingAllowed = argResults!["findOpenPort"] == true;
 
-    // Enable content compression
-    server.autoCompress = true;
-
-    print('Serving at http://${server.address.host}:${server.port}');
+    StaticShockDevServer(_log, buildWebsite).run(
+      port: port,
+      findAnOpenPort: isPortSearchingAllowed,
+    );
   }
 }
 
