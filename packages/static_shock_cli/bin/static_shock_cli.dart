@@ -108,7 +108,7 @@ class ServeCommand extends Command with PubVersionCheck {
         help: "The port used to serve the Static Shock website via localhost.",
       )
       ..addFlag(
-        "findOpenPort",
+        "find-open-port",
         defaultsTo: true,
         help: "When flag is set, Static Stock looks for open ports if the desired port isn't available.",
       );
@@ -147,7 +147,7 @@ class ServeCommand extends Command with PubVersionCheck {
       _log.err("Tried to serve the website at an invalid port: '${argResults!["port"]}'");
       return;
     }
-    final isPortSearchingAllowed = argResults!["findOpenPort"] == true;
+    final isPortSearchingAllowed = argResults!["find-open-port"] == true;
 
     StaticShockDevServer(_log, buildWebsite).run(
       port: port,
