@@ -1,3 +1,6 @@
+## 0.0.2 - Dec 10, 2023
+`shock serve` auto-refreshes HTML pages on change, dev server port is configurable.
+
 ## 0.0.1 - July 19, 2023
 First non-preview release.
 
