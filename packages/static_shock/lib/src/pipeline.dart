@@ -44,6 +44,28 @@ abstract class StaticShockPipeline {
   /// by [PageLoader]s, before the [Page] is rendered by a [PageRenderer].
   void transformPages(PageTransformer transformer);
 
+  /// Adds the given [templateFunction] to the pipeline, making the function available
+  /// during page template rendering via the given [name].
+  ///
+  /// Example - Register a function that converts Markdown to inline HTML:
+  ///
+  ///     pipeline.addTemplateFunction("md", (markdown) => markdownToHtml(markdown, inlineOnly: true));
+  ///
+  /// The registered function can then be used within a page template:
+  ///
+  ///     ---
+  ///     some_property: This is **markdown** in a *Front Matter* property.
+  ///     ---
+  ///     <html>
+  ///       <body>
+  ///         <h1>Markdown from Front Matter</h2>
+  ///         <!-- The following lines takes the value of some_property and passes it into the md() function -->
+  ///         <p>{{ md(some_property) }}</p>
+  ///       <body>
+  ///     </html>
+  ///
+  void addTemplateFunction(String name, Function templateFunction);
+
   /// Adds the given [PageRenderer] to the pipeline, which takes a [Page] and serializes
   /// that [Page] to an HTML page in the build set.
   void renderPages(PageRenderer renderer);
@@ -90,6 +112,32 @@ class StaticShockPipelineContext {
   void putLayout(Layout layout) {
     _layouts[layout.path] = layout;
   }
+
+  /// Functions that should be available during template rendering.
+  Map<String, Function> get templateFunctions => Map<String, Function>.from(_templateFunctions);
+  final _templateFunctions = <String, Function>{};
+
+  /// Adds the given [templateFunction] to the pipeline, making the function available
+  /// during page template rendering via the given [name].
+  ///
+  /// Example - Register a function that converts Markdown to inline HTML:
+  ///
+  ///     pipeline.addTemplateFunction("md", (markdown) => markdownToHtml(markdown, inlineOnly: true));
+  ///
+  /// The registered function can then be used within a page template:
+  ///
+  ///     ---
+  ///     some_property: This is **markdown** in a *Front Matter* property.
+  ///     ---
+  ///     <html>
+  ///       <body>
+  ///         <h1>Markdown from Front Matter</h2>
+  ///         <!-- The following lines takes the value of some_property and passes it into the md() function -->
+  ///         <p>{{ md(some_property) }}</p>
+  ///       <body>
+  ///     </html>
+  ///
+  void putTemplateFunction(String name, Function templateFunction) => _templateFunctions[name] = templateFunction;
 
   /// All components loaded into the pipeline.
   Map<String, Component> get components => Map<String, Component>.from(_components);
