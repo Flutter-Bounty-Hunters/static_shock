@@ -102,6 +102,30 @@ class StaticShock implements StaticShockPipeline {
   void transformPages(PageTransformer transformer) => _pageTransformers.add(transformer);
   late final Set<PageTransformer> _pageTransformers;
 
+  /// Adds the given [templateFunction] to the pipeline, making the function available
+  /// during page template rendering via the given [name].
+  ///
+  /// Example - Register a function that converts Markdown to inline HTML:
+  ///
+  ///     pipeline.addTemplateFunction("md", (markdown) => markdownToHtml(markdown, inlineOnly: true));
+  ///
+  /// The registered function can then be used within a page template:
+  ///
+  ///     ---
+  ///     some_property: This is **markdown** in a *Front Matter* property.
+  ///     ---
+  ///     <html>
+  ///       <body>
+  ///         <h1>Markdown from Front Matter</h2>
+  ///         <!-- The following lines takes the value of some_property and passes it into the md() function -->
+  ///         <p>{{ md(some_property) }}</p>
+  ///       <body>
+  ///     </html>
+  ///
+  @override
+  void addTemplateFunction(String name, Function templateFunction) =>
+      _context.putTemplateFunction(name, templateFunction);
+
   /// Adds the given [PageRenderer] to the pipeline, which takes a [Page] and serializes
   /// that [Page] to an HTML page in the build set.
   @override

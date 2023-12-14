@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:jinja/jinja.dart';
+import 'package:markdown/markdown.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/pages.dart';
@@ -127,6 +128,7 @@ class JinjaPageRenderer implements PageRenderer {
     final pageData = {
       ...page.data,
       "content": page.destinationContent ?? page.sourceContent,
+      ...context.templateFunctions,
       ...context.pagesIndex.buildPageIndexDataForTemplates(),
       "components": {
         // Maps component name to a factory method: "footer": () -> "<div>...</div>"

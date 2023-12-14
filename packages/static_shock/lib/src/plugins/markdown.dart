@@ -14,9 +14,12 @@ class MarkdownPlugin implements StaticShockPlugin {
 
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
-    pipeline.pick(const ExtensionPicker("md"));
-    pipeline.loadPages(MarkdownPageLoader(context.log));
-    pipeline.renderPages(MarkdownPageRenderer(context.log));
+    pipeline
+      ..pick(const ExtensionPicker("md"))
+      ..loadPages(MarkdownPageLoader(context.log))
+      ..renderPages(MarkdownPageRenderer(context.log));
+
+    context.putTemplateFunction("md", (String markdown) => markdownToHtml(markdown, inlineOnly: true));
   }
 }
 
