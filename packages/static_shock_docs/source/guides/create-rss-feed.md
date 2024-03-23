@@ -1,5 +1,6 @@
 ---
 title: Create RSS Feed
+tags: publishing
 ---
 # Create RSS Feed
 

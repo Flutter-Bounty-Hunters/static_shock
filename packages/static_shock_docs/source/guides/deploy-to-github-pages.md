@@ -1,5 +1,6 @@
 ---
 title: Deploy to GitHub Pages
+tags: publishing
 ---
 # GitHub Pages
 GitHub provides a free tool for building, deploying, and serving static websites - it's called

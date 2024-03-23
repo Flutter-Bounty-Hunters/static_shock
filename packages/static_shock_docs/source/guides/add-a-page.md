@@ -1,5 +1,6 @@
 ---
 title: Add a Page
+tags: drafting
 ---
 # Add a Page
 A page is a URL-addressable web page.

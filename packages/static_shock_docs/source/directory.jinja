@@ -1,0 +1,70 @@
+<!--
+title: Directory
+-->
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title }} | Static Shock</title>
+
+    {{ components.favicon() }}
+
+    {{ components.bootstrapJs() }}
+
+    {{ components.highlightJs() }}
+
+    {{ components.fontAwesome() }}
+
+    <link rel="stylesheet" href="/styles/theme.css">
+    <link rel="stylesheet" href="/styles/base_layout.css">
+    <link rel="stylesheet" href="/styles/inner_page.css">
+  </head>
+
+  <body class="inner-page">
+    <main>
+      {{ components.navbar({"title": title}) }}
+
+      {{
+        components.innerPageHeader({
+          "title": "Directory",
+          "subtitle": "All website pages in one directory"
+        })
+      }}
+
+      <section id="content">
+        <h2>Drafting</h2>
+        <ol>
+          {% for page in pages.byTag("drafting", sortBy="title", order="desc") %}
+          <li><a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a></li>
+          {% endfor %}
+        </ol>
+
+        <h2>Styling</h2>
+        <ol>
+          {% for page in pages.byTag("styling", order="desc") %}
+          <li><a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a></li>
+          {% endfor %}
+        </ol>
+
+        <h2>Publishing</h2>
+        <ol>
+          {% for page in pages.byTag("publishing", order="desc") %}
+          <li><a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a></li>
+          {% endfor %}
+        </ol>
+
+        <h2>Extensions</h2>
+        <ol>
+          {% for page in pages.byTag("extensions", order="desc") %}
+          <li><a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a></li>
+          {% endfor %}
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      {{ components.footer() }}
+    </footer>
+  </body>
+</html>

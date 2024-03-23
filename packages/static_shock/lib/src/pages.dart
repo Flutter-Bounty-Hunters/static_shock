@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:mason_logger/mason_logger.dart';
+
 import 'files.dart';
 import 'pipeline.dart';
 
@@ -18,6 +20,8 @@ abstract class PageRenderer {
 }
 
 class PagesIndex {
+  PagesIndex();
+
   Iterable<Page> get pages => List.from(_pages);
   final List<Page> _pages = [];
 
@@ -31,18 +35,125 @@ class PagesIndex {
     _pages.add(page);
   }
 
+  /// Returns a data structure which represents a "page index" within a Jinja template.
+  ///
+  /// For example, when the returned data structure is added to a Jinja context, a developer
+  /// can list all pages with a "flutter" tag as follows:
+  ///
+  /// ```jinja
+  /// <body>
+  ///   <ul>
+  ///     {% for page in pages.byTag("flutter") %}
+  ///       <li>
+  ///         <a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a>
+  ///       </li>
+  ///     {% endfor %}
+  ///   </ul>
+  /// </body>
+  /// ```
+  ///
   Map<String, dynamic> buildPageIndexDataForTemplates() {
     return {
       "pages": {
-        "byTag": (String tag) {
-          return _pages.where((page) => page.hasTag(tag)).map(
-                (page) => {
-                  "data": page.data,
-                },
-              );
-        },
+        "all": _all,
+        "byTag": _byTag,
       },
     };
+  }
+
+  /// Return an `Iterable` of page data for all pages, optionally ordered by [sortBy].
+  Iterable<Map<String, dynamic>> _all({
+    String? sortBy,
+    String order = "asc",
+  }) {
+    final allPagesSorted = _pages.toList() //
+      ..sort(_sortPages(sortBy, _parseSortOrder(order)));
+    return allPagesSorted.map(_serializePage);
+  }
+
+  /// Return an `Iterable` of page data for all pages with the given [tag], optionally
+  /// ordered by [sortBy].
+  Iterable<Map<String, dynamic>> _byTag(
+    String tag, {
+    String? sortBy,
+    String order = "asc",
+  }) {
+    final pages = _pages.where((page) => page.hasTag(tag)).toList() //
+      ..sort(_sortPages(sortBy, _parseSortOrder(order)));
+    return pages.map(_serializePage);
+  }
+
+  _SortOrder _parseSortOrder(String order) {
+    final sortOrder = _SortOrder.fromName(order);
+    if (sortOrder != null) {
+      return sortOrder;
+    }
+
+    _log.warn("WARNING: Received unknown name for sort order: '$order'");
+    return _SortOrder.ascending;
+  }
+
+  /// Returns a sorting function for [Page]s based on each [Page]'s [sortBy] property.
+  ///
+  /// For example, assume that every [Page] has a property called `index`. This method
+  /// would be called as follows:
+  ///
+  ///     final sortFunction = _sortPages("index");
+  ///
+  /// The `sortFunction` would say that Page A < Page B when `index` A < `index` B.
+  int Function(Page, Page) _sortPages(String? sortBy, _SortOrder sortOrder) {
+    if (sortBy == null || sortBy.isEmpty) {
+      return (Page a, Page b) => -1;
+    }
+
+    return (Page a, Page b) {
+      switch (sortOrder) {
+        case _SortOrder.ascending:
+          if (a.data[sortBy] == null) {
+            // The first item doesn't have the sorted property - show it last.
+            return 1;
+          }
+          if (b.data[sortBy] == null) {
+            // The second item doesn't have the sorted property - show it last.
+            return -1;
+          }
+
+          return a.data[sortBy].compareTo(b.data[sortBy]);
+        case _SortOrder.descending:
+          if (a.data[sortBy] == null) {
+            // The first item doesn't have the sorted property - show it first (because descending).
+            return -1;
+          }
+          if (b.data[sortBy] == null) {
+            // The second item doesn't have the sorted property - show it first (because descending).
+            return 1;
+          }
+
+          return b.data[sortBy].compareTo(a.data[sortBy]);
+      }
+    };
+  }
+
+  Map<String, dynamic> _serializePage(Page page) => {
+        "data": page.data,
+      };
+}
+
+enum _SortOrder {
+  ascending,
+  descending;
+
+  /// Parses the given [name] and returns the corresponding [_SortOrder], or returns
+  /// `null` if the [name] doesn't correspond to a sort order.
+  static _SortOrder? fromName(String name) {
+    if (name == "asc" || name == "ascending") {
+      return _SortOrder.ascending;
+    }
+    if (name == "desc" || name == "descending") {
+      return _SortOrder.descending;
+    }
+
+    return null;
   }
 }
 
@@ -105,7 +216,8 @@ class Page {
   set url(String? url) => data["url"] = url;
 
   bool hasTag(String tag) => tags.contains(tag);
-  List<String> get tags => data["tags"] != null ? List.from(data["tags"]) : [];
+  List<String> get tags =>
+      data["tags"] != null ? List.from(data["tags"] is List ? data["tags"] : [data["tags"] as String]) : [];
 
   String describe() {
     return '''Page:
@@ -133,3 +245,5 @@ $destinationContent
   @override
   String toString() => "[Page] - source: $sourcePath, destination: $destinationPath";
 }
+
+final _log = Logger(level: Level.verbose);
