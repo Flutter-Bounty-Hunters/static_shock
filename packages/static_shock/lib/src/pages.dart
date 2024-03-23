@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'files.dart';
@@ -13,6 +14,10 @@ abstract class PageLoader {
 
 abstract class PageTransformer {
   FutureOr<void> transformPage(StaticShockPipelineContext context, Page page);
+}
+
+abstract class PageFilter {
+  bool shouldInclude(StaticShockPipelineContext context, Page page);
 }
 
 abstract class PageRenderer {
@@ -33,6 +38,10 @@ class PagesIndex {
 
   void addPage(Page page) {
     _pages.add(page);
+  }
+
+  void removePage(Page page) {
+    _pages.remove(page);
   }
 
   /// Returns a data structure which represents a "page index" within a Jinja template.
