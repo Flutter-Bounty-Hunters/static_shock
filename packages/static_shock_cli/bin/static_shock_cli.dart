@@ -92,9 +92,18 @@ class BuildCommand extends Command {
   final description = "Builds a Static Shock website when run at the top-level of a Static Shock project.";
 
   @override
+  final bool takesArguments = true;
+
+  @override
   Future<void> run() async {
     _log.info("Building a Static Shock website.");
-    await buildWebsite();
+    if (argResults?.rest.isNotEmpty == true) {
+      _log.detail("Passing extra arguments to the website builder: ${argResults!.rest.join(", ")}");
+    }
+
+    await buildWebsite(
+      appArguments: argResults?.rest ?? [],
+    );
   }
 }
 
