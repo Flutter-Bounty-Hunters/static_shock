@@ -4,6 +4,22 @@ import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 
+/// Plugin that helps with drafting content.
+///
+/// Drafting is the process of creating content over time. For example, an early version of an article
+/// might be written and committed, but that article shouldn't appear in the built website. With this
+/// plugin, that article can be marked as a draft, and it will be ignored in the website build.
+///
+/// To mark a [Page] as being a draft, set `draft` to `true` in the page configuration, e.g.,
+///
+/// ```
+/// ---
+/// title: My Article (WIP)
+/// draft: true
+/// ---
+/// ```
+///
+/// To preview draft content, build the website with [showDrafts] set to `true`.
 class DraftingPlugin implements StaticShockPlugin {
   const DraftingPlugin({
     this.showDrafts = false,
@@ -14,13 +30,13 @@ class DraftingPlugin implements StaticShockPlugin {
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
     pipeline.filterPages(
-      DraftPageFilter(showDrafts: showDrafts),
+      _DraftPageFilter(showDrafts: showDrafts),
     );
   }
 }
 
-class DraftPageFilter implements PageFilter {
-  const DraftPageFilter({
+class _DraftPageFilter implements PageFilter {
+  const _DraftPageFilter({
     this.showDrafts = false,
   });
 

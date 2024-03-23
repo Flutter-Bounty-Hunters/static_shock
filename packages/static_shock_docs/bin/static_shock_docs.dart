@@ -12,7 +12,9 @@ Future<void> main(List<String> arguments) async {
     ))
     ..plugin(const PrettyUrlsPlugin())
     ..plugin(const SassPlugin())
-    ..plugin(const DraftingPlugin())
+    ..plugin(DraftingPlugin(
+      showDrafts: arguments.contains("preview"),
+    ))
     ..plugin(const PubPackagePlugin({
       "static_shock",
       "static_shock_cli",
