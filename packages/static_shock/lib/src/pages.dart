@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:mason_logger/mason_logger.dart';
+
 import 'files.dart';
 import 'pipeline.dart';
 
@@ -87,8 +89,7 @@ class PagesIndex {
       return sortOrder;
     }
 
-    // TODO: switch to logger
-    print("WARNING: Received unknown name for sort order: '$order'");
+    _log.warn("WARNING: Received unknown name for sort order: '$order'");
     return _SortOrder.ascending;
   }
 
@@ -244,3 +245,5 @@ $destinationContent
   @override
   String toString() => "[Page] - source: $sourcePath, destination: $destinationPath";
 }
+
+final _log = Logger(level: Level.verbose);

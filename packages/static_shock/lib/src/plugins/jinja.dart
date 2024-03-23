@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:jinja/jinja.dart';
-import 'package:markdown/markdown.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/pages.dart';
