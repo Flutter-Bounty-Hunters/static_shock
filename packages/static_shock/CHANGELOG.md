@@ -1,3 +1,7 @@
+## 0.0.2 - Mar 23, 2023
+ * Jinja templates can query Pages by tag and choose ascending or descending order.
+ * Custom template renderers can be registered and then used within Jinja templates.
+
 ## 0.0.1 - July 19, 2023
 First non-preview release.
 
