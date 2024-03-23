@@ -1,5 +1,6 @@
 ---
 title: Directory of Pages
+tags: drafting
 ---
 # Directory of Pages
 Use the pages index to display a list of page links for pages in your website.

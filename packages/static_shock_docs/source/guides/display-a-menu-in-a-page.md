@@ -1,5 +1,6 @@
 ---
 title: Display a Menu in a Page
+tags: drafting
 ---
 # Display a Menu in a Page
 A page might display a menu of links, and it might appear as if the content changes within that

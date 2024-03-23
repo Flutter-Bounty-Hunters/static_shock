@@ -62,12 +62,10 @@ class PagesIndex {
   /// Return an `Iterable` of page data for all pages, optionally ordered by [sortBy].
   Iterable<Map<String, dynamic>> _all({
     String? sortBy,
+    String order = "asc",
   }) {
-    if (sortBy != null && sortBy.isNotEmpty) {
-      _ensurePagesHaveSortingProperty(sortBy);
-    }
-
-    final allPagesSorted = _pages.toList()..sort(_sortPages(sortBy));
+    final allPagesSorted = _pages.toList() //
+      ..sort(_sortPages(sortBy, _parseSortOrder(order)));
     return allPagesSorted.map(_serializePage);
   }
 
@@ -76,21 +74,22 @@ class PagesIndex {
   Iterable<Map<String, dynamic>> _byTag(
     String tag, {
     String? sortBy,
+    String order = "asc",
   }) {
-    if (sortBy != null && sortBy.isNotEmpty) {
-      _ensurePagesHaveSortingProperty(sortBy);
-    }
-
-    final pages = _pages.where((page) => page.hasTag(tag)).toList()..sort(_sortPages(sortBy));
+    final pages = _pages.where((page) => page.hasTag(tag)).toList() //
+      ..sort(_sortPages(sortBy, _parseSortOrder(order)));
     return pages.map(_serializePage);
   }
 
-  void _ensurePagesHaveSortingProperty(String sortBy) {
-    final allPagesHaveProperty =
-        _pages.fold(true, (hasProperty, element) => hasProperty && element.data[sortBy] != null);
-    if (!allPagesHaveProperty) {
-      throw Exception("Tried to sort pages by '$sortBy' but not all pages have that property!");
+  _SortOrder _parseSortOrder(String order) {
+    final sortOrder = _SortOrder.fromName(order);
+    if (sortOrder != null) {
+      return sortOrder;
     }
+
+    // TODO: switch to logger
+    print("WARNING: Received unknown name for sort order: '$order'");
+    return _SortOrder.ascending;
   }
 
   /// Returns a sorting function for [Page]s based on each [Page]'s [sortBy] property.
@@ -101,17 +100,60 @@ class PagesIndex {
   ///     final sortFunction = _sortPages("index");
   ///
   /// The `sortFunction` would say that Page A < Page B when `index` A < `index` B.
-  int Function(Page, Page) _sortPages(String? sortBy) {
+  int Function(Page, Page) _sortPages(String? sortBy, _SortOrder sortOrder) {
     if (sortBy == null || sortBy.isEmpty) {
       return (Page a, Page b) => -1;
     }
 
-    return (Page a, Page b) => a.data[sortBy] <= b.data[sortBy] ? -1 : 1;
+    return (Page a, Page b) {
+      switch (sortOrder) {
+        case _SortOrder.ascending:
+          if (a.data[sortBy] == null) {
+            // The first item doesn't have the sorted property - show it last.
+            return 1;
+          }
+          if (b.data[sortBy] == null) {
+            // The second item doesn't have the sorted property - show it last.
+            return -1;
+          }
+
+          return a.data[sortBy].compareTo(b.data[sortBy]);
+        case _SortOrder.descending:
+          if (a.data[sortBy] == null) {
+            // The first item doesn't have the sorted property - show it first (because descending).
+            return -1;
+          }
+          if (b.data[sortBy] == null) {
+            // The second item doesn't have the sorted property - show it first (because descending).
+            return 1;
+          }
+
+          return b.data[sortBy].compareTo(a.data[sortBy]);
+      }
+    };
   }
 
   Map<String, dynamic> _serializePage(Page page) => {
         "data": page.data,
       };
+}
+
+enum _SortOrder {
+  ascending,
+  descending;
+
+  /// Parses the given [name] and returns the corresponding [_SortOrder], or returns
+  /// `null` if the [name] doesn't correspond to a sort order.
+  static _SortOrder? fromName(String name) {
+    if (name == "asc" || name == "ascending") {
+      return _SortOrder.ascending;
+    }
+    if (name == "desc" || name == "descending") {
+      return _SortOrder.descending;
+    }
+
+    return null;
+  }
 }
 
 class PageIndex {
@@ -173,7 +215,8 @@ class Page {
   set url(String? url) => data["url"] = url;
 
   bool hasTag(String tag) => tags.contains(tag);
-  List<String> get tags => data["tags"] != null ? List.from(data["tags"]) : [];
+  List<String> get tags =>
+      data["tags"] != null ? List.from(data["tags"] is List ? data["tags"] : [data["tags"] as String]) : [];
 
   String describe() {
     return '''Page:

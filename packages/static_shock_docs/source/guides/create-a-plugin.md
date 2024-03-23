@@ -1,5 +1,6 @@
 ---
 title: Create a Plugin
+tags: extensions
 ---
 # Create a Plugin
 

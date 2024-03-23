@@ -1,5 +1,6 @@
 ---
 title: Compile Sass
+tags: styling
 ---
 # Compile Sass
 Sass (also known as SCSS) is a format for defining CSS in a more convenient and extensible way.
