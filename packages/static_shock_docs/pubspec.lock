@@ -391,7 +391,7 @@ packages:
       path: "../static_shock"
       relative: true
     source: path
-    version: "0.0.2"
+    version: "0.0.3"
   stream_channel:
     dependency: transitive
     description:

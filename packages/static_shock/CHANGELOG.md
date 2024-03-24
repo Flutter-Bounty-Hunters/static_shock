@@ -1,7 +1,7 @@
-## 0.0.3 - Mar 23, 2023
+## 0.0.3 - Mar 23, 2024
  * Hide pages by adding `DraftingPlugin` and setting `draft` to `true` for each draft page.
 
-## 0.0.2 - Mar 23, 2023
+## 0.0.2 - Mar 23, 2024
  * Jinja templates can query Pages by tag and choose ascending or descending order.
  * Custom template renderers can be registered and then used within Jinja templates.
 

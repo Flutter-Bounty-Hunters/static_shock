@@ -1,3 +1,6 @@
+## 0.0.3 - March 23, 2024
+`shock build` and `shock serve` can take extra custom arguments, e.g. `shock serve preview`.
+
 ## 0.0.2 - Dec 10, 2023
 `shock serve` auto-refreshes HTML pages on change, dev server port is configurable.
 
