@@ -5,9 +5,16 @@ Future<void> main(List<String> arguments) async {
   final staticShock = StaticShock()
     ..pick(DirectoryPicker.parse("images"))
     ..plugin(const MarkdownPlugin())
-    ..plugin(const JinjaPlugin())
+    ..plugin(JinjaPlugin(
+      filters: [
+        menuItemsWherePageExistsFilterBuilder,
+      ],
+    ))
     ..plugin(const PrettyUrlsPlugin())
     ..plugin(const SassPlugin())
+    ..plugin(DraftingPlugin(
+      showDrafts: arguments.contains("preview"),
+    ))
     ..plugin(const PubPackagePlugin({
       "static_shock",
       "static_shock_cli",

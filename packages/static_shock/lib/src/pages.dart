@@ -15,6 +15,10 @@ abstract class PageTransformer {
   FutureOr<void> transformPage(StaticShockPipelineContext context, Page page);
 }
 
+abstract class PageFilter {
+  bool shouldInclude(StaticShockPipelineContext context, Page page);
+}
+
 abstract class PageRenderer {
   FutureOr<void> renderPage(StaticShockPipelineContext context, Page page);
 }
@@ -33,6 +37,10 @@ class PagesIndex {
 
   void addPage(Page page) {
     _pages.add(page);
+  }
+
+  void removePage(Page page) {
+    _pages.remove(page);
   }
 
   /// Returns a data structure which represents a "page index" within a Jinja template.

@@ -10,15 +10,37 @@ import 'package:static_shock/src/static_shock.dart';
 import 'package:yaml/yaml.dart';
 
 class JinjaPlugin implements StaticShockPlugin {
-  const JinjaPlugin();
+  const JinjaPlugin({
+    this.filters = const [],
+    this.tests = const [],
+  });
+
+  final List<StaticShockJinjaFunctionBuilder> filters;
+  final List<StaticShockJinjaFunctionBuilder> tests;
 
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
     pipeline.pick(const ExtensionPicker("jinja"));
     pipeline.loadPages(JinjaPageLoader(context.log));
-    pipeline.renderPages(JinjaPageRenderer(context.log));
+    pipeline.renderPages(JinjaPageRenderer(
+      context.log,
+      filters: filters,
+      tests: tests,
+    ));
   }
 }
+
+/// Constructs and returns a Jinja function (filter or test), along with the function name,
+/// given the [StaticShockPipelineContext].
+///
+/// Some Jinja functions only care about the input value, such as a filter that capitalizes a word.
+/// For those functions, a function builder is redundant. However, other functions need to inspect
+/// the [StaticShockPipelineContext], such as a filter that checks for the existence of a
+/// given page. Therefore, all Jinja functions are configured with a builder like this, instead
+/// of directly passing a function to Jinja.
+typedef StaticShockJinjaFunctionBuilder = (String functionName, Function function) Function(
+  StaticShockPipelineContext context,
+);
 
 class JinjaPageLoader implements PageLoader {
   const JinjaPageLoader(this._log);
@@ -60,9 +82,16 @@ class JinjaPageLoader implements PageLoader {
 }
 
 class JinjaPageRenderer implements PageRenderer {
-  const JinjaPageRenderer(this._log);
+  const JinjaPageRenderer(
+    this._log, {
+    this.filters = const [],
+    this.tests = const [],
+  });
 
   final Logger _log;
+
+  final List<StaticShockJinjaFunctionBuilder> filters;
+  final List<StaticShockJinjaFunctionBuilder> tests;
 
   @override
   FutureOr<void> renderPage(StaticShockPipelineContext context, Page page) async {
@@ -103,8 +132,25 @@ class JinjaPageRenderer implements PageRenderer {
   }
 
   void _renderJinjaToContent(StaticShockPipelineContext context, Page page, String templateSource) {
+    final jinjaFilters = Map.fromEntries(
+      filters.map((filterBuilder) {
+        final filter = filterBuilder(context);
+        return MapEntry<String, Function>(filter.$1, filter.$2);
+      }),
+    );
+    final jinjaTests = Map.fromEntries(
+      tests.map((testBuilder) {
+        final test = testBuilder(context);
+        return MapEntry<String, Function>(test.$1, test.$2);
+      }),
+    );
+
     // Generate the layout, filled with content and data.
-    final template = Template(templateSource);
+    final template = Template(
+      templateSource,
+      filters: jinjaFilters,
+      tests: jinjaTests,
+    );
 
     final componentsLookup = <String, String Function(Map<Object?, Object?>)>{};
     for (final entry in context.components.entries) {
@@ -118,7 +164,11 @@ class JinjaPageRenderer implements PageRenderer {
           }
         }
 
-        final template = Template(entry.value.content);
+        final template = Template(
+          entry.value.content,
+          filters: jinjaFilters,
+          tests: jinjaTests,
+        );
         String component = template.render(vars?.cast() ?? {});
         return component;
       };

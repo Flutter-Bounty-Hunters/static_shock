@@ -7,6 +7,7 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  collection: ^1.18.0
   fbh_front_matter: ^0.0.1
   jinja: ^0.4.2
   markdown: ^7.0.2

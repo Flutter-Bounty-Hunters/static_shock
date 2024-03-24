@@ -92,9 +92,18 @@ class BuildCommand extends Command {
   final description = "Builds a Static Shock website when run at the top-level of a Static Shock project.";
 
   @override
+  final bool takesArguments = true;
+
+  @override
   Future<void> run() async {
     _log.info("Building a Static Shock website.");
-    await buildWebsite();
+    if (argResults?.rest.isNotEmpty == true) {
+      _log.detail("Passing extra arguments to the website builder: ${argResults!.rest.join(", ")}");
+    }
+
+    await buildWebsite(
+      appArguments: argResults?.rest ?? [],
+    );
   }
 }
 
@@ -121,13 +130,22 @@ class ServeCommand extends Command with PubVersionCheck {
   final description = "Serves a pre-built Static Shock site via localhost.";
 
   @override
+  final bool takesArguments = true;
+
+  @override
   Future<void> run() async {
     await super.run();
 
     // Run a website build just in case the user has never built, or hasn't built recently.
     _log.info("Building website.");
     try {
-      final result = await buildWebsite();
+      if (argResults?.rest.isNotEmpty == true) {
+        _log.detail("Passing extra arguments to the website builder: ${argResults!.rest.join(", ")}");
+      }
+
+      final result = await buildWebsite(
+        appArguments: argResults?.rest ?? [],
+      );
       if (result == null) {
         _log.err("Failed to build website, therefore not starting the dev server.");
         return;

@@ -44,6 +44,17 @@ abstract class StaticShockPipeline {
   /// by [PageLoader]s, before the [Page] is rendered by a [PageRenderer].
   void transformPages(PageTransformer transformer);
 
+  /// Adds the given [PageFilter] to the pipeline, which can remove [Page]s before
+  /// those [Page]s are rendered.
+  ///
+  /// For example, a plugin might implement a "draft mode" in which article drafts
+  /// are excluded from the final build. While the draft mode could try to exclude
+  /// pages at the file level, that would require the draft mode plugin to understand
+  /// all possible file types so that it could parse the draft data. By filtering
+  /// after the creation of [Page]s, the draft mode plugin only needs to know which
+  /// property to check on the [Page] object.
+  void filterPages(PageFilter filter);
+
   /// Adds the given [templateFunction] to the pipeline, making the function available
   /// during page template rendering via the given [name].
   ///

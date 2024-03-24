@@ -12,7 +12,9 @@ export 'src/source_files.dart';
 export 'src/files.dart';
 
 // ----- Plugins -----
+export 'src/plugins/drafting.dart';
 export 'src/plugins/markdown.dart';
+export 'src/plugins/menus.dart';
 export 'src/plugins/jinja.dart';
 export 'src/plugins/pretty_urls.dart';
 export 'src/plugins/pub_package.dart';

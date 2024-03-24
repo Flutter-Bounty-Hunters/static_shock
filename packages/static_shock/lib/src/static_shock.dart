@@ -38,6 +38,7 @@ class StaticShock implements StaticShockPipeline {
     Set<AssetTransformer>? assetTransformers,
     Set<PageLoader>? pageLoaders,
     Set<PageTransformer>? pageTransformers,
+    Set<PageFilter>? pageFilters,
     Set<PageRenderer>? pageRenderers,
     Set<Finisher>? finishers,
     Set<StaticShockPlugin>? plugins,
@@ -50,6 +51,7 @@ class StaticShock implements StaticShockPipeline {
         _assetTransformers = assetTransformers ?? {},
         _pageLoaders = pageLoaders ?? {},
         _pageTransformers = pageTransformers ?? {},
+        _pageFilters = pageFilters ?? {},
         _pageRenderers = pageRenderers ?? {},
         _finishers = finishers ?? {},
         _plugins = plugins ?? {};
@@ -101,6 +103,10 @@ class StaticShock implements StaticShockPipeline {
   @override
   void transformPages(PageTransformer transformer) => _pageTransformers.add(transformer);
   late final Set<PageTransformer> _pageTransformers;
+
+  @override
+  void filterPages(PageFilter filter) => _pageFilters.add(filter);
+  late final Set<PageFilter> _pageFilters;
 
   /// Adds the given [templateFunction] to the pipeline, making the function available
   /// during page template rendering via the given [name].
@@ -215,6 +221,9 @@ class StaticShock implements StaticShockPipeline {
 
     // Transform assets.
     await _transformAssets();
+
+    // Filter out unwanted pages.
+    _filterPages();
 
     // Render pages.
     await _renderPages();
@@ -383,6 +392,29 @@ class StaticShock implements StaticShockPipeline {
         await transformer.transformAsset(_context, asset);
       }
     }
+    _log.info("");
+  }
+
+  void _filterPages() async {
+    _log.info("⚡ Filtering pages");
+    if (_pageFilters.isEmpty) {
+      // If there aren't any filters, don't waste time looping through all the pages.
+      _log.info("No page filters to apply - all pages will be rendered.");
+      return;
+    }
+
+    for (int i = _pages.length - 1; i >= 0; i -= 1) {
+      for (final filter in _pageFilters) {
+        if (!filter.shouldInclude(_context, _pages[i])) {
+          final page = _pages[i];
+          _log.info("Removing page: ${page.title}");
+          _pages.removeAt(i);
+          _context.pagesIndex.removePage(page);
+          continue;
+        }
+      }
+    }
+
     _log.info("");
   }
 

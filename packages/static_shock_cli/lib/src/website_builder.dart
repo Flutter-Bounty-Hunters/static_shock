@@ -5,12 +5,15 @@ import 'package:yaml/yaml.dart';
 
 /// Builds a static shock website from a source directory.
 ///
+/// Any provided [appArguments] will be forwarded to the `main` method of the website builder.
+///
 /// Expects to find a `pubspec.yaml` in the current directory.
 ///
 /// Expects to find a project name in the `pubspec.yaml`, which is then expected to lead
 /// to the executable file via `bin/[package_name].dart`.
 Future<int?> buildWebsite({
   Logger? log,
+  List<String> appArguments = const [],
   bool attachBuildProcessToStdIo = true,
 }) async {
   final pubspecFile = File("pubspec.yaml");
@@ -38,7 +41,7 @@ Future<int?> buildWebsite({
   log?.detail("Running Static Shock executable: ${executableFile.path}");
   final process = await Process.start(
     'dart',
-    [executableFile.path],
+    [executableFile.path, ...appArguments],
   );
 
   stdout.addStream(process.stdout);
