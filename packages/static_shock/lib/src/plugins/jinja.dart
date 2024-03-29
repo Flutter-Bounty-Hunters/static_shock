@@ -174,8 +174,12 @@ class JinjaPageRenderer implements PageRenderer {
 
         final componentData = <String, Object?>{
           ...page.data,
+          ...context.pagesIndex.buildPageIndexDataForTemplates(),
           if (vars != null) ...vars.cast(),
         };
+
+        print("Components data:");
+        print("$componentData");
 
         final template = Template(
           entry.value.content,

@@ -10,26 +10,33 @@
           <a class="nav-link {% if url|startsWith("quickstart/") %}active{% endif %}" aria-current="page" href="/quickstart">Quickstart</a>
         </li>
 
-        {% if
+        {% if pages.hasPageWithUrl("jumpstart/") %}
         <li class="nav-item">
           <a class="nav-link {% if url|startsWith("jumpstart/") %}active{% endif %}" href="/jumpstart">Jumpstart</a>
         </li>
+        {% endif %}
 
+        {% if pages.hasPagesAtPath("guides/") %}
         <li class="nav-item">
           <a class="nav-link {% if url|startsWith("guides/") %}active{% endif %}" href="/guides/add-a-page">Guides</a>
         </li>
+        {% endif %}
 
+        {% if pages.hasPageWithUrl("directory/") %}
         <li class="nav-item">
           <a class="nav-link {% if url|startsWith("directory/") %}active{% endif %}" href="/directory">Directory</a>
         </li>
+        {% endif %}
 
         <li class="nav-item">
           <a class="nav-link" href="https://pub.dev/documentation/static_shock/latest/" target="_blank">API Docs</a>
         </li>
 
+        {% if pages.hasPageWithUrl("about/") %}
         <li class="nav-item">
           <a class="nav-link {% if url|startsWith("about/") %}active{% endif %}" href="/about">About</a>
         </li>
+        {% endif %}
       </ul>
     </div>
   </div>
