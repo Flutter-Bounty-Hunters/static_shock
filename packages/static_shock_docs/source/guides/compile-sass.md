@@ -2,7 +2,6 @@
 title: Compile Sass
 tags: styling
 ---
-# Compile Sass
 Sass (also known as SCSS) is a format for defining CSS in a more convenient and extensible way.
 
 Sass is a CSS superset, which means you can write regular CSS in a Sass file. But, Sass adds a 

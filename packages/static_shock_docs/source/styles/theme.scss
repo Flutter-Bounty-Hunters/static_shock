@@ -11,6 +11,7 @@ $primaryLighter : #203035;
 $accent       : #FFE500;
 $accentLight  : #FFFF33;
 
+$defaultTextColor: WHITE;
 $inlineCode : $accent;
 
 @font-face {
@@ -25,10 +26,13 @@ $inlineCode : $accent;
 }
 
 html, body {
-  color: WHITE;
+  color: $defaultTextColor;
 
   font-size: 20px;
-  height: 1.4em;
+}
+
+p {
+  line-height: 1.4em;
 }
 
 .accent-text {
@@ -48,7 +52,7 @@ code {
 //   margin-bottom: 2em;
 //
 //   padding: 5em 3em;
-//
+
 //   background: rgb(207,36,36);
 //   background: linear-gradient(331deg, rgba(207,36,36,1) 0%, rgba(255,182,143,1) 100%);
 // }

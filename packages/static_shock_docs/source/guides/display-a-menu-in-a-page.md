@@ -2,7 +2,6 @@
 title: Display a Menu in a Page
 tags: drafting
 ---
-# Display a Menu in a Page
 A page might display a menu of links, and it might appear as if the content changes within that
 one page when you select different menu items. For example, the page you're viewing right now
 contains a menu with links to different guides. However, you're not looking at one single page,

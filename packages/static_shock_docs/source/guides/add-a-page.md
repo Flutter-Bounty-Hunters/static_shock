@@ -2,7 +2,6 @@
 title: Add a Page
 tags: drafting
 ---
-# Add a Page
 A page is a URL-addressable web page.
 
 A page can be configured with a Markdown file, which is the most common approach for repeated content, such as blog posts. A page can also be configured with a Jinja template, which is the most common approach for one-off pages, such as a landing page, or a contact page. 

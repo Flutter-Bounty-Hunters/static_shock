@@ -35,6 +35,17 @@
             {% endfor %}
           </nav>
           <section class="col-md-9 col-12">
+            <h1>{{ title }}</h1>
+
+            {% if toc is defined and toc.linkCountBeyondLevel(0) > 1 %}
+            <div class="table-of-contents">
+            {{ toc.renderMultiLevelList(startingLevel = 1) }}
+            </div>
+
+            <div class="toc-divider">&nbsp;</div>
+            {% endif %}
+
+
             {{ content }}
           </section>
         </div>
