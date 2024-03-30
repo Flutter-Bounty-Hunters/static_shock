@@ -98,10 +98,12 @@ class MarkdownPageLoader implements PageLoader {
       if (level != null) {
         links.add({
           "title": title!,
-          // The following title assignment applies the same ID naming convention as the Markdown
+          // The following section ID assignment applies the same ID naming convention as the Markdown
           // package. This is required, because the URL needs to link to the HTML header on this
           // page, which was created by the Markdown parser.
-          "url": "#${title.toLowerCase().replaceAll(" ", "-")}",
+          //
+          // Example: "#my-section-title"
+          "sectionId": "#${title.toLowerCase().replaceAll(" ", "-")}",
           "level": level,
         });
       }
@@ -136,7 +138,7 @@ class MarkdownPageLoader implements PageLoader {
     final tocMarkdown = StringBuffer();
     for (final link in visibleLinks) {
       final indent = List.generate((link["level"] - baseLevel), (index) => "  ").join("");
-      tocMarkdown.writeln("${indent}1. [${link["title"]}](${link["url"]})");
+      tocMarkdown.writeln("${indent}1. [${link["title"]}](${link["sectionId"]})");
     }
 
     // Convert the markdown link list to an HTML list, which can be used as a table of contents.
