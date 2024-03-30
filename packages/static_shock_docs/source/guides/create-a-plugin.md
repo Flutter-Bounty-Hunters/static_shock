@@ -2,8 +2,6 @@
 title: Create a Plugin
 tags: extensions
 ---
-# Create a Plugin
-
 ## What is a plugin?
 A plugin is a collection of Static Shock configurations that's easy to share across projects and
 across the community. For example, a plugin might pick specific files for the pipeline, apply

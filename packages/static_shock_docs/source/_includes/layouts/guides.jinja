@@ -35,6 +35,17 @@
             {% endfor %}
           </nav>
           <section class="col-md-9 col-12">
+            <h1>{{ title }}</h1>
+
+            {% if tableOfContents is defined and tableOfContents.linkCountBeyondLevel(0) > 1 %}
+            <div class="table-of-contents">
+            {{ tableOfContents.renderHtmlList(startingLevel = 1) }}
+            </div>
+
+            <div class="table-of-contents-divider">&nbsp;</div>
+            {% endif %}
+
+
             {{ content }}
           </section>
         </div>
