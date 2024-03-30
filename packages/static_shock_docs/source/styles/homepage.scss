@@ -7,6 +7,10 @@
   .featured {
     margin: auto;
 
+    // Use padding to push the featured area up a bit so that it doesn't get too close
+    // to the GitHub button near the bottom.
+    padding-bottom: 120px;
+
     .supplemental-text {
       margin-left: 16px;
 
@@ -97,7 +101,13 @@
     height: 100%;
 
     display: flex;
+    flex-direction: column-reverse;
     align-items: end;
+
+    .btn.github {
+      margin: auto;
+      margin-bottom: 48px;
+    }
   }
 }
 
