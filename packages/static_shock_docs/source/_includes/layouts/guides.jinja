@@ -39,7 +39,7 @@
 
             {% if tableOfContents is defined and tableOfContents.linkCountBeyondLevel(0) > 1 %}
             <div class="table-of-contents">
-            {{ tableOfContents.renderMultiLevelList(startingLevel = 1) }}
+            {{ tableOfContents.renderHtmlList(startingLevel = 1) }}
             </div>
 
             <div class="table-of-contents-divider">&nbsp;</div>

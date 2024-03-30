@@ -44,9 +44,6 @@ class MarkdownPageLoader implements PageLoader {
       rethrow;
     }
 
-    print("Markdown content:");
-    print(markdown.content ?? "");
-
     final destinationPath = path.copyWith(extension: "html");
 
     return Page(
@@ -116,7 +113,7 @@ class MarkdownPageLoader implements PageLoader {
       "isEmptyBeyondLevel": (int level) => _linkCountBeyondLevel(links, level) == 0,
       "hasMultipleBeyondLevel": (int level) => _linkCountBeyondLevel(links, level) > 1,
       "linkCountBeyondLevel": (int level) => _linkCountBeyondLevel(links, level),
-      "renderMultiLevelList": ({int? startingLevel}) => _renderMultiLevelList(links, startingLevel),
+      "renderHtmlList": ({int? startingLevel}) => _renderHtmlList(links, startingLevel),
     };
   }
 
@@ -124,7 +121,7 @@ class MarkdownPageLoader implements PageLoader {
     return links.where((link) => link["level"] > level).fold(0, (prev, link) => prev + 1);
   }
 
-  String _renderMultiLevelList(List<Map<String, dynamic>> links, [int? startingLevel]) {
+  String _renderHtmlList(List<Map<String, dynamic>> links, [int? startingLevel]) {
     final visibleLinks = startingLevel == null ? links : links.where((link) => link["level"] >= startingLevel);
     if (visibleLinks.isEmpty) {
       return "";
@@ -135,21 +132,15 @@ class MarkdownPageLoader implements PageLoader {
       baseLevel = max(startingLevel, baseLevel);
     }
 
+    // Create a Markdown list of links for every header. We'll convert it to HTML next.
     final tocMarkdown = StringBuffer();
     for (final link in visibleLinks) {
       final indent = List.generate((link["level"] - baseLevel), (index) => "  ").join("");
       tocMarkdown.writeln("${indent}1. [${link["title"]}](${link["url"]})");
     }
 
-    print("Table of contents rendered list:");
-    print(tocMarkdown.toString());
-
-    final html = markdownToHtml(tocMarkdown.toString());
-    print("---");
-    print("HTML version:");
-    print(html);
-
-    return html;
+    // Convert the markdown link list to an HTML list, which can be used as a table of contents.
+    return markdownToHtml(tocMarkdown.toString());
   }
 }
 
