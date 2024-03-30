@@ -54,7 +54,7 @@ class MarkdownPageLoader implements PageLoader {
       markdown.content ?? "",
       data: {
         ...markdown.data,
-        "toc": _createTableOfContents(destinationPath.value, markdown.content ?? ""),
+        "tableOfContents": _createTableOfContents(destinationPath.value, markdown.content ?? ""),
       },
       destinationPath: destinationPath,
     );
