@@ -58,7 +58,7 @@ class MarkdownPageLoader implements PageLoader {
   }
 
   Map<String, dynamic> _createTableOfContents(String pageUrl, String markdown) {
-    final links = <Map<String, dynamic>>[];
+    final items = <Map<String, dynamic>>[];
     final lines = markdown.split("\n");
     bool ignoreCurrentBlock = false;
     for (final line in lines) {
@@ -96,7 +96,7 @@ class MarkdownPageLoader implements PageLoader {
       }
 
       if (level != null) {
-        links.add({
+        items.add({
           "title": title!,
           // The following section ID assignment applies the same ID naming convention as the Markdown
           // package. This is required, because the URL needs to link to the HTML header on this
@@ -110,12 +110,12 @@ class MarkdownPageLoader implements PageLoader {
     }
 
     return {
-      "links": links,
-      "isEmpty": links.isEmpty,
-      "isEmptyBeyondLevel": (int level) => _linkCountBeyondLevel(links, level) == 0,
-      "hasMultipleBeyondLevel": (int level) => _linkCountBeyondLevel(links, level) > 1,
-      "linkCountBeyondLevel": (int level) => _linkCountBeyondLevel(links, level),
-      "renderHtmlList": ({int? startingLevel}) => _renderHtmlList(links, startingLevel),
+      "items": items,
+      "isEmpty": items.isEmpty,
+      "isEmptyBeyondLevel": (int level) => _linkCountBeyondLevel(items, level) == 0,
+      "hasMultipleBeyondLevel": (int level) => _linkCountBeyondLevel(items, level) > 1,
+      "linkCountBeyondLevel": (int level) => _linkCountBeyondLevel(items, level),
+      "renderHtmlList": ({int? startingLevel}) => _renderHtmlList(items, startingLevel),
     };
   }
 
