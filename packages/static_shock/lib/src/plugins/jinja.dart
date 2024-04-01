@@ -134,7 +134,6 @@ class JinjaPageRenderer implements PageRenderer {
   void _renderJinjaToContent(StaticShockPipelineContext context, Page page, String templateSource) {
     final jinjaFilters = Map.fromEntries([
       MapEntry("startsWith", (String? candidate, String? prefix) {
-        print("startsWith - candidate: '$candidate', prefix: '$prefix'");
         if (candidate == null || prefix == null) {
           return false;
         }
@@ -178,9 +177,6 @@ class JinjaPageRenderer implements PageRenderer {
           if (vars != null) ...vars.cast(),
         };
 
-        print("Components data:");
-        print("$componentData");
-
         final template = Template(
           entry.value.content,
           filters: jinjaFilters,
@@ -201,11 +197,6 @@ class JinjaPageRenderer implements PageRenderer {
         ...componentsLookup,
       },
     };
-
-    print("Page data");
-    print(" - incoming page.data[url]: ${page.data['url']}");
-    print(" - outgoing pageData[url]: ${pageData['url']}");
-    print("");
 
     final hydratedLayout = template.render(pageData);
 

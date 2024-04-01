@@ -116,7 +116,6 @@ class StaticShockDevServer {
 
   FutureOr<Response> Function(Request) _createServerHandler() {
     return (Request request) {
-      print("Server handler received request for: '${request.url.path}'");
       if (request.url.path == 'ws') {
         return _createDevServerSocketHandler()(request);
       } else {
@@ -168,48 +167,14 @@ class StaticShockDevServer {
   }
 
   Future<void> _onSourceFileChange(WatchEvent event) async {
-    try {
-      _log.detail("File system change (${event.type}): ${event.path}.");
-    } catch (exception) {
-      print("WARNING: Mason Logger threw exception during _onSourceFileChange()");
-      print(" - change type: ${event.type}");
-      print(" - change path: ${event.path}");
-      // This try/catch was added because during some file changes the dev server
-      // would blow up with the following stacktrace:
-      //
-      // Unhandled exception:
-      // Bad state: StreamSink is bound to a stream
-      // #0      _StreamSinkImpl._controller (dart:io/io_sink.dart:234:7)
-      // #1      _StreamSinkImpl.add (dart:io/io_sink.dart:154:5)
-      // #2      _IOSinkImpl.write (dart:io/io_sink.dart:287:5)
-      // #3      _StdSink._write (dart:io/stdio.dart:401:13)
-      // #4      _StdSink.writeln (dart:io/stdio.dart:419:5)
-      // #5      Logger.detail (package:mason_logger/src/mason_logger.dart:152:13)
-      // #6      StaticShockDevServer._onSourceFileChange (package:static_shock_cli/src/dev_server.dart:171:10)
-      // #7      _RootZone.runUnaryGuarded (dart:async/zone.dart:1594:10)
-      // #8      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:365:11)
-      // #9      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:297:7)
-      // #10     _SyncBroadcastStreamController._sendData (dart:async/broadcast_stream_controller.dart:377:25)
-      // #11     _BroadcastStreamController.add (dart:async/broadcast_stream_controller.dart:244:5)
-      // #12     _RootZone.runUnaryGuarded (dart:async/zone.dart:1594:10)
-      // #13     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:365:11)
-      // #14     _DelayedData.perform (dart:async/stream_impl.dart:541:14)
-      // #15     _PendingEvents.handleNext (dart:async/stream_impl.dart:646:11)
-      // #16     _PendingEvents.schedule.<anonymous closure> (dart:async/stream_impl.dart:617:7)
-      // #17     _microtaskLoop (dart:async/schedule_microtask.dart:40:21)
-      // #18     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
-      // #19     _runPendingImmediateCallback (dart:isolate-patch/isolate_patch.dart:118:13)
-      // #20     _Timer._runTimers (dart:isolate-patch/timer_impl.dart:405:11)
-      // #21     _Timer._handleMessage (dart:isolate-patch/timer_impl.dart:429:5)
-      // #22     _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart:184:12)
-    }
-
     if (isBuilding) {
       // A website build is already on-going. We don't want to risk conflicting file outputs
       // on the file system. Queue another build when the current build is done.
       isAnotherBuildQueued = true;
       return;
     }
+
+    _log.detail("File system change (${event.type}): ${event.path}.");
 
     // Run a website build, and then keep rebuilding as long as more changes come in while
     // we're running a build.
@@ -262,6 +227,7 @@ class StaticShockDevServer {
 /// a full page refresh so that the page is running the latest version from the server. This
 /// is kind of a like an automatic "hot restart" for every HTML page that this dev server
 /// serves.
+// ignore: unused_element
 Middleware _injectDevServerWebSocket(int Function() getPort, {void Function(String message, bool isError)? logger}) =>
     (innerHandler) {
       return (request) async {

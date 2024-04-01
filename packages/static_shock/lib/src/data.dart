@@ -17,18 +17,14 @@ abstract class DataLoader {
 /// Inspects all [sourceFiles] for files called `_data.yaml`, accumulates the content of those
 /// files into a [DataIndex], and returns that [DataIndex].
 Future<DataIndex> indexSourceData(SourceFiles sourceFiles) async {
-  print("Indexing source set data");
   final dataIndex = DataIndex();
   for (final directory in sourceFiles.sourceDirectories()) {
-    print("Inspecting directory: ${directory.path}");
     final dataFile = File("${directory.directory.path}${Platform.pathSeparator}_data.yaml");
     if (!dataFile.existsSync()) {
       continue;
     }
 
-    print("Found a _data.yaml file at: ${dataFile.path}");
     final data = loadYaml(dataFile.readAsStringSync());
-    print("Loaded data:\n$data");
 
     dataIndex.mergeAtPath(DirectoryRelativePath(directory.subPath), Map<String, Object>.from(data));
   }

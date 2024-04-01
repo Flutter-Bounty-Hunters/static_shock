@@ -75,10 +75,6 @@ class PagesIndex {
   /// Returns `true` if a page exists with a destination path that's the same as the given
   /// [path].
   bool _hasPageWithUrl(String path) {
-    print("Looking for path at path: '$path'");
-    for (final page in _pages) {
-      print(" - page path: '${page.destinationPath}'");
-    }
     return _pages.firstWhereOrNull(
             (page) => page.destinationPath?.value == path || page.destinationPath?.value == "${path}index.html") !=
         null;
