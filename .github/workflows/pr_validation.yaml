@@ -1,0 +1,110 @@
+name: Run tests on every PR
+on: [pull_request]
+jobs:
+  analyze-static-shock:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/static_shock
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup a Dart environment
+      - uses: dart-lang/setup-dart@v1
+
+      # Download all the packages that the app uses
+      - run: dart pub get
+
+      # Run Dart analysis
+      - run: dart analyze
+
+  test-static-shock:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/static_shock
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup a Dart environment
+      - uses: dart-lang/setup-dart@v1
+
+      # Download all the packages that the app uses
+      - run: dart pub get
+
+      # Run tests
+      - run: dart test
+
+  analyze-cli:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/static_shock_cli
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup a Dart environment
+      - uses: dart-lang/setup-dart@v1
+
+      # Download all the packages that the app uses
+      - run: dart pub get
+
+      # Run Dart analysis
+      - run: dart analyze
+
+  test-cli:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/static_shock_cli
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup a Dart environment
+      - uses: dart-lang/setup-dart@v1
+
+      # Download all the packages that the app uses
+      - run: dart pub get
+
+      # Run tests
+      - run: dart test
+
+  analyze-docs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/static_shock_docs
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup a Dart environment
+      - uses: dart-lang/setup-dart@v1
+
+      # Download all the packages that the app uses
+      - run: dart pub get
+
+      # Run Dart analysis
+      - run: dart analyze
+
+  test-docs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/static_shock_docs
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup a Dart environment
+      - uses: dart-lang/setup-dart@v1
+
+      # Download all the packages that the app uses
+      - run: dart pub get
+
+      # Run tests
+      - run: dart test
