@@ -1,8 +1,5 @@
 name: Run tests on every PR
-on:
-  push:
-    branches:
-      main
+on: [pull_request]
 jobs:
   analyze-static-shock:
     runs-on: ubuntu-latest
