@@ -133,12 +133,7 @@ class JinjaPageRenderer implements PageRenderer {
 
   void _renderJinjaToContent(StaticShockPipelineContext context, Page page, String templateSource) {
     final jinjaFilters = Map.fromEntries([
-      MapEntry("startsWith", (String? candidate, String? prefix) {
-        if (candidate == null || prefix == null) {
-          return false;
-        }
-        return candidate.startsWith(prefix);
-      }),
+      MapEntry("startsWith", _startsWith),
       ...filters.map((filterBuilder) {
         final filter = filterBuilder(context);
         return MapEntry<String, Function>(filter.$1, filter.$2);
@@ -202,5 +197,12 @@ class JinjaPageRenderer implements PageRenderer {
 
     // Set the page's final content to the newly hydrated layout, and set the extension to HTML.
     page.destinationContent = hydratedLayout;
+  }
+
+  bool _startsWith(String? candidate, String? prefix) {
+    if (candidate == null || prefix == null) {
+      return false;
+    }
+    return candidate.startsWith(prefix);
   }
 }
