@@ -132,18 +132,20 @@ class JinjaPageRenderer implements PageRenderer {
   }
 
   void _renderJinjaToContent(StaticShockPipelineContext context, Page page, String templateSource) {
-    final jinjaFilters = Map.fromEntries(
-      filters.map((filterBuilder) {
+    final jinjaFilters = Map.fromEntries([
+      MapEntry("startsWith", _startsWith),
+      ...filters.map((filterBuilder) {
         final filter = filterBuilder(context);
         return MapEntry<String, Function>(filter.$1, filter.$2);
       }),
-    );
-    final jinjaTests = Map.fromEntries(
-      tests.map((testBuilder) {
+    ]);
+
+    final jinjaTests = Map.fromEntries([
+      ...tests.map((testBuilder) {
         final test = testBuilder(context);
         return MapEntry<String, Function>(test.$1, test.$2);
       }),
-    );
+    ]);
 
     // Generate the layout, filled with content and data.
     final template = Template(
@@ -164,12 +166,18 @@ class JinjaPageRenderer implements PageRenderer {
           }
         }
 
+        final componentData = <String, Object?>{
+          ...page.data,
+          ...context.pagesIndex.buildPageIndexDataForTemplates(),
+          if (vars != null) ...vars.cast(),
+        };
+
         final template = Template(
           entry.value.content,
           filters: jinjaFilters,
           tests: jinjaTests,
         );
-        String component = template.render(vars?.cast() ?? {});
+        String component = template.render(componentData);
         return component;
       };
     }
@@ -189,5 +197,12 @@ class JinjaPageRenderer implements PageRenderer {
 
     // Set the page's final content to the newly hydrated layout, and set the extension to HTML.
     page.destinationContent = hydratedLayout;
+  }
+
+  bool _startsWith(String? candidate, String? prefix) {
+    if (candidate == null || prefix == null) {
+      return false;
+    }
+    return candidate.startsWith(prefix);
   }
 }

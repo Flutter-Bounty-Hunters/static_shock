@@ -73,11 +73,8 @@ YamlList _pageExistsForMenuItem(
   for (final menuItem in menuItems) {
     final pathFragments = [...prefixPathFragments, menuItem['id']];
     final url = "${pathFragments.join("/")}/";
-    print("Checking if menu item has a page with url: '$url'");
     for (final page in context.pagesIndex.pages) {
-      print(" - existing page url: ${page.url}");
       if (page.url == url) {
-        print("    - THIS IS THE PAGE");
         filteredMenuItems.add(menuItem);
         break;
       }

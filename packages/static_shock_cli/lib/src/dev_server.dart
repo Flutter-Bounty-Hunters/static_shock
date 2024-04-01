@@ -116,7 +116,6 @@ class StaticShockDevServer {
 
   FutureOr<Response> Function(Request) _createServerHandler() {
     return (Request request) {
-      print("Server handler received request for: '${request.url.path}'");
       if (request.url.path == 'ws') {
         return _createDevServerSocketHandler()(request);
       } else {
@@ -232,6 +231,7 @@ class StaticShockDevServer {
 /// a full page refresh so that the page is running the latest version from the server. This
 /// is kind of a like an automatic "hot restart" for every HTML page that this dev server
 /// serves.
+// ignore: unused_element
 Middleware _injectDevServerWebSocket(int Function() getPort, {void Function(String message, bool isError)? logger}) =>
     (innerHandler) {
       return (request) async {

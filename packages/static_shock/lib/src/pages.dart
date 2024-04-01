@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:mason_logger/mason_logger.dart';
 
 import 'files.dart';
@@ -63,10 +64,25 @@ class PagesIndex {
   Map<String, dynamic> buildPageIndexDataForTemplates() {
     return {
       "pages": {
+        "hasPageWithUrl": _hasPageWithUrl,
+        "hasPagesAtPath": _hasPagesAtPath,
         "all": _all,
         "byTag": _byTag,
       },
     };
+  }
+
+  /// Returns `true` if a page exists with a destination path that's the same as the given
+  /// [path].
+  bool _hasPageWithUrl(String path) {
+    return _pages.firstWhereOrNull(
+            (page) => page.destinationPath?.value == path || page.destinationPath?.value == "${path}index.html") !=
+        null;
+  }
+
+  /// Returns `true` if at least one page has a destination path that begins with [path].
+  bool _hasPagesAtPath(String path) {
+    return _pages.firstWhereOrNull((page) => page.destinationPath?.value.startsWith(path) == true) != null;
   }
 
   /// Return an `Iterable` of page data for all pages, optionally ordered by [sortBy].
