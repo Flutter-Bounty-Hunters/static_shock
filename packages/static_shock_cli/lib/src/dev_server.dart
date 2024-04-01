@@ -167,10 +167,14 @@ class StaticShockDevServer {
   }
 
   Future<void> _onSourceFileChange(WatchEvent event) async {
+    // WARNING: Don't log anything with mason_logger if we're already running a
+    // build. Something is causing the logger to blow up. https://github.com/felangel/mason/issues/1280
     if (isBuilding) {
       // A website build is already on-going. We don't want to risk conflicting file outputs
       // on the file system. Queue another build when the current build is done.
       isAnotherBuildQueued = true;
+      print(
+          "File system change (${event.type}): ${event.path} - server is already running a build. We'll queue a followup build to run after that.");
       return;
     }
 

@@ -15,7 +15,7 @@ dependencies:
   args: ^2.4.0
   cli_completion: ^0.3.0
   mason: ^0.1.0-dev.49
-  mason_logger: ^0.2.5
+  mason_logger: ^0.2.12
   shelf: ^1.4.1
   shelf_static: ^1.1.2
   pub_updater: ^0.3.0

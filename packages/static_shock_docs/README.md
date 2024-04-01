@@ -1,18 +1,9 @@
 # Static Shock Documentation Website
-This project generates the documentation website for Static Shock.
+This project generates the documentation website for Static Shock - https://staticshock.io
 
 The Static Shock documentation website is built with Static Shock.
 
 ## Releasing
-Before releasing, first build a new version of the website:
+This website is built and released by a GitHub action.
 
-    dart bin/static_shock_docs.dart
-
-Verify the newly built website:
-
-    shock serve
-
-Upload to Firebase hosting:
-
-    firebase deploy --only hosting
-
+To build and release the website, merge a change into the `main` branch of the repository.

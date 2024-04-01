@@ -22,15 +22,20 @@ title: Static Shock
   </head>
 
   <body>
+    {{ components.githubCornerLink() }}
+
     <main>
       {{ components.navbar({"title": title}) }}
 
       <section id="hero">
         <!-- This is declared above "middle" so that mouse interaction hits the "middle" before this "bottom" section -->
         <div class="bottom">
+          <!-- This area uses flex layout column-reverse, so the order is bottom to top -->
           <div id="banner-built-with-static-shock">
             <span class="message">This website was built with <span class="accent-text">Static Shock!</span></span>
           </div>
+
+          <a href="https://github.com/Flutter-Bounty-Hunters/static_shock/" target="_blank" role="button" class="github btn btn-dark" style="z-index:9999;"><span class="fa fa-github"></span>&nbsp;&nbsp;GitHub</a>
         </div>
 
         <div class="middle">

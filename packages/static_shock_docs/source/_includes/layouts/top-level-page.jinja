@@ -1,0 +1,43 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title }} | Static Shock</title>
+
+    {{ components.favicon() }}
+
+    {{ components.bootstrapJs() }}
+
+    {{ components.highlightJs() }}
+
+    {{ components.fontAwesome() }}
+
+    <link rel="stylesheet" href="/styles/theme.css">
+    <link rel="stylesheet" href="/styles/base_layout.css">
+    <link rel="stylesheet" href="/styles/inner_page.css">
+  </head>
+
+  <body class="inner-page">
+    <main>
+      {{ components.githubCornerLink() }}
+
+      {{ components.navbar({"title": title}) }}
+
+      {{
+        components.innerPageHeader({
+          "title": title,
+          "subtitle": description
+        })
+      }}
+
+      <section id="content">
+        {{ content }}
+      </section>
+    </main>
+
+    <footer>
+      {{ components.footer() }}
+    </footer>
+  </body>
+</html>

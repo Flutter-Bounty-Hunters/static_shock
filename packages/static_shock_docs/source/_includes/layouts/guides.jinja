@@ -21,6 +21,8 @@
 
   <body class="inner-page">
     <main>
+      {{ components.githubCornerLink() }}
+
       {{ components.navbar({"title": title}) }}
 
       <!-- Push all content down, providing padding near the top of the screen -->
@@ -35,6 +37,17 @@
             {% endfor %}
           </nav>
           <section class="col-md-9 col-12" style="padding-left: 48px;">
+            <h1>{{ title }}</h1>
+
+            {% if tableOfContents is defined and tableOfContents.linkCountBeyondLevel(0) > 1 %}
+            <div class="table-of-contents">
+            {{ tableOfContents.renderHtmlList(startingLevel = 1) }}
+            </div>
+
+            <div class="table-of-contents-divider">&nbsp;</div>
+            {% endif %}
+
+
             {{ content }}
           </section>
         </div>

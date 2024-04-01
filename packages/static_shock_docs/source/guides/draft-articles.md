@@ -2,7 +2,6 @@
 title: Draft Articles
 tags: drafting
 ---
-# Draft Articles
 When writing documentation, blog entries, or news articles, it's convenient to be able to work on
 those pages within the static site project, but without publishing those pages to the final build.
 The drafting plugin makes this possible.

@@ -2,7 +2,6 @@
 title: Copy Assets
 tags: drafting
 ---
-# Copy Images, CSS, JS
 A static site typically contains many assets. An asset is a file served by a web server, which isn't a page.
 
 Typically an asset, like an image, should be copied directly from the source set to the build set.
