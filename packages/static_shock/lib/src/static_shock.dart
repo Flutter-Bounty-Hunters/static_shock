@@ -350,6 +350,12 @@ class StaticShock implements StaticShockPipeline {
         final inheritedData = _dataIndex.getForPath(page.sourcePath);
         page.data.addEntries(inheritedData.entries);
 
+        // Check for a desired base path override, and apply it.
+        final basePath = page.data['basePath'] as String?;
+        if (basePath != null && basePath.isNotEmpty) {
+          page.destinationPath = page.destinationPath!.copyWith(directoryPath: basePath);
+        }
+
         _pages.add(page);
 
         continue pickerLoop;
