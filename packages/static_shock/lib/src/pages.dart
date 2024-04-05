@@ -90,7 +90,7 @@ class PagesIndex {
     String? sortBy,
     String order = "asc",
   }) {
-    final allPagesSorted = _pages.toList() //
+    final allPagesSorted = _pages.where((page) => page.data["shouldIndex"] != false).toList() //
       ..sort(_sortPages(sortBy, _parseSortOrder(order)));
     return allPagesSorted.map(_serializePage);
   }
@@ -102,7 +102,7 @@ class PagesIndex {
     String? sortBy,
     String order = "asc",
   }) {
-    final pages = _pages.where((page) => page.hasTag(tag)).toList() //
+    final pages = _pages.where((page) => page.hasTag(tag) && page.data["shouldIndex"] != false).toList() //
       ..sort(_sortPages(sortBy, _parseSortOrder(order)));
     return pages.map(_serializePage);
   }
