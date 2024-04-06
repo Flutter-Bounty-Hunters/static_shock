@@ -20,7 +20,7 @@ jobs:
       - run: dart analyze
         id: analysis
 
-      - run: 'echo "Analysis result code: ${$?}"'
+      - run: 'echo "Analysis result code: $?"'
 
   test-static-shock:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
       # Run Dart analysis
       - run: dart analyze
 
-      - run: 'echo "Analysis result code: ${$?}"'
+      - run: 'echo "Analysis result code: $?"'
 
   test-cli:
     runs-on: ubuntu-latest
@@ -96,7 +96,7 @@ jobs:
       # Run Dart analysis
       - run: dart analyze
 
-      - run: 'echo "Analysis result code: ${$?}"'
+      - run: 'echo "Analysis result code: $?"'
 
   test-docs:
     runs-on: ubuntu-latest
