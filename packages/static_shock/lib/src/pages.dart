@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:mason_logger/mason_logger.dart';
 
 import 'files.dart';
 import 'pipeline.dart';
