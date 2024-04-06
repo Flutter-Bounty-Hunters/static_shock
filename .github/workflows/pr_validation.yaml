@@ -58,6 +58,8 @@ jobs:
       # Run Dart analysis
       - run: dart analyze
 
+      - run: 'echo "Analysis result code: ${$?}"'
+
   test-cli:
     runs-on: ubuntu-latest
     defaults:
@@ -93,6 +95,8 @@ jobs:
 
       # Run Dart analysis
       - run: dart analyze
+
+      - run: 'echo "Analysis result code: ${$?}"'
 
   test-docs:
     runs-on: ubuntu-latest
