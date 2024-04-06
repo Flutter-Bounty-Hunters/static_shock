@@ -36,28 +36,28 @@ draft: true
       <section id="content">
         <h2>Drafting</h2>
         <ol>
-          {% for page in pages.byTag("drafting", sortBy="title", order="desc") %}
+          {% for page in pages.byTag("drafting", sortBy="title=asc") %}
           <li><a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a></li>
           {% endfor %}
         </ol>
 
         <h2>Styling</h2>
         <ol>
-          {% for page in pages.byTag("styling", order="desc") %}
+          {% for page in pages.byTag("styling") %}
           <li><a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a></li>
           {% endfor %}
         </ol>
 
         <h2>Publishing</h2>
         <ol>
-          {% for page in pages.byTag("publishing", order="desc") %}
+          {% for page in pages.byTag("publishing") %}
           <li><a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a></li>
           {% endfor %}
         </ol>
 
         <h2>Extensions</h2>
         <ol>
-          {% for page in pages.byTag("extensions", order="desc") %}
+          {% for page in pages.byTag("extensions") %}
           <li><a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a></li>
           {% endfor %}
         </ol>
