@@ -20,7 +20,7 @@ jobs:
       - run: dart analyze
         id: analysis
 
-      - run: echo $?
+      - run: 'echo "Analysis result code: ${$?}"'
 
   test-static-shock:
     runs-on: ubuntu-latest
