@@ -173,6 +173,7 @@ class StaticShockDevServer {
       // A website build is already on-going. We don't want to risk conflicting file outputs
       // on the file system. Queue another build when the current build is done.
       isAnotherBuildQueued = true;
+      // ignore: avoid_print
       print(
           "File system change (${event.type}): ${event.path} - server is already running a build. We'll queue a followup build to run after that.");
       return;

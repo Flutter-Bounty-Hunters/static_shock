@@ -18,6 +18,9 @@ jobs:
 
       # Run Dart analysis
       - run: dart analyze
+        id: analysis
+
+      - run: echo $?
 
   test-static-shock:
     runs-on: ubuntu-latest

@@ -312,5 +312,3 @@ $destinationContent
   @override
   String toString() => "[Page] - source: $sourcePath, destination: $destinationPath";
 }
-
-final _log = Logger(level: Level.verbose);
