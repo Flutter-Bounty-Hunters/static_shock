@@ -351,8 +351,18 @@ class StaticShock implements StaticShockPipeline {
         page.data.addEntries(inheritedData.entries);
 
         // Check for a desired base path override, and apply it.
-        final basePath = page.data['basePath'] as String?;
+        String? basePath = page.data['basePath'];
         if (basePath != null && basePath.isNotEmpty) {
+          if (basePath.startsWith("/")) {
+            // Chop off leading "/".
+            //
+            // A "/" is acceptable from a URL perspective, where it refers to the root
+            // of the website. However, from a file system perspective, a "/" refers to
+            // the root of the file system. We don't want to write files to the root of
+            // the file system.
+            basePath = basePath.substring(1);
+          }
+
           page.destinationPath = page.destinationPath!.copyWith(directoryPath: basePath);
         }
 
