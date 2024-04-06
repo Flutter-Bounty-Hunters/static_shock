@@ -106,3 +106,21 @@ Continuing with our example, after running a Static Shock build, an HTML file is
 ```
 
 You now have a static HTML page that you can serve to users, and it's available at your desired URL path.
+
+## Change the base path of the URL
+For many websites, the source directory structure works well for the final URL, such as `/guides/getting-started.md`
+being deployed to `mysite.com/guides/getting-started/`. However, for some websites, the best directory
+structure doesn't necessarily match the desired URL. For example, a blog might store a post at 
+`/posts/my-post.md` but the blog author would like to serve that post at `myblog.com/my-post/`.
+
+Static Shock allows you to override the base path of the final URL. The base path is the path that
+appears before the final path segment, e.g., given `/posts/my-post/` the base path is `/posts`. To
+override the default base path, specify a different value for `basePath` for a given page, or
+within a `_data.yaml` file to apply the change to entire directory.
+
+```markdown
+---
+title: My Blog Post
+basePath: /
+---
+```

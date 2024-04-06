@@ -35,7 +35,7 @@ tags:
 # My Page
 ```
 
-You can also defin tags in the front matter for Jinja pages.
+You can also define tags in the front matter for Jinja pages.
 
 ```html
 <!--
@@ -62,4 +62,19 @@ After associating pages with tags, list pages per tag by using the tag iterator 
     {% endfor %}
   </body>
 </html>
+```
+
+## Hide a page from the index
+Sometimes you might want a page to be available at a URL, but you don't want that page to be listed
+in a directory of pages. For example, perhaps you published an article that you no longer want to
+promote, but you want the URL to keep working for existing links around the web.
+
+You can hide individual pages from the page index, while still publishing them to a URL, by using
+the `shouldIndex` page property.
+
+```yaml
+---
+title: My Hidden Page
+shouldIndex: false
+---
 ```
