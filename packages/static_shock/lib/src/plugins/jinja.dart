@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:intl/intl.dart';
 import 'package:jinja/jinja.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/files.dart';
@@ -134,6 +135,7 @@ class JinjaPageRenderer implements PageRenderer {
   void _renderJinjaToContent(StaticShockPipelineContext context, Page page, String templateSource) {
     final jinjaFilters = Map.fromEntries([
       MapEntry("startsWith", _startsWith),
+      MapEntry("formatDateTime", _formatDateTime),
       ...filters.map((filterBuilder) {
         final filter = filterBuilder(context);
         return MapEntry<String, Function>(filter.$1, filter.$2);
@@ -204,5 +206,23 @@ class JinjaPageRenderer implements PageRenderer {
       return false;
     }
     return candidate.startsWith(prefix);
+  }
+
+  /// Jinja filter that formats an incoming date string.
+  ///
+  /// The incoming format defaults to "yyyy-MM-dd", but an alternative
+  /// incoming format can be provided in [from].
+  ///
+  /// The returned date string follows the [to] format, which is required.
+  ///
+  /// This filter might be used, for example, to replace "2024-02-15" with
+  /// "Feb 15, 2024".
+  String _formatDateTime(
+    String date, {
+    String from = "yyyy-MM-dd",
+    required String to,
+  }) {
+    final dateTime = DateFormat(from).parse(date);
+    return DateFormat(to).format(dateTime);
   }
 }
