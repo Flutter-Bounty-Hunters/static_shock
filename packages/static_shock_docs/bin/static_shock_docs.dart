@@ -18,7 +18,12 @@ Future<void> main(List<String> arguments) async {
     ..plugin(const PubPackagePlugin({
       "static_shock",
       "static_shock_cli",
-    }));
+    }))
+    ..plugin(const RssPlugin(
+      title: "Static Shock Docs",
+      description: "Documentation website for the static_shock package.",
+      homePageUrl: "https://staticshock.io",
+    ));
 
   // Generate the static website.
   await staticShock.generateSite();

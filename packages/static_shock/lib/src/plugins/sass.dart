@@ -27,7 +27,13 @@ class SassAssetTransformer implements AssetTransformer {
 
   @override
   FutureOr<void> transformAsset(StaticShockPipelineContext context, Asset asset) async {
-    if (!_extensions.contains(asset.sourcePath.extension.toLowerCase())) {
+    if (asset.sourcePath == null) {
+      // This asset didn't come from a file, therefore it must not be a Sass file. Ignore it.
+      // TODO: Handle the possibility of Sass code generated at runtime, or downloaded from a web service.
+      return;
+    }
+
+    if (!_extensions.contains(asset.sourcePath!.extension.toLowerCase())) {
       // This isn't a Sass asset. Ignore it.
       return;
     }
@@ -38,7 +44,7 @@ class SassAssetTransformer implements AssetTransformer {
     asset.destinationContent = AssetContent.text(
       sass
           .compileToResult(
-            context.resolveSourceFile(asset.sourcePath).path,
+            context.resolveSourceFile(asset.sourcePath!).path,
           )
           .css,
     );

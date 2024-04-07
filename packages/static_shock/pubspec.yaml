@@ -8,8 +8,13 @@ environment:
 
 dependencies:
   collection: ^1.18.0
+#  dart_rss: ^3.0.2
+  dart_rss:
+    git:
+      url: git@github.com:Flutter-Bounty-Hunters/dart-rss.git
+      ref: 46_serialize-to-xml
   fbh_front_matter: ^0.0.1
-  intl: ^0.19.0
+  intl: ^0.18.0
   jinja: ^0.4.2
   markdown: ^7.0.2
   mason_logger: ^0.2.5
