@@ -9,45 +9,70 @@ import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 
+/// Plugin for generating RSS feeds.
+///
+/// An RSS feed is an XML file. By default, this plugin writes the RSS feeds to `/rss_feed.xml`.
+///
+/// An RSS feed includes information about both the overall website, as well as individual
+/// content items within the website, e.g., articles.
+///
+/// The RSS feed's site-level information is pulled from the provided [site] data structure.
+///
+/// By default, all `Page`s are given an `item` entry in the RSS feed. You can globally
+/// include or exclude all `Page`s with [includePagesByDefault]. You can include or
+/// exclude individual `Page`s by setting the `rss` property to `true` or `false` for
+/// specific `Page`s.
+///
+/// To change the name and/or location of the final RSS feed file, use [rssFeedPath].
 class RssPlugin implements StaticShockPlugin {
   const RssPlugin({
     required this.site,
+    this.rssFeedPath = const FileRelativePath("", "rss_feed", "xml"),
+    this.includePagesByDefault = true,
     this.pageToRssItemMapper = defaultPageToRssItemMapper,
   });
 
+  /// Top-level website information for the `<channel>` configuration.
   final RssSiteConfiguration site;
+
+  /// The name and location of the generated RSS feed file.
+  final FileRelativePath rssFeedPath;
+
+  /// Set to `true` if all [Page]s should be included in the RSS feed, except the
+  /// pages that explicitly opt out, or `false` if all [Page]s should be
+  /// excluded from the RSS feed, except the pages that explicitly opt in.
+  final bool includePagesByDefault;
+
+  /// Maps individual [Page]s to RSS `<item>`s, which are placed within the `<channel>`.
+  ///
+  /// A default mapper is included, so this property only needs to be set if the default
+  /// mapper isn't sufficient for your use-case.
   final PageToRssItemMapper pageToRssItemMapper;
 
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
     pipeline.finish(_RssFinisher(
       site: site,
+      rssFeedPath: rssFeedPath,
+      includePagesByDefault: includePagesByDefault,
       pageToRssItemMapper: pageToRssItemMapper,
     ));
   }
 }
 
+/// Configures top-level website info for the [RssPlugin].
 class RssSiteConfiguration {
   const RssSiteConfiguration({
     this.title,
     this.description,
     required this.homePageUrl,
     this.language = "en-us",
-    this.rssFeedPath = const FileRelativePath("", "rss_feed", "xml"),
-    this.includePagesByDefault = true,
   });
 
   final String? title;
   final String? description;
   final String homePageUrl;
   final String? language;
-
-  final FileRelativePath rssFeedPath;
-
-  /// Is `true` if all [Page]s should be included in the RSS feed, except the
-  /// pages that explicitly opt out, or `false` if all [Page]s should be
-  /// excluded from the RSS feed, except the pages that explicitly opt in.
-  final bool includePagesByDefault;
 
   @override
   bool operator ==(Object other) =>
@@ -63,6 +88,7 @@ class RssSiteConfiguration {
   int get hashCode => title.hashCode ^ description.hashCode ^ homePageUrl.hashCode ^ language.hashCode;
 }
 
+/// The default [PageToRssItemMapper] used by the [RssPlugin].
 RssItem? defaultPageToRssItemMapper(RssSiteConfiguration config, Page page) {
   if (page.url == null) {
     // This page isn't going to be built because it has no destination. Ignore it.
@@ -98,10 +124,20 @@ final rssDateFormat = DateFormat("dd MMM yyyy");
 class _RssFinisher implements Finisher {
   const _RssFinisher({
     required this.site,
+    required this.rssFeedPath,
+    required this.includePagesByDefault,
     required this.pageToRssItemMapper,
   });
 
   final RssSiteConfiguration site;
+
+  final FileRelativePath rssFeedPath;
+
+  /// Is `true` if all [Page]s should be included in the RSS feed, except the
+  /// pages that explicitly opt out, or `false` if all [Page]s should be
+  /// excluded from the RSS feed, except the pages that explicitly opt in.
+  final bool includePagesByDefault;
+
   final PageToRssItemMapper pageToRssItemMapper;
 
   @override
@@ -127,7 +163,7 @@ class _RssFinisher implements Finisher {
 
     context.addAsset(
       Asset(
-        destinationPath: site.rssFeedPath,
+        destinationPath: rssFeedPath,
         destinationContent: AssetContent.text(
           feed.toXmlDocument().toXmlString(pretty: true, indent: "  "),
         ),
@@ -136,11 +172,11 @@ class _RssFinisher implements Finisher {
   }
 
   bool _selectPagesToPublish(Page page) {
-    if (site.includePagesByDefault && page.data['rss'] == false) {
+    if (includePagesByDefault && page.data['rss'] == false) {
       // This page opted out of RSS inclusion. Ignore it.
       return false;
     }
-    if (!site.includePagesByDefault && page.data['rss'] != true) {
+    if (!includePagesByDefault && page.data['rss'] != true) {
       // This page didn't opt in to RSS inclusion. Ignore it.
       return false;
     }

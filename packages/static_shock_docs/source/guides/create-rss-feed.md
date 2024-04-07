@@ -73,11 +73,9 @@ output location by configuring the `RssPlugin`:
 
 ```dart
 RssPlugin(
-  site: RssSiteConfiguration(
-    // ...
-    // Write to "/feed.xml" instead of "/rss_feed.xml".
-    rssFeedPath: FileRelativePath("", "feed", "xml"),
-  ),
+  // ...
+  // Write to "/feed.xml" instead of "/rss_feed.xml".
+  rssFeedPath: FileRelativePath("", "feed", "xml"),
 );
 ```
 
@@ -124,13 +122,11 @@ First, decide whether you want all `Page`s **included** by default, or whether y
 
 ```dart
 RssPlugin(
-  site: RssSiteConfiguration(
-    // ...
-    // Include all pages by default...
-    includePagesByDefault: true,
-    // or exclude all pages by default.
-    includePagesByDefault: false,
-  ),
+  // ...
+  // Include all pages by default...
+  includePagesByDefault: true,
+  // or exclude all pages by default.
+  includePagesByDefault: false,
 );
 ```
 
