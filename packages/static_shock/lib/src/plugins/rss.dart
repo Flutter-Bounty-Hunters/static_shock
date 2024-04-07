@@ -81,7 +81,7 @@ class _RssFinisher implements Finisher {
       docs: "http://blogs.law.harvard.edu/tech/rss",
       items: [
         for (final page in context.pagesIndex.pages) //
-          defaultPageToRssItemMapper(page),
+          pageToRssItemMapper(page),
       ],
     );
 
