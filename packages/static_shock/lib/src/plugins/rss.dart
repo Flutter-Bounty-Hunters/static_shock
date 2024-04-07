@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:static_shock/src/assets.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/finishers.dart';
+import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 
@@ -14,12 +15,14 @@ class RssPlugin implements StaticShockPlugin {
     this.description,
     this.homePageUrl,
     this.language = "en-us",
+    this.pageToRssItemMapper = defaultPageToRssItemMapper,
   });
 
   final String? title;
   final String? description;
   final String? homePageUrl;
   final String? language;
+  final PageToRssItemMapper pageToRssItemMapper;
 
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
@@ -28,9 +31,23 @@ class RssPlugin implements StaticShockPlugin {
       description: description,
       homePageUrl: homePageUrl,
       language: language,
+      pageToRssItemMapper: pageToRssItemMapper,
     ));
   }
 }
+
+RssItem defaultPageToRssItemMapper(Page page) {
+  return RssItem(
+    guid: page.url,
+    link: page.url,
+    title: page.title,
+    description: page.data["description"],
+    pubDate: page.data["publishDate"],
+    author: page.data["author"],
+  );
+}
+
+typedef PageToRssItemMapper = RssItem Function(Page page);
 
 class _RssFinisher implements Finisher {
   static final _rssDateFormat = DateFormat("dd MMM yyyy");
@@ -40,16 +57,17 @@ class _RssFinisher implements Finisher {
     this.description,
     this.homePageUrl,
     this.language = "en-us",
+    required this.pageToRssItemMapper,
   });
 
   final String? title;
   final String? description;
   final String? homePageUrl;
   final String? language;
+  final PageToRssItemMapper pageToRssItemMapper;
 
   @override
   FutureOr<void> execute(StaticShockPipelineContext context) {
-    print("Running RSS Finisher");
     final feed = RssFeed(
       title: title,
       description: description,
@@ -62,15 +80,8 @@ class _RssFinisher implements Finisher {
       lastBuildDate: _rssDateFormat.format(DateTime.now()),
       docs: "http://blogs.law.harvard.edu/tech/rss",
       items: [
-        for (final page in context.pagesIndex.pages)
-          RssItem(
-            guid: page.url,
-            link: page.url,
-            title: page.title,
-            description: page.data["description"],
-            pubDate: page.data["publishDate"],
-            author: page.data["author"],
-          ),
+        for (final page in context.pagesIndex.pages) //
+          defaultPageToRssItemMapper(page),
       ],
     );
 
