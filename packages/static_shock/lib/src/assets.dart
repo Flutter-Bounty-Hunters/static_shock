@@ -9,17 +9,27 @@ abstract class AssetTransformer {
 }
 
 class Asset {
-  Asset(
+  Asset({
     this.sourcePath,
-    this.sourceContent, {
+    this.sourceContent,
     this.destinationPath,
     this.destinationContent,
   });
 
-  final FileRelativePath sourcePath;
-  final AssetContent sourceContent;
+  /// The relative file path of the source asset, within the website source files, or `null`
+  /// if this asset is generated at runtime or comes from a non-file location.
+  final FileRelativePath? sourcePath;
 
+  /// The content of the source file, or `null` if this asset is generated at runtime, or comes
+  /// from a non-file location.
+  final AssetContent? sourceContent;
+
+  /// The relative file path where this asset will be written within the website build directory,
+  /// or `null` if the pipeline hasn't chosen a destination yet.
   FileRelativePath? destinationPath;
+
+  /// The content of the final asset, as written to the website build directory, or `null` if
+  /// the pipeline hasn't chosen the final content yet.
   AssetContent? destinationContent;
 
   String describe() {

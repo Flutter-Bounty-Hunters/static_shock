@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/files.dart';
@@ -110,6 +111,43 @@ class StaticShockPipelineContext {
   /// Maps a given [relativePath] to a fully-resolved file system [File].
   File resolveSourceFile(FileRelativePath relativePath) {
     return _sourceDirectory.descFile([relativePath.value]);
+  }
+
+  List<Asset> get assets => List.unmodifiable(_assets);
+  final _assets = <Asset>[];
+
+  /// Returns `true` if an asset has been added whose source path matches [sourcePath].
+  bool hasAssetFromSourcePath(FileRelativePath sourcePath) {
+    return _assets.firstWhereOrNull((asset) => asset.sourcePath == sourcePath) != null;
+  }
+
+  /// Returns `true` if an asset has been added whose destination path matches [destinationPath].
+  bool hasAssetForDestinationPath(FileRelativePath destinationPath) {
+    return _assets.firstWhereOrNull((asset) => asset.destinationPath == destinationPath) != null;
+  }
+
+  /// Returns all assets whose destination file has the given extension.
+  Iterable<Asset> findAssetsWithExtension(String extension) {
+    return _assets.where((asset) => asset.destinationPath?.extension == extension);
+  }
+
+  /// Adds the given [asset] to those that will be included in the final website build.
+  void addAsset(Asset asset) {
+    _assets.add(asset);
+  }
+
+  /// Removes the asset whose source path matches the given [sourcePath].
+  ///
+  /// Once removed, the asset will not be included in the final website build.
+  void removeAssetBySourcePath(FileRelativePath sourcePath) {
+    _assets.removeWhere((asset) => asset.sourcePath == sourcePath);
+  }
+
+  /// Removes the asset whose destination path matches the given [destinationPath].
+  ///
+  /// Once removed, the asset will not be included in the final website build.
+  void removeAssetByDestinationPath(FileRelativePath destinationPath) {
+    _assets.removeWhere((asset) => asset.destinationPath == destinationPath);
   }
 
   /// An index of [Page]s loaded into the pipeline.

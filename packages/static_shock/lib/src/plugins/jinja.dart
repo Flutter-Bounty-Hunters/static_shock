@@ -73,11 +73,17 @@ class JinjaPageLoader implements PageLoader {
       }
     }
 
+    final destinationPath = path.copyWith(extension: "html");
+
     return Page(
       path,
       trimmedContent,
-      data: {...frontMatter},
-      destinationPath: path.copyWith(extension: "html"),
+      data: {
+        // Note: assign "url" before including frontMatter so that the frontMatter can override it.
+        "url": destinationPath.value,
+        ...frontMatter
+      },
+      destinationPath: destinationPath,
     );
   }
 }
