@@ -33,6 +33,7 @@ class RssSiteConfiguration {
     this.description,
     required this.homePageUrl,
     this.language = "en-us",
+    this.rssFeedPath = const FileRelativePath("", "rss_feed", "xml"),
     this.includePagesByDefault = true,
   });
 
@@ -40,6 +41,8 @@ class RssSiteConfiguration {
   final String? description;
   final String homePageUrl;
   final String? language;
+
+  final FileRelativePath rssFeedPath;
 
   /// Is `true` if all [Page]s should be included in the RSS feed, except the
   /// pages that explicitly opt out, or `false` if all [Page]s should be
@@ -80,9 +83,9 @@ RssItem? defaultPageToRssItemMapper(RssSiteConfiguration config, Page page) {
     guid: urlPath,
     link: "${config.homePageUrl}$urlPath",
     title: page.title,
-    description: page.data["description"],
-    pubDate: page.data["publishDate"],
-    author: page.data["author"],
+    description: page.data["description"] is String ? page.data["description"] : null,
+    pubDate: page.data["publishDate"] is String ? page.data["publishDate"] : null,
+    author: page.data["author"] is String ? page.data["author"] : null,
   );
 }
 
@@ -124,7 +127,7 @@ class _RssFinisher implements Finisher {
 
     context.addAsset(
       Asset(
-        destinationPath: FileRelativePath("", "feed", "rss"),
+        destinationPath: site.rssFeedPath,
         destinationContent: AssetContent.text(
           feed.toXmlDocument().toXmlString(pretty: true, indent: "  "),
         ),
