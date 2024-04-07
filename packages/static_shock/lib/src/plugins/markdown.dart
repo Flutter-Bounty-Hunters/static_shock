@@ -50,6 +50,8 @@ class MarkdownPageLoader implements PageLoader {
       path,
       markdown.content ?? "",
       data: {
+        // Note: assign "url" before including Markdown data so that the Markdown data can override it.
+        "url": destinationPath.value,
         ...markdown.data,
         "tableOfContents": _createTableOfContents(destinationPath.value, markdown.content ?? ""),
       },
