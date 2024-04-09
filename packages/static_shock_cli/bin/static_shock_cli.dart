@@ -11,14 +11,22 @@ import 'package:static_shock_cli/static_shock_cli.dart';
 final _log = Logger(level: Level.verbose);
 
 Future<void> main(List<String> arguments) async {
-  // Run the desired command.
-  CommandRunner("shock", "A static site generator, written in Dart.")
+  // Configure available commands that the user might run.
+  final runner = CommandRunner("shock", "A static site generator, written in Dart.")
     ..addCommand(CreateCommand())
     ..addCommand(BuildCommand())
     ..addCommand(ServeCommand())
     ..addCommand(UpgradeCommand())
-    ..addCommand(VersionCommand())
-    ..run(arguments);
+    ..addCommand(VersionCommand());
+
+  // Run the desired command.
+  try {
+    await runner.run(arguments);
+  } on UsageException catch (exception) {
+    _log.err("Command failed - please check your usage.\n");
+    _log.err(exception.message);
+    _log.detail(exception.usage);
+  }
 }
 
 class CreateCommand extends Command with PubVersionCheck {
@@ -27,6 +35,9 @@ class CreateCommand extends Command with PubVersionCheck {
 
   @override
   final description = "Creates a new static site project at the desired location.";
+
+  @override
+  bool get takesArguments => false;
 
   @override
   Future<void> run() async {
@@ -159,6 +170,7 @@ class BuildCommand extends Command {
 
     await buildWebsite(
       appArguments: argResults?.rest ?? [],
+      log: _log,
     );
   }
 }
