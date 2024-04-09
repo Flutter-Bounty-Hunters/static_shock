@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:pub_updater/pub_updater.dart';
+import 'package:static_shock_cli/src/package_name_validation.dart';
 import 'package:static_shock_cli/static_shock_cli.dart';
 
 final _log = Logger(level: Level.verbose);
@@ -50,12 +51,47 @@ class CreateCommand extends Command with PubVersionCheck {
   Future<Map<String, dynamic>> _promptForConfiguration() async {
     final vars = <String, dynamic>{};
 
-    vars["project_name"] = _log.prompt("Project name (e.g., 'static_shock_docs')");
-    if (vars["project_name"].trim().isEmpty) {
-      _log.err("Your project name can't be blank");
-      exit(ExitCode.ioError.code);
-    }
+    // Prompt for project package name.
+    String? projectName;
+    do {
+      projectName = _log.prompt("Project name (e.g., 'static_shock_docs')");
+      if (projectName.trim().isEmpty) {
+        _log.err("Your project name can't be blank");
+        continue;
+      }
 
+      // Check validity of package name and let user fix it.
+      if (!PackageName.isValid(projectName)) {
+        _log.warn("Your project name doesn't follow Dart package naming guidelines.");
+        final choice = _log.chooseOne("What would you like to do?", choices: [
+          if (PackageName.canFix(projectName)) //
+            "autoFix",
+          "newName",
+          "useAnyway",
+        ], display: (String option) {
+          switch (option) {
+            case "autoFix":
+              return "Adjust name to '${PackageName.fix(projectName!)}'";
+            case "newName":
+              return "Enter a new name";
+            case "useAnyway":
+              return "Use the name anyway";
+            default:
+              throw Exception("Unknown choice: '$option'");
+          }
+        });
+
+        switch (choice) {
+          case "autoFix":
+            projectName = PackageName.fix(projectName);
+          case "newName":
+            projectName = "";
+        }
+      }
+    } while (projectName.trim().isEmpty);
+    vars["project_name"] = projectName;
+
+    // Prompt for project description.
     vars["project_description"] = _log.prompt("Project description (e.g., 'Documentation for Static Shock')");
 
     return vars;
