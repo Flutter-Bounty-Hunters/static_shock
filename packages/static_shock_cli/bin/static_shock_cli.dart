@@ -45,7 +45,27 @@ class CreateCommand extends Command with PubVersionCheck {
 
     await generator.generate(target, vars: projectConfiguration);
 
-    _log.success("Successfully created a new Static Shock project!");
+    _log.success("Successfully created a new Static Shock project!\n");
+
+    _log.info("Running 'pub get' to initialize your project...");
+    final pubGetResult = await Process.run('dart', ['pub', 'get']);
+    _log.detail(pubGetResult.stdout);
+    if (pubGetResult.exitCode != 0) {
+      _log.err("Command 'pub get' failed. Please check your project for errors.");
+      return;
+    }
+
+    _log.info("Successfully initialized your project. Now we'll run an initial build of your static site.");
+    final buildResult = await Process.run('dart', ['run', 'bin/${projectConfiguration['project_name']}.dart']);
+    _log.detail(buildResult.stdout);
+    if (buildResult.exitCode != 0) {
+      _log.err("Failed to build your static site. Please check your project for errors.");
+      return;
+    }
+
+    _log.success("Congratulations, your Static Shock project is ready to go!");
+
+    _log.info("\nTo learn how to use Static Shock, check out staticshock.io\n");
   }
 
   Future<Map<String, dynamic>> _promptForConfiguration() async {
