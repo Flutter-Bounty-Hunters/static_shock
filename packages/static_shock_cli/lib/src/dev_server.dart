@@ -153,16 +153,14 @@ class StaticShockDevServer {
       _connectedWebpages.add(webSocket);
 
       webSocket.stream.listen((message) {
-        final log = Logger(level: Level.verbose);
-        log.detail("Page websocket received message: '$message'");
+        _log.detail("Page websocket received message: '$message'");
         webSocket.sink.add("echo $message");
       });
 
       webSocket.sink.done.then((webSocketImpl) {
         // Note: The "web socket" we're given in this callback is of type WebSocketImpl, which is
         // different from the WebSocketChannel type that we receive in the main callback above.
-        final log = Logger(level: Level.verbose);
-        log.detail("WebSocket is done! Removing it: $webSocket - ID: ${webSocket.hashCode}");
+        _log.detail("WebSocket is done! Removing it: $webSocket - ID: ${webSocket.hashCode}");
         _connectedWebpages.remove(webSocket);
       });
     });
