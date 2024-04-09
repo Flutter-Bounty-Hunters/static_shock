@@ -10,7 +10,7 @@ executables:
   shock: static_shock_cli
 
 dependencies:
-  static_shock: ^0.0.1
+  static_shock: ^0.0.3
 
   args: ^2.4.0
   cli_completion: ^0.3.0
