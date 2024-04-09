@@ -4,8 +4,8 @@ import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
-import 'package:pub_updater/pub_updater.dart';
 import 'package:static_shock_cli/src/package_name_validation.dart';
+import 'package:static_shock_cli/src/version_check.dart';
 import 'package:static_shock_cli/static_shock_cli.dart';
 
 final _log = Logger(level: Level.verbose);
@@ -251,21 +251,19 @@ class UpgradeCommand extends Command {
 
   @override
   Future<void> run() async {
-    final pubUpdater = PubUpdater();
-
     _log.info("Checking for newer versions of static_shock_cli...");
-    final isUpToDate = await pubUpdater.isUpToDate(packageName: "static_shock_cli", currentVersion: packageVersion);
+    final isUpToDate = await StaticShockCliVersion.isAtLeastUpToDateWithPub();
     if (isUpToDate) {
       _log.info("No updates available.\n");
       return;
     }
 
-    final newestVersion = await pubUpdater.getLatestVersion("static_shock_cli");
+    final newestVersion = await StaticShockCliVersion.getLatestVersion();
     _log.info(
         "New version of ${lightYellow.wrap("static_shock_cli")} is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}");
 
     _log.info("Updating your static_shock_cli package to version ${lightGreen.wrap(newestVersion)}...");
-    await pubUpdater.update(packageName: "static_shock_cli");
+    await StaticShockCliVersion.update();
     _log.info("Done upgrading static_shock_cli. Your current version is $packageVersion.");
   }
 }
@@ -283,14 +281,13 @@ class VersionCommand extends Command {
         "Your current version of ${lightYellow.wrap("static_shock_cli")} is: ${lightYellow.wrap(packageVersion)}");
 
     _log.detail("Checking for newer versions of static_shock_cli on Pub...");
-    final pubUpdater = PubUpdater();
-    final isUpToDate = await pubUpdater.isUpToDate(packageName: "static_shock_cli", currentVersion: packageVersion);
+    final isUpToDate = await StaticShockCliVersion.isAtLeastUpToDateWithPub();
     if (isUpToDate) {
       _log.info("You're up to date!\n");
       return;
     }
 
-    final newestVersion = await pubUpdater.getLatestVersion("static_shock_cli");
+    final newestVersion = await StaticShockCliVersion.getLatestVersion();
     _log.info("A new version is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}\n");
   }
 }
@@ -308,16 +305,14 @@ class VersionCommand extends Command {
 mixin PubVersionCheck on Command {
   @override
   Future<void> run() async {
-    final pubUpdater = PubUpdater();
-
     _log.detail("Checking for newer versions of static_shock_cli...");
-    final isUpToDate = await pubUpdater.isUpToDate(packageName: "static_shock_cli", currentVersion: packageVersion);
+    final isUpToDate = await StaticShockCliVersion.isAtLeastUpToDateWithPub();
     if (isUpToDate) {
       _log.info("No updates available.\n");
       return;
     }
 
-    final newestVersion = await pubUpdater.getLatestVersion("static_shock_cli");
+    final newestVersion = await StaticShockCliVersion.getLatestVersion();
     _log.info(
         "New version of ${lightYellow.wrap("static_shock_cli")} is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}\n");
   }
