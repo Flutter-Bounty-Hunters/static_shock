@@ -153,14 +153,16 @@ class StaticShockDevServer {
       _connectedWebpages.add(webSocket);
 
       webSocket.stream.listen((message) {
-        _log.detail("Page websocket received message: '$message'");
+        final log = Logger(level: Level.verbose);
+        log.detail("Page websocket received message: '$message'");
         webSocket.sink.add("echo $message");
       });
 
       webSocket.sink.done.then((webSocketImpl) {
         // Note: The "web socket" we're given in this callback is of type WebSocketImpl, which is
         // different from the WebSocketChannel type that we receive in the main callback above.
-        _log.detail("WebSocket is done! Removing it: $webSocket - ID: ${webSocket.hashCode}");
+        final log = Logger(level: Level.verbose);
+        log.detail("WebSocket is done! Removing it: $webSocket - ID: ${webSocket.hashCode}");
         _connectedWebpages.remove(webSocket);
       });
     });
@@ -217,9 +219,18 @@ class StaticShockDevServer {
 
       _log.detail("Rebuilt website in ${stopwatch.elapsed.inMilliseconds}ms");
 
-      _log.detail("Notifying ${_connectedWebpages.length} connected webpages to refresh.");
-      for (final page in _connectedWebpages) {
-        page.sink.add("refresh");
+      if (!isAnotherBuildQueued) {
+        // We're done running all the queued builds, so now we can have the connected
+        // websites refresh their files without running into a race condition with the
+        // build system. Notify the websites to update themselves.
+        //
+        // Previously, we were refreshing the webpages after every build, while immediately
+        // starting a followup build. I think this created a file system race condition, and
+        // lead to crashes similar to this: https://github.com/Flutter-Bounty-Hunters/static_shock/issues/76
+        _log.detail("Notifying ${_connectedWebpages.length} connected webpages to refresh.");
+        for (final page in _connectedWebpages) {
+          page.sink.add("refresh");
+        }
       }
     } while (isAnotherBuildQueued);
   }
