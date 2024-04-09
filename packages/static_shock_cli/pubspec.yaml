@@ -18,7 +18,7 @@ dependencies:
   mason_logger: ^0.2.12
   shelf: ^1.4.1
   shelf_static: ^1.1.2
-  pub_updater: ^0.4.0
+  pub_updater: any
   yaml: ^3.1.2
   watcher: ^1.1.0
   html: ^0.15.4
