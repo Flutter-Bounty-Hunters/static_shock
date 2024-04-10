@@ -1,3 +1,9 @@
+## 0.0.4 - April 9, 2024
+ * Project creation: the chosen package name is validated against Dart standards.
+ * All CLI commands fail more gracefully.
+ * Reduced dev server crashes by only refreshing connected webpages after all queued builds compete.
+ * Upgraded internal `static_shock` dependency to `0.0.3`.
+
 ## 0.0.3 - March 23, 2024
 `shock build` and `shock serve` can take extra custom arguments, e.g. `shock serve preview`.
 
