@@ -1,3 +1,11 @@
+## 0.0.4 - Apr 9, 2024
+ * Pages now have access to a computed table-of-contents when rendering the page.
+ * Individual pages can be hidden from the page index, but still made available at their URL.
+ * BREAKING - Page sorting API now takes a single encoded string, e.g., `sortBy="pubDate=desc title=asc"`.
+ * Jinja plugin: You can add custom filters and tests.
+ * Jinja plugin: Added a `formatDateTime` filter.
+ * RSS plugin: Can now generate (partial) RSS feeds. More RSS properties to come later.
+
 ## 0.0.3 - Mar 23, 2024
  * Hide pages by adding `DraftingPlugin` and setting `draft` to `true` for each draft page.
 
