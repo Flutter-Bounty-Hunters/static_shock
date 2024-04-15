@@ -1,3 +1,6 @@
+## 0.0.5 - April 9, 2024
+ * Upgraded `static_shock` to `0.0.4` to resolve a dependency conflict.
+
 ## 0.0.4 - April 9, 2024
  * Project creation: the chosen package name is validated against Dart standards.
  * All CLI commands fail more gracefully.
