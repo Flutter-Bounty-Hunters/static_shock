@@ -1,0 +1,9 @@
+# Configuration for places to load data related to package documentation.
+pub:
+  packages:
+    - static_shock
+    - static_shock_cli
+github:
+  contributors:
+    repositories:
+      - { organization: flutter-bounty-hunters, name: static_shock }

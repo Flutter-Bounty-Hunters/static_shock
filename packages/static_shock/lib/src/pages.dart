@@ -301,6 +301,19 @@ $destinationContent
 ''';
   }
 
+  /// Returns a copy of this [Page].
+  ///
+  /// The [data] is shallow-copied from the original [Page].
+  Page copy() {
+    return Page(
+      sourcePath,
+      sourceContent,
+      destinationPath: destinationPath,
+      destinationContent: destinationContent,
+      data: Map.from(data),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) || other is Page && runtimeType == other.runtimeType && sourcePath == other.sourcePath;

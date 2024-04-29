@@ -152,6 +152,20 @@ Create a new static website project:
         })
       }}
       </section>
+
+      <section style="max-width: 800px; margin: auto; margin-bottom: 200px;">
+        <h2 style="text-align: center; text-transform: uppercase;">Contributors</h2>
+        <p style="text-align: center; color: rgba(255, 255, 255, 0.5);">Built by the following contributors.</p>
+        <ol style="list-style-type: none; margin: 0; padding: 0; text-align: center;">
+          {% for contributor in github["flutter-bounty-hunters"].static_shock %}
+          <li style="display: inline-block; margin: 0; padding: 0;">
+            <a href="{{ contributor.userUrl }}" target="_blank" title="{{ contributor.userId }}">
+              <img src="{{ contributor.avatarUrl }}" style="display: inline-block; width: 64px; height: 64px; border-radius: 32px; margin: 16px;">
+            </a>
+          </li>
+          {% endfor %}
+        </ol>
+      </section>
     </main>
 
     <footer>
