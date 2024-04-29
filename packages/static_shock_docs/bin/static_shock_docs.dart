@@ -28,7 +28,7 @@ Future<void> main(List<String> arguments) async {
     ))
     ..plugin(
       GitHubContributorsPlugin(
-        authToken: Platform.environment["github_doc_website_token"]!,
+        authToken: Platform.environment["github_doc_website_token"],
       ),
     );
 
