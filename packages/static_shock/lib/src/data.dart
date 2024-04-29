@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:static_shock/src/files.dart';
+import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/source_files.dart';
 import 'package:yaml/yaml.dart';
 
@@ -11,25 +12,27 @@ abstract class DataLoader {
   /// Loads data from any desired data source and returns it.
   ///
   /// The returned data will be made available to all pages.
-  Future<Map<String, Object>> loadData();
+  Future<Map<String, Object>> loadData(StaticShockPipelineContext context);
 }
 
 /// Inspects all [sourceFiles] for files called `_data.yaml`, accumulates the content of those
 /// files into a [DataIndex], and returns that [DataIndex].
-Future<DataIndex> indexSourceData(SourceFiles sourceFiles) async {
-  final dataIndex = DataIndex();
+Future<void> indexSourceData(DataIndex dataIndex, SourceFiles sourceFiles) async {
   for (final directory in sourceFiles.sourceDirectories()) {
     final dataFile = File("${directory.directory.path}${Platform.pathSeparator}_data.yaml");
     if (!dataFile.existsSync()) {
       continue;
     }
 
-    final data = loadYaml(dataFile.readAsStringSync());
+    final text = dataFile.readAsStringSync();
+    if (text.trim().isEmpty) {
+      // The file is empty. Ignore it.
+      continue;
+    }
 
+    final data = loadYaml(text);
     dataIndex.mergeAtPath(DirectoryRelativePath(directory.subPath), Map<String, Object>.from(data));
   }
-
-  return dataIndex;
 }
 
 /// A hierarchical index of data.
@@ -38,6 +41,9 @@ class DataIndex {
 
   final _DataNode _data;
 
+  // FIXME: Document the exact intended purpose for this method. The implementation is unclear.
+  // FIXME: The implementation seems to return data even when the full `path` can't be matched, is that intentional?
+  // FIXME: The implementation returns data that sits outside the given path, e.g., will return "github/users" data even if "github/repositories" is requested.
   Map<String, Object> getForPath(RelativePath path) {
     final data = Map<String, Object>.from(_data.data);
 
@@ -49,6 +55,36 @@ class DataIndex {
     }
 
     return data;
+  }
+
+  /// Returns the data subtree that begins at the given [path], or `null` if no data subtree
+  /// exists at the given [path].
+  Object? getAtPath(List<String> path) {
+    Map<String, dynamic> dataSubtree = _data.data;
+    final searchPath = List.from(path);
+
+    while (searchPath.length > 1 && dataSubtree[searchPath.first] != null) {
+      if (dataSubtree[searchPath.first] is Map<String, dynamic>) {
+        dataSubtree = dataSubtree[searchPath.first] as Map<String, dynamic>;
+      }
+      if (dataSubtree[searchPath.first] is YamlMap) {
+        dataSubtree = Map.fromEntries((dataSubtree[searchPath.first] as YamlMap)
+            .entries
+            .map((yamlEntry) => MapEntry<String, dynamic>(yamlEntry.key as String, yamlEntry.value)));
+      }
+
+      searchPath.removeAt(0);
+    }
+
+    if (searchPath.length > 1) {
+      // We didn't match all the path segments to existing data. Return nothing.
+      return null;
+    }
+
+    // We mapped every desired level of the path. The current node holds the
+    // data we want to return.
+    final finalSegment = searchPath.first;
+    return dataSubtree[finalSegment];
   }
 
   void mergeAtPath(RelativePath path, Map<String, Object> data) {

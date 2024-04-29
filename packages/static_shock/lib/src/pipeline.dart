@@ -113,6 +113,10 @@ class StaticShockPipelineContext {
     return _sourceDirectory.descFile([relativePath.value]);
   }
 
+  /// The global hierarchy of data, which is filled during data loading, and which is
+  /// made available to every page during rendering.
+  final dataIndex = DataIndex();
+
   List<Asset> get assets => List.unmodifiable(_assets);
   final _assets = <Asset>[];
 
