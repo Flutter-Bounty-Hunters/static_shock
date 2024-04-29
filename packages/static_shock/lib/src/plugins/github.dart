@@ -69,7 +69,7 @@ class _GitHubDataLoader implements DataLoader {
     final apiFutures = allDesiredRepositories.map((repo) => _fetchRepositoryContributors(github, repo));
 
     // Wait for all GitHub API calls to return.
-    List<GitHubRepositoryContributors> contributorsByOrganizationAndRepo = await Future.wait(apiFutures);
+    List<_GitHubRepositoryContributors> contributorsByOrganizationAndRepo = await Future.wait(apiFutures);
 
     // We have to manually close the HTTP client because the GitHub package seems to leave it
     // open, which then causes the CLI to hang for about 20 seconds after our code is done.
@@ -129,14 +129,14 @@ class _GitHubDataLoader implements DataLoader {
     return allDesiredRepositories;
   }
 
-  Future<GitHubRepositoryContributors> _fetchRepositoryContributors(GitHub github, GitHubRepository repository) async {
+  Future<_GitHubRepositoryContributors> _fetchRepositoryContributors(GitHub github, GitHubRepository repository) async {
     final json = await github.requestJson("GET", "repos/${repository.organization}/${repository.name}/contributors")
         as List<dynamic>;
 
-    return GitHubRepositoryContributors(
+    return _GitHubRepositoryContributors(
       repository,
       json.map((dynamic contributor) {
-        return GitHubContributor(
+        return _GitHubContributor(
           userId: contributor["login"],
           userUrl: contributor["html_url"],
           avatarUrl: contributor["avatar_url"],
@@ -174,15 +174,15 @@ class GitHubRepository {
   int get hashCode => organization.hashCode ^ name.hashCode;
 }
 
-class GitHubRepositoryContributors {
-  const GitHubRepositoryContributors(this.repository, this.contributors);
+class _GitHubRepositoryContributors {
+  const _GitHubRepositoryContributors(this.repository, this.contributors);
 
   final GitHubRepository repository;
-  final List<GitHubContributor> contributors;
+  final List<_GitHubContributor> contributors;
 }
 
-class GitHubContributor {
-  const GitHubContributor({
+class _GitHubContributor {
+  const _GitHubContributor({
     required this.userId,
     required this.userUrl,
     required this.avatarUrl,
@@ -195,7 +195,7 @@ class GitHubContributor {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is GitHubContributor &&
+      other is _GitHubContributor &&
           runtimeType == other.runtimeType &&
           userId == other.userId &&
           userUrl == other.userUrl &&
