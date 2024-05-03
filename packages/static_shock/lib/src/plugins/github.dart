@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:github/github.dart';
 import 'package:http/http.dart';
 import 'package:static_shock/src/data.dart';
@@ -130,8 +132,12 @@ class _GitHubDataLoader implements DataLoader {
   }
 
   Future<_GitHubRepositoryContributors> _fetchRepositoryContributors(GitHub github, GitHubRepository repository) async {
-    final json = await github.requestJson("GET", "repos/${repository.organization}/${repository.name}/contributors")
-        as List<dynamic>;
+    final json = await github.requestJson("GET", "repos/${repository.organization}/${repository.name}/contributors");
+    if (json is! List<dynamic>) {
+      print("Received unexpected response from GitHub:");
+      print(const JsonEncoder.withIndent("  ").convert(json));
+      return _GitHubRepositoryContributors(repository, []);
+    }
 
     return _GitHubRepositoryContributors(
       repository,

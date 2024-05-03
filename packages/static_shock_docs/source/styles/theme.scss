@@ -14,6 +14,9 @@ $accentLight  : #FFFF33;
 $defaultTextColor: WHITE;
 $inlineCode : $accent;
 
+$phoneWidth: 600px;
+$tabletWidth: 1000px;
+
 @font-face {
   font-family: marketFresh;
   src: url(/fonts/market-fresh/Market-Fresh.ttf);
@@ -59,4 +62,28 @@ code {
 
 pre > code {
   margin: 8px 0;
+}
+
+.show-desktop {
+  @media (max-width: $tabletWidth) {
+    display: none;
+  }
+}
+
+.show-tablet {
+  @media (min-width: $tabletWidth) {
+    display: none;
+  }
+}
+
+.hide-tablet {
+  @media (max-width: tabletWidth) and (min-width: $phoneWidth) {
+    display: none;
+  }
+}
+
+.hide-phone {
+  @media (max-width: $phoneWidth) {
+    display: none;
+  }
 }

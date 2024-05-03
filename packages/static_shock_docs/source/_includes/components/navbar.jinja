@@ -17,8 +17,14 @@
         {% endif %}
 
         {% if pages.hasPagesAtPath("guides/") %}
-        <li class="nav-item">
+        <!-- Desktop Link -->
+        <li class="nav-item d-none d-lg-block d-xl-none">
           <a class="nav-link {% if url|startsWith("guides/") %}active{% endif %}" href="/guides/add-a-page">Guides</a>
+        </li>
+
+        <!-- Mobile Link -->
+        <li class="nav-item d-lg-none d-xl-none">
+          <a class="nav-link {% if url|startsWith("guides/directory") %}active{% endif %}" href="/guides/directory">Guides</a>
         </li>
         {% endif %}
 

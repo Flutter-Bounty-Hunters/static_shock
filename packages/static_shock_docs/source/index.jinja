@@ -29,40 +29,66 @@ rss: false
     <main>
       {{ components.navbar({"title": title}) }}
 
-      <section id="hero">
-        <!-- This is declared above "middle" so that mouse interaction hits the "middle" before this "bottom" section -->
-        <div class="bottom">
-          <!-- This area uses flex layout column-reverse, so the order is bottom to top -->
-          <div id="banner-built-with-static-shock">
-            <span class="message">This website was built with <span class="accent-text">Static Shock!</span></span>
+      <!-- Desktop header -->
+      <div class="show-desktop">
+        <section id="hero">
+          <!-- This is declared above "middle" so that mouse interaction hits the "middle" before this "bottom" section -->
+          <div class="bottom">
+            <!-- This area uses flex layout column-reverse, so the order is bottom to top -->
+            <div id="banner-built-with-static-shock">
+              <span class="message">This website was built with <span class="accent-text">Static Shock!</span></span>
+            </div>
+
+            <a href="https://github.com/Flutter-Bounty-Hunters/static_shock/" target="_blank" role="button" class="github btn btn-dark" style="z-index:9999;"><span class="fa fa-github"></span>&nbsp;&nbsp;GitHub</a>
           </div>
 
-          <a href="https://github.com/Flutter-Bounty-Hunters/static_shock/" target="_blank" role="button" class="github btn btn-dark" style="z-index:9999;"><span class="fa fa-github"></span>&nbsp;&nbsp;GitHub</a>
-        </div>
-
-        <div class="middle">
-          <div class="featured">
-            <div class="row">
-              <div class="col">
-                <div class="tagline">
-                  <span class="accent-text">*</span>THE<span class="accent-text">* Static Site<br>Generator</span> for Dart</span>
+          <div class="middle">
+            <div class="featured">
+              <div class="row">
+                <div class="col">
+                  <div class="tagline">
+                    <span class="accent-text">*</span>THE<span class="accent-text">* Static Site<br>Generator</span> for Dart</span>
+                  </div>
+                  <span class="label supplemental-text">Activate Static Shock:</span>
+                  <div id="activation-command">
+                    <span class="cli">dart pub global activate <span class="accent-text">static_shock_cli</span></span>
+                    <button class="btn btn-primary copy" type="submit" onclick="copyActivationToClipboard();">
+                      <i class="fa fa-clone" style="color: black; font-size: 24px; font-weight: bold;"></i>
+                    </button>
+                  </div>
+                  <span class="call-to-action supplemental-text"><a href="/quickstart">Get started with our Quickstart guide</a></span>
                 </div>
-                <span class="label supplemental-text">Activate Static Shock:</span>
-                <div id="activation-command">
-                  <span class="cli">dart pub global activate <span class="accent-text">static_shock_cli</span></span>
-                  <button class="btn btn-primary copy" type="submit" onclick="copyActivationToClipboard();">
-                    <i class="fa fa-clone" style="color: black; font-size: 24px; font-weight: bold;"></i>
-                  </button>
+                <div class="col col-auto logo">
+                  <img src="images/logo_big.png" width="225">
                 </div>
-                <span class="call-to-action supplemental-text"><a href="/quickstart">Get started with our Quickstart guide</a></span>
-              </div>
-              <div class="col col-auto logo">
-                <img src="images/logo_big.png" width="225">
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
+
+      <!-- Desktop header -->
+      <div class="show-tablet">
+        <section id="hero" style="padding-top: 96px;">
+          <div style="padding-left: 24px; padding-right: 24px;">
+            <div style="margin-bottom: 48px; text-align: center;">
+              <img src="images/logo_big.png" width="125">
+            </div>
+
+            <div class="tagline" style="text-align: center; text-wrap: balance;">
+              <span class="accent-text">*</span>THE<span class="accent-text">* Static Site<br>Generator</span> for Dart</span>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 48px; text-align: center;">
+            <a href="https://github.com/Flutter-Bounty-Hunters/static_shock/" target="_blank" role="button" class="github btn btn-dark"><span class="fa fa-github"></span>&nbsp;&nbsp;GitHub</a>
+          </div>
+
+          <div id="banner-built-with-static-shock">
+            <span class="message">This website was built with <span class="accent-text">Static Shock!</span></span>
+          </div>
+        </section>
+      </div>
 
       <section id="content">
 

@@ -1,10 +1,30 @@
 <div class="code-sample container">
-    <div class="row">
+
+    <!-- Desktop Layout -->
+    <div class="row show-desktop">
       <div class="info col-4">
         <div class="title">{{ title }}</div>
         <div class="description">{{ description }}</div>
       </div>
       <div class="code-example col-8">
+        <div class="app-window" style="margin-left: 24px;">
+          <div class="app-bar">
+            <div class="app-bar-button"></div>
+            <div class="app-bar-button"></div>
+            <div class="app-bar-button"></div>
+          </div>
+          <pre><code class="{{ language }}">{{ code }}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Layout -->
+    <div class="show-tablet">
+      <div class="info" style="margin-bottom: 1em;">
+        <div class="title">{{ title }}</div>
+        <div class="description">{{ description }}</div>
+      </div>
+      <div class="code-example">
         <div class="app-window">
           <div class="app-bar">
             <div class="app-bar-button"></div>
@@ -15,5 +35,4 @@
         </div>
       </div>
     </div>
-  </div>
 </div>

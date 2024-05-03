@@ -51,6 +51,10 @@
     font-size: 64px;
     font-weight: bold;
     line-height: 1.0em;
+
+    @media (max-width: $tabletWidth) {
+      font-size: 42px;
+    }
   }
 
   .logo {
@@ -125,6 +129,10 @@
 #content {
   padding-top: 96px;
   padding-bottom: 96px;
+
+  @media (max-width: $tabletWidth) {
+    padding-top: 48px;
+  }
 }
 
 .code-sample {
@@ -144,8 +152,6 @@
   }
 
   .app-window {
-    margin-left: 24px;
-
     border-radius: 8px;
     background: #1F262A;
 

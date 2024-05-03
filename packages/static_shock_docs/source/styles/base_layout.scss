@@ -31,6 +31,12 @@ html, body {
 .inner-page #hero {
   padding: 64px;
 
+  @media (max-width: $tabletWidth) {
+    padding-top: 128px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 
   .message {
@@ -43,6 +49,12 @@ html, body {
       font-weight: bold;
 
       text-align: center;
+
+      @media (max-width: $tabletWidth) {
+        margin-bottom: 1em;
+
+        font-size: 42px;
+      }
     }
 
     .subtitle {
@@ -53,7 +65,18 @@ html, body {
       font-weight: bold;
 
       text-align: center;
+
+      @media (max-width: $tabletWidth) {
+        font-size: 28px;
+      }
     }
+  }
+}
+
+#content {
+  @media (max-width: $tabletWidth) {
+    padding-left: 24px;
+    padding-right: 24px;
   }
 }
 

@@ -289,6 +289,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  github:
+    dependency: transitive
+    description:
+      name: github
+      sha256: "57f6ad78591f9638e903409977443093f862d25062a6b582a3c89e4ae44e4814"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.24.0"
   glob:
     dependency: transitive
     description:

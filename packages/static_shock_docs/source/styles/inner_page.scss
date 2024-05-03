@@ -1,5 +1,9 @@
+@import "theme";
+
 #hero {
-  height: 80vh;
+  @media (min-width: tabletWidth) {
+    height: 80vh;
+  }
 }
 
 #content {
@@ -7,6 +11,10 @@
   margin: auto;
 
   padding-bottom: 96px;
+
+  @media (max-width: $tabletWidth) {
+    padding-bottom: 48px;
+  }
 
   h2, p + h2 {
     margin-top: 2em;
@@ -23,5 +31,10 @@
   pre > code {
     margin-top: 2em;
     margin-bottom: 2em;
+
+    @media (max-width: $tabletWidth) {
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
   }
 }
