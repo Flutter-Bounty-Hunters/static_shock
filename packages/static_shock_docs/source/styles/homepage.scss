@@ -2,7 +2,9 @@
 @import "base_layout";
 
 #hero {
-  height: 100vh;
+  @media (min-width: $tabletWidth) {
+    height: 100vh;
+  }
 
   .featured {
     margin: auto;
