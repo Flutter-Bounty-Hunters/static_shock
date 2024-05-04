@@ -153,6 +153,7 @@ class MarkdownPageLoader implements PageLoader {
 class MarkdownPageRenderer implements PageRenderer {
   const MarkdownPageRenderer(this._log);
 
+  // ignore: unused_field
   final Logger _log;
 
   @override
