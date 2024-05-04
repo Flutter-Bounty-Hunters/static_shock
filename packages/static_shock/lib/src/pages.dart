@@ -308,11 +308,24 @@ class Page {
   String? get url => data["url"];
   set url(String? url) => data["url"] = url;
 
-  List<String> get contentRenderers => List.from(
-        // Note: We map the value and cast each renderer ID because the data might be a YamlList,
-        // which isn't a typed list. We'll get an exception if we try to return `List<String>`.
-        data["contentRenderers"].map((rendererId) => rendererId as String),
-      );
+  List<String> get contentRenderers {
+    final renderers = data["contentRenderers"];
+    if (renderers == null) {
+      return [];
+    }
+
+    if (renderers is String) {
+      // There's exactly one renderer. Return it.
+      return [renderers];
+    }
+
+    // A list of renderers was requested.
+    return List.from(
+      // Note: We map the value and cast each renderer ID because the data might be a YamlList,
+      // which isn't a typed list. We'll get an exception if we try to return `List<String>`.
+      data["contentRenderers"].map((rendererId) => rendererId as String),
+    );
+  }
 
   bool hasTag(String tag) => tags.contains(tag);
   List<String> get tags =>
