@@ -20,7 +20,34 @@ abstract class PageFilter {
 }
 
 abstract class PageRenderer {
-  FutureOr<void> renderPage(StaticShockPipelineContext context, Page page);
+  /// Globally unique ID for this renderer, which is used to identify which pages
+  /// should be rendered by this renderer.
+  ///
+  /// A single page might be rendered by multiple renderers. The page selects the
+  /// order of rendering by specifying a list of renderer IDs.
+  String get id;
+
+  /// Renders source content by applying some kind of transcoding or template replacements
+  /// to [page.sourceContent].
+  ///
+  /// Examples:
+  ///  - Markdown is rendered to HTML
+  ///  - Jinja templates are executed, such as value substitution.
+  ///
+  /// When this method renders content, the content is stored in [page.destinationContent].
+  FutureOr<void> renderContent(StaticShockPipelineContext context, Page page);
+
+  /// Applies a layout template to the [page], if desired.
+  ///
+  /// Some pages have content that's separate from layout. For example, a Markdown page specifies
+  /// its content as Markdown, but expects that content to be placed within a broader layout
+  /// template, such as a full-page Jinja template. This method does that.
+  ///
+  /// However, not all pages separate content from layout. For example, a page might consist of
+  /// a combination of HTML and Jinja templating. For such a page, the content is the layout.
+  /// In that case, the relevant rendering takes place in [renderContent], and this method does
+  /// nothing.
+  FutureOr<void> renderLayout(StaticShockPipelineContext context, Page page);
 }
 
 class PagesIndex {
@@ -280,6 +307,12 @@ class Page {
 
   String? get url => data["url"];
   set url(String? url) => data["url"] = url;
+
+  List<String> get contentRenderers => List.from(
+        // Note: We map the value and cast each renderer ID because the data might be a YamlList,
+        // which isn't a typed list. We'll get an exception if we try to return `List<String>`.
+        data["contentRenderers"].map((rendererId) => rendererId as String),
+      );
 
   bool hasTag(String tag) => tags.contains(tag);
   List<String> get tags =>

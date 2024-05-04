@@ -81,6 +81,8 @@ class JinjaPageLoader implements PageLoader {
       data: {
         // Note: assign "url" before including frontMatter so that the frontMatter can override it.
         "url": destinationPath.value,
+        if (!frontMatter.containsKey("contentRenderers")) //
+          "contentRenderers": ["jinja"],
         ...frontMatter
       },
       destinationPath: destinationPath,
@@ -101,20 +103,24 @@ class JinjaPageRenderer implements PageRenderer {
   final List<StaticShockJinjaFunctionBuilder> tests;
 
   @override
-  FutureOr<void> renderPage(StaticShockPipelineContext context, Page page) async {
-    if (page.sourcePath.extension.toLowerCase() == "jinja") {
-      _renderJinjaContent(context, page);
-    } else {
-      _renderJinjaLayout(context, page);
+  String get id => "jinja";
+
+  @override
+  FutureOr<void> renderContent(StaticShockPipelineContext context, Page page) {
+    _renderJinjaTemplate(
+      context,
+      page,
+      templateSource: page.destinationContent ?? page.sourceContent,
+    );
+  }
+
+  @override
+  FutureOr<void> renderLayout(StaticShockPipelineContext context, Page page) async {
+    if (page.data["layout"] == null) {
+      return;
     }
-  }
 
-  void _renderJinjaContent(StaticShockPipelineContext context, Page page) {
-    _log.detail("Rendering Jinja layout page (${page.sourcePath})");
-    _renderJinjaToContent(context, page, page.sourceContent);
-  }
-
-  void _renderJinjaLayout(StaticShockPipelineContext context, Page page) {
+    // Treat the page's source content as content to be injected in the specified layout.
     final layoutPathString = page.data["layout"] as String?;
     if (layoutPathString == null || layoutPathString.isEmpty) {
       return;
@@ -135,10 +141,20 @@ class JinjaPageRenderer implements PageRenderer {
     }
 
     _log.detail("Applying Jinja layout template (${layout.path}) to page (${page.sourcePath})");
-    _renderJinjaToContent(context, page, layout.value);
+    _renderJinjaTemplate(
+      context,
+      page,
+      templateSource: layout.value,
+      content: page.destinationContent ?? page.sourceContent,
+    );
   }
 
-  void _renderJinjaToContent(StaticShockPipelineContext context, Page page, String templateSource) {
+  void _renderJinjaTemplate(
+    StaticShockPipelineContext context,
+    Page page, {
+    required String templateSource,
+    String? content,
+  }) {
     final jinjaFilters = Map.fromEntries([
       MapEntry("startsWith", _startsWith),
       MapEntry("formatDateTime", _formatDateTime),
@@ -155,13 +171,7 @@ class JinjaPageRenderer implements PageRenderer {
       }),
     ]);
 
-    // Generate the layout, filled with content and data.
-    final template = Template(
-      templateSource,
-      filters: jinjaFilters,
-      tests: jinjaTests,
-    );
-
+    // Make components available to the template renderer.
     final componentsLookup = <String, String Function(Map<Object?, Object?>)>{};
     for (final entry in context.components.entries) {
       componentsLookup[entry.key] = ([Map<Object?, Object?>? vars]) {
@@ -190,9 +200,11 @@ class JinjaPageRenderer implements PageRenderer {
       };
     }
 
+    // Assemble all data that should be available to the page during template rendering.
     final pageData = {
       ...page.data,
-      "content": page.destinationContent ?? page.sourceContent,
+      if (content != null) //
+        "content": content,
       ...context.templateFunctions,
       ...context.pagesIndex.buildPageIndexDataForTemplates(),
       "components": {
@@ -201,6 +213,12 @@ class JinjaPageRenderer implements PageRenderer {
       },
     };
 
+    // Render the template.
+    final template = Template(
+      templateSource,
+      filters: jinjaFilters,
+      tests: jinjaTests,
+    );
     final hydratedLayout = template.render(pageData);
 
     // Set the page's final content to the newly hydrated layout, and set the extension to HTML.

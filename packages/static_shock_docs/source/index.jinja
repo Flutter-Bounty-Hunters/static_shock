@@ -92,6 +92,8 @@ rss: false
 
       <section id="content">
 
+      {{ pub.packages|join(", ") }}
+
       {{
         components.codeSample({
           "title": "Copy static assets",

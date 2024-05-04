@@ -1,7 +1,7 @@
 @import "theme";
 
 #hero {
-  @media (min-width: tabletWidth) {
+  @media (min-width: $tabletWidth) {
     height: 80vh;
   }
 }
