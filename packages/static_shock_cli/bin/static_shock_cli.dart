@@ -280,10 +280,8 @@ class VersionCommand extends Command {
     _log.info(
         "Your current version of ${lightYellow.wrap("static_shock_cli")} is: ${lightYellow.wrap(packageVersion)}");
 
-    _log.detail("Checking for newer versions of static_shock_cli on Pub...");
     final isUpToDate = await StaticShockCliVersion.isAtLeastUpToDateWithPub();
     if (isUpToDate) {
-      _log.info("You're up to date!\n");
       return;
     }
 
@@ -305,10 +303,8 @@ class VersionCommand extends Command {
 mixin PubVersionCheck on Command {
   @override
   Future<void> run() async {
-    _log.detail("Checking for newer versions of static_shock_cli...");
     final isUpToDate = await StaticShockCliVersion.isAtLeastUpToDateWithPub();
     if (isUpToDate) {
-      _log.info("No updates available.\n");
       return;
     }
 
