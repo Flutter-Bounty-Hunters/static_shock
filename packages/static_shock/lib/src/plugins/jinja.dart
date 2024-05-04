@@ -187,6 +187,10 @@ class JinjaPageRenderer implements PageRenderer {
         final componentData = <String, Object?>{
           ...page.data,
           ...context.pagesIndex.buildPageIndexDataForTemplates(),
+          "components": {
+            // Maps component name to a factory method: "footer": () -> "<div>...</div>"
+            ...componentsLookup,
+          },
           if (vars != null) ...vars.cast(),
         };
 
