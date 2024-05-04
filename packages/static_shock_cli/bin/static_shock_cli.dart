@@ -286,7 +286,8 @@ class VersionCommand extends Command {
     }
 
     final newestVersion = await StaticShockCliVersion.getLatestVersion();
-    _log.info("A new version is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}\n");
+    _log.info("A new version is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}");
+    _log.info("Run `shock upgrade` to upgrade to the latest version.\n");
   }
 }
 
@@ -310,6 +311,8 @@ mixin PubVersionCheck on Command {
 
     final newestVersion = await StaticShockCliVersion.getLatestVersion();
     _log.info(
-        "New version of ${lightYellow.wrap("static_shock_cli")} is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}\n");
+      "New version of ${lightYellow.wrap("static_shock_cli")} is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}",
+    );
+    _log.info("Run `shock upgrade` to upgrade to the latest version.\n");
   }
 }
