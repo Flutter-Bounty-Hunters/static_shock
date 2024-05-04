@@ -74,8 +74,11 @@ class PagesIndex {
     _pages.remove(page);
   }
 
-  List<Page> search(String query) {
-    // TODO:
+  /// Searches all pages using the given [rawQuery] and returns a list of pages that satisfy the
+  /// search.
+  List<Page> search(String rawQuery) {
+    final query = _SearchQuery.parse(rawQuery);
+    return query.find(_pages);
   }
 
   /// Returns a data structure which represents a "page index" within a Jinja template.
@@ -102,6 +105,7 @@ class PagesIndex {
         "hasPagesAtPath": _hasPagesAtPath,
         "all": _all,
         "byTag": _byTag,
+        "search": (String query) => search(query).map((page) => _serializePage(page)),
       },
     };
   }
@@ -152,6 +156,160 @@ class PagesIndex {
   Map<String, dynamic> _serializePage(Page page) => {
         "data": page.data,
       };
+}
+
+class _SearchQuery {
+  factory _SearchQuery.parse(String query) {
+    final tokens = query.split("/s+");
+    final conditions = <_PropertySearchCondition>[];
+    for (final token in tokens) {
+      final condition = _PropertySearchCondition.parse(token);
+      if (condition == null) {
+        continue;
+      }
+
+      conditions.add(condition);
+    }
+
+    return _SearchQuery(conditions);
+  }
+
+  const _SearchQuery(this.conditions);
+
+  final List<_PropertySearchCondition> conditions;
+
+  List<Page> find(List<Page> allPages) {
+    return allPages
+        .where(
+          (page) => conditions.every((condition) => condition.isSatisfied(page.data[condition.propertyName])),
+        )
+        .toList();
+  }
+}
+
+class _PropertySearchCondition {
+  static _PropertySearchCondition? parse(String condition) {
+    for (final operator in _SearchOperator.values) {
+      if (condition.contains(operator.syntax)) {
+        final pieces = condition.split(operator.syntax);
+        return _PropertySearchCondition(pieces.first, operator, _parseDiscriminator(pieces.last));
+      }
+    }
+
+    // We didn't find any operator in the given condition. In that case, we assume that
+    // the condition represents a desired tag. This grammar is a UX consideration. Tag
+    // searching is so common that we don't want to require explicit reference to the
+    // tag property.
+    return _PropertySearchCondition("tags", _SearchOperator.contains, condition);
+  }
+
+  static Object? _parseDiscriminator(String discriminator) {
+    if (discriminator.toLowerCase() == "null") {
+      return null;
+    }
+
+    final integer = int.tryParse(discriminator);
+    if (integer != null) {
+      return integer;
+    }
+
+    final float = double.tryParse(discriminator);
+    if (float != null) {
+      return float;
+    }
+
+    // The discriminator is actually a string.
+    return discriminator;
+  }
+
+  const _PropertySearchCondition(this.propertyName, this.operator, this.discriminator);
+
+  /// The name of a property, e.g., "title", "url", "tags".
+  final String propertyName;
+
+  /// The condition operator, which applies to the [discriminator], e.g., "=", "*=", ">=", etc.
+  final _SearchOperator operator;
+
+  /// The discriminator, which determines whether this condition is met, e.g., "Guides" for
+  /// a title, "/archive" for a URL, "flutter" as a tag.
+  final Object? discriminator;
+
+  bool isSatisfied(Object? propertyValue) {
+    switch (operator) {
+      case _SearchOperator.equals:
+        return propertyValue == discriminator;
+      case _SearchOperator.startsWith:
+        if (propertyValue is! String || discriminator is! String) {
+          return false;
+        }
+        return propertyValue.startsWith(discriminator as String);
+      case _SearchOperator.endsWith:
+        if (propertyValue is! String || discriminator is! String) {
+          return false;
+        }
+        return propertyValue.endsWith(discriminator as String);
+      case _SearchOperator.contains:
+        if (propertyValue is List) {
+          return propertyValue.contains(discriminator);
+        }
+        if (propertyValue is String && discriminator is String) {
+          return propertyValue.contains(discriminator as String);
+        }
+        return false;
+      case _SearchOperator.lessThanEqualTo:
+        if (propertyValue is! num || discriminator is! num) {
+          return false;
+        }
+        return propertyValue <= (discriminator as num);
+      case _SearchOperator.lessThan:
+        if (propertyValue is! num || discriminator is! num) {
+          return false;
+        }
+        return propertyValue < (discriminator as num);
+      case _SearchOperator.greaterThanEqualTo:
+        if (propertyValue is! num || discriminator is! num) {
+          return false;
+        }
+        return propertyValue >= (discriminator as num);
+      case _SearchOperator.greaterThan:
+        if (propertyValue is! num || discriminator is! num) {
+          return false;
+        }
+        return propertyValue > (discriminator as num);
+    }
+  }
+
+  @override
+  String toString() => "$propertyName${operator.syntax}$discriminator";
+}
+
+enum _SearchOperator {
+  equals("="),
+  startsWith("^="),
+  endsWith("\$="),
+  contains("*="),
+  // Order of the following is important because we greedily try to match
+  // each syntax in a condition. Notice that "<=" and "<" both contain a
+  // "<". If we try to parse "value<=3" by first looking for a "<" then we'll
+  // incorrectly treat the condition as "less than" instead of "less than or equal to".
+  lessThanEqualTo("<="),
+  lessThan("<"),
+  greaterThanEqualTo(">="),
+  greaterThan(">");
+
+  static _SearchOperator? parse(String syntax) {
+    for (final operator in _SearchOperator.values) {
+      if (operator.syntax == syntax) {
+        return operator;
+      }
+    }
+
+    return null;
+  }
+
+  const _SearchOperator(this.syntax);
+
+  final String syntax;
 }
 
 /// Sorts [Page]s based on a priority order of [_SortProperty]s.
