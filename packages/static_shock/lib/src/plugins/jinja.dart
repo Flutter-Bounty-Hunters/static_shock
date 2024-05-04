@@ -76,8 +76,8 @@ class JinjaPageLoader implements PageLoader {
     final destinationPath = path.copyWith(extension: "html");
 
     return Page(
-      path,
-      trimmedContent,
+      sourcePath: path,
+      sourceContent: trimmedContent,
       data: {
         // Note: assign "url" before including frontMatter so that the frontMatter can override it.
         "url": destinationPath.value,
@@ -106,16 +106,21 @@ class JinjaPageRenderer implements PageRenderer {
   String get id => "jinja";
 
   @override
-  FutureOr<void> renderContent(StaticShockPipelineContext context, Page page) {
+  void renderContent(StaticShockPipelineContext context, Page page) {
+    if (page.destinationContent == null && page.sourceContent == null) {
+      // There's no content in this page to render.
+      return;
+    }
+
     _renderJinjaTemplate(
       context,
       page,
-      templateSource: page.destinationContent ?? page.sourceContent,
+      templateSource: (page.destinationContent ?? page.sourceContent)!,
     );
   }
 
   @override
-  FutureOr<void> renderLayout(StaticShockPipelineContext context, Page page) async {
+  void renderLayout(StaticShockPipelineContext context, Page page) async {
     if (page.data["layout"] == null) {
       return;
     }

@@ -15,6 +15,10 @@ abstract class PageTransformer {
   FutureOr<void> transformPage(StaticShockPipelineContext context, Page page);
 }
 
+abstract class PageGenerator {
+  FutureOr<void> generatePages(StaticShockPipelineContext context);
+}
+
 abstract class PageFilter {
   bool shouldInclude(StaticShockPipelineContext context, Page page);
 }
@@ -68,6 +72,10 @@ class PagesIndex {
 
   void removePage(Page page) {
     _pages.remove(page);
+  }
+
+  List<Page> search(String query) {
+    // TODO:
   }
 
   /// Returns a data structure which represents a "page index" within a Jinja template.
@@ -287,27 +295,53 @@ enum _SortOrder {
 }
 
 class Page {
-  Page(
+  Page({
     this.sourcePath,
-    this.sourceContent, {
+    this.sourceContent,
     Map<String, dynamic>? data,
     this.destinationPath,
     this.destinationContent,
   }) : data = data ?? {};
 
-  final FileRelativePath sourcePath;
-  final String sourceContent;
-  final Map<String, dynamic> data;
+  /// The path the source file that declares this page's initial structure, if this page is based on
+  /// a source file.
+  ///
+  /// A dynamically generated page doesn't have a [sourcePath].
+  final FileRelativePath? sourcePath;
 
+  /// The page content that came from the source file that declares this page's initial structure, if
+  /// this page is based on a source file.
+  ///
+  /// A dynamically generated page doesn't have [sourceContent].
+  final String? sourceContent;
+
+  /// The relative file path where this page will be written in the final build directory for the website.
+  ///
+  /// The final file will be filled with [destinationContent].
   FileRelativePath? destinationPath;
+
+  /// The full content of this page, which will be written to the file at [destinationPath].
   String? destinationContent;
 
-  // TODO: decide if these properties should exist on Page, or if we should have a PageData sub-object
+  /// Data that's specific to the rendering of this page.
+  ///
+  /// The [data] of this page is combined with inherited data from the [DataIndex], and is made available
+  /// to the rendering engine when this page is rendered.
+  final Map<String, dynamic> data;
+
+  /// The title of this page.
   String? get title => data["title"];
 
+  /// The relative path URL for this page, which determines the [destinationPath].
   String? get url => data["url"];
   set url(String? url) => data["url"] = url;
 
+  /// A priority list of renderers, through which the page's content should move.
+  ///
+  /// Typically, a page only uses a single content renderer, such as a Markdown renderer to
+  /// convert from Markdown to HTML. However, the Markdown content might include Jinja template
+  /// values, in which case that page first needs to render with Jinja, and then render with Markdown.
+  /// To do so, this list would be ["jinja", "markdown"].
   List<String> get contentRenderers {
     final renderers = data["contentRenderers"];
     if (renderers == null) {
@@ -327,20 +361,23 @@ class Page {
     );
   }
 
+  /// Returns `true` if this page contains the given [tag], or `false` otherwise.
   bool hasTag(String tag) => tags.contains(tag);
+
+  /// Returns all tags in the [data] for this page.
   List<String> get tags =>
       data["tags"] != null ? List.from(data["tags"] is List ? data["tags"] : [data["tags"] as String]) : [];
 
   String describe() {
     return '''Page:
-Source: "$sourcePath"
+Source: "${sourcePath ?? "None"}"
 Destination: "$destinationPath"
 
 Data: 
 $data
 
 Source Content:
-$sourceContent
+${sourceContent ?? "None"}
 
 Destination Content:
 $destinationContent
@@ -352,8 +389,8 @@ $destinationContent
   /// The [data] is shallow-copied from the original [Page].
   Page copy() {
     return Page(
-      sourcePath,
-      sourceContent,
+      sourcePath: sourcePath,
+      sourceContent: sourceContent,
       destinationPath: destinationPath,
       destinationContent: destinationContent,
       data: Map.from(data),

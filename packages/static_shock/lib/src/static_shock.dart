@@ -105,6 +105,10 @@ class StaticShock implements StaticShockPipeline {
   late final Set<PageTransformer> _pageTransformers;
 
   @override
+  void generatePages(PageGenerator generator) => _pageGenerators.add(generator);
+  late final Set<PageGenerator> _pageGenerators;
+
+  @override
   void filterPages(PageFilter filter) => _pageFilters.add(filter);
   late final Set<PageFilter> _pageFilters;
 
@@ -228,6 +232,11 @@ class StaticShock implements StaticShockPipeline {
     // Transform pages.
     await _transformPages();
     // _log.info("Transform pages time: ${(stopwatch.elapsedMilliseconds - checkpointMillis) / 1000}s\n");
+    // checkpointMillis = stopwatch.elapsedMilliseconds;
+
+    // Generate pages.
+    await _generatePages();
+    // _log.info("Generate pages time: ${(stopwatch.elapsedMilliseconds - checkpointMillis) / 1000}s\n");
     // checkpointMillis = stopwatch.elapsedMilliseconds;
 
     // Transform assets.
@@ -375,7 +384,7 @@ class StaticShock implements StaticShockPipeline {
         _log.detail("Loading page: $pickedFile");
         final page = await pageLoader.loadPage(pickedFile, content.text!);
 
-        final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath);
+        final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath!);
         page.data.addEntries(inheritedData.entries);
 
         // Check for a desired base path override, and apply it.
@@ -420,6 +429,14 @@ class StaticShock implements StaticShockPipeline {
       for (final transformer in _pageTransformers) {
         await transformer.transformPage(_context, page);
       }
+    }
+    _log.info("");
+  }
+
+  Future<void> _generatePages() async {
+    _log.info("⚡ Generating pages");
+    for (final generator in _pageGenerators) {
+      await generator.generatePages(_context);
     }
     _log.info("");
   }

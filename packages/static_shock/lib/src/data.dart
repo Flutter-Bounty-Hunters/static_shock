@@ -158,7 +158,22 @@ class DataIndex {
     // whatever data already exists at that node.
     _deepMergeMap(node.data, data);
   }
+
+  /// Walks the data tree in a breadth-first order, calling [visitor] for every node,
+  /// passing the node's path in the tree, and the data blob at that path.
+  void visitBreadthFirst(DataNodeVisitor visitor) {
+    final queue = [_data];
+
+    while (queue.isNotEmpty) {
+      final node = queue.removeAt(0);
+      visitor(node.directory, node.data);
+
+      queue.addAll(_data.children.values);
+    }
+  }
 }
+
+typedef DataNodeVisitor = void Function(String path, Map<String, dynamic> data);
 
 /// Merges the given [newData] into [destination], replacing any [YamlMap]s along the way with
 /// standard [Map]s so that we can retain map typing as `Map<String, dynamic>`.

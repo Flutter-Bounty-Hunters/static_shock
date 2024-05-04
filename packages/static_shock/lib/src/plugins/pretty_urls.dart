@@ -23,13 +23,19 @@ class PrettyPathPageTransformer implements PageTransformer {
   const PrettyPathPageTransformer();
 
   @override
-  FutureOr<void> transformPage(StaticShockPipelineContext context, Page page) async {
+  void transformPage(StaticShockPipelineContext context, Page page) {
     if (page.destinationPath?.filename == "index") {
       // The file is already an index file. Nothing to prettify.
       return;
     }
 
     final originalPath = page.destinationPath ?? page.sourcePath;
+    if (originalPath == null) {
+      // For some reason this page hasn't been fully configured. It's missing its destination
+      // path info. Ignore it.
+      return;
+    }
+
     page
       ..url = "${originalPath.directoryPath}${originalPath.filename}${Platform.pathSeparator}"
       ..destinationPath = originalPath.copyWith(

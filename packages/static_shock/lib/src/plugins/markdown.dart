@@ -47,8 +47,8 @@ class MarkdownPageLoader implements PageLoader {
     final destinationPath = path.copyWith(extension: "html");
 
     return Page(
-      path,
-      markdown.content ?? "",
+      sourcePath: path,
+      sourceContent: markdown.content ?? "",
       data: {
         // Note: assign "url" before including Markdown data so that the Markdown data can override it.
         "url": destinationPath.value,
@@ -160,9 +160,14 @@ class MarkdownPageRenderer implements PageRenderer {
   String get id => "markdown";
 
   @override
-  FutureOr<void> renderContent(StaticShockPipelineContext context, Page page) {
+  void renderContent(StaticShockPipelineContext context, Page page) {
+    if (page.destinationContent == null && page.sourceContent == null) {
+      // There's no content in this page to render.
+      return;
+    }
+
     final contentHtml = markdownToHtml(
-      page.destinationContent ?? page.sourceContent,
+      (page.destinationContent ?? page.sourceContent)!,
       blockSyntaxes: [
         HeaderWithIdSyntax(),
       ],
@@ -171,7 +176,7 @@ class MarkdownPageRenderer implements PageRenderer {
   }
 
   @override
-  FutureOr<void> renderLayout(StaticShockPipelineContext context, Page page) async {
+  void renderLayout(StaticShockPipelineContext context, Page page) {
     // No-op. Markdown doesn't render page layouts.
   }
 }

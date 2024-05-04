@@ -45,6 +45,13 @@ abstract class StaticShockPipeline {
   /// by [PageLoader]s, before the [Page] is rendered by a [PageRenderer].
   void transformPages(PageTransformer transformer);
 
+  /// Generates additional pages with code.
+  ///
+  /// For example, a [PageGenerator] might inspect all the articles in a website and
+  /// then create directory pages, or archive pages, which lists all articles in a
+  /// paginated fashion.
+  void generatePages(PageGenerator generator);
+
   /// Adds the given [PageFilter] to the pipeline, which can remove [Page]s before
   /// those [Page]s are rendered.
   ///
