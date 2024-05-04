@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:github/github.dart';
 import 'package:http/http.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
@@ -68,7 +69,7 @@ class _GitHubDataLoader implements DataLoader {
     final allDesiredRepositories = _desiredRepositories(context);
 
     // Request all desired repository contributors.
-    final apiFutures = allDesiredRepositories.map((repo) => _fetchRepositoryContributors(github, repo));
+    final apiFutures = allDesiredRepositories.map((repo) => _fetchRepositoryContributors(context.log, github, repo));
 
     // Wait for all GitHub API calls to return.
     List<_GitHubRepositoryContributors> contributorsByOrganizationAndRepo = await Future.wait(apiFutures);
@@ -131,11 +132,12 @@ class _GitHubDataLoader implements DataLoader {
     return allDesiredRepositories;
   }
 
-  Future<_GitHubRepositoryContributors> _fetchRepositoryContributors(GitHub github, GitHubRepository repository) async {
+  Future<_GitHubRepositoryContributors> _fetchRepositoryContributors(
+      Logger log, GitHub github, GitHubRepository repository) async {
     final json = await github.requestJson("GET", "repos/${repository.organization}/${repository.name}/contributors");
     if (json is! List<dynamic>) {
-      print("Received unexpected response from GitHub:");
-      print(const JsonEncoder.withIndent("  ").convert(json));
+      log.warn("Received unexpected response from GitHub:");
+      log.warn(const JsonEncoder.withIndent("  ").convert(json));
       return _GitHubRepositoryContributors(repository, []);
     }
 

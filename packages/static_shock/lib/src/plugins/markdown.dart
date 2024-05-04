@@ -52,6 +52,8 @@ class MarkdownPageLoader implements PageLoader {
       data: {
         // Note: assign "url" before including Markdown data so that the Markdown data can override it.
         "url": destinationPath.value,
+        if (!markdown.data.containsKey("contentRenderers")) //
+          "contentRenderers": ["markdown"],
         ...markdown.data,
         "tableOfContents": _createTableOfContents(destinationPath.value, markdown.content ?? ""),
       },
@@ -151,22 +153,25 @@ class MarkdownPageLoader implements PageLoader {
 class MarkdownPageRenderer implements PageRenderer {
   const MarkdownPageRenderer(this._log);
 
+  // ignore: unused_field
   final Logger _log;
 
   @override
-  FutureOr<void> renderPage(StaticShockPipelineContext context, Page page) async {
-    if (page.sourcePath.extension != "md") {
-      // This isn't a markdown page. Nothing for us to do.
-      return;
-    }
+  String get id => "markdown";
 
-    _log.detail("Transforming Markdown page: ${page.sourcePath}");
+  @override
+  FutureOr<void> renderContent(StaticShockPipelineContext context, Page page) {
     final contentHtml = markdownToHtml(
-      page.sourceContent,
+      page.destinationContent ?? page.sourceContent,
       blockSyntaxes: [
         HeaderWithIdSyntax(),
       ],
     );
     page.destinationContent = contentHtml;
+  }
+
+  @override
+  FutureOr<void> renderLayout(StaticShockPipelineContext context, Page page) async {
+    // No-op. Markdown doesn't render page layouts.
   }
 }

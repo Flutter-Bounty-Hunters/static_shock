@@ -206,7 +206,7 @@ class StaticShock implements StaticShockPipeline {
     // checkpointMillis = stopwatch.elapsedMilliseconds;
 
     // Collect all data in _data.yaml files in the source set.
-    await indexSourceData(_context.dataIndex, _sourceFiles);
+    await indexSourceData(_context, _sourceFiles);
     // _log.info("Index source data time: ${(stopwatch.elapsedMilliseconds - checkpointMillis) / 1000}s\n");
     // checkpointMillis = stopwatch.elapsedMilliseconds;
 
@@ -375,7 +375,7 @@ class StaticShock implements StaticShockPipeline {
         _log.detail("Loading page: $pickedFile");
         final page = await pageLoader.loadPage(pickedFile, content.text!);
 
-        final inheritedData = _context.dataIndex.getForPath(page.sourcePath);
+        final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath);
         page.data.addEntries(inheritedData.entries);
 
         // Check for a desired base path override, and apply it.
@@ -457,11 +457,28 @@ class StaticShock implements StaticShockPipeline {
 
   Future<void> _renderPages() async {
     _log.info("⚡ Rendering pages");
+
+    // Render the content for every page.
+    _log.info("\nRendering content for all pages...");
     for (final page in _context.pagesIndex.pages) {
-      for (final renderer in _pageRenderers) {
-        await renderer.renderPage(_context, page);
+      for (final rendererId in page.contentRenderers) {
+        for (final renderer in _pageRenderers) {
+          if (renderer.id == rendererId) {
+            _log.detail("Rendering page '${page.title}' content as '$rendererId'");
+            await renderer.renderContent(_context, page);
+          }
+        }
       }
     }
+
+    // Render the layout for every page whose layout is separate from content.
+    _log.info("\nRendering layouts for all pages...");
+    for (final page in _context.pagesIndex.pages) {
+      for (final renderer in _pageRenderers) {
+        await renderer.renderLayout(_context, page);
+      }
+    }
+
     _log.info("");
   }
 

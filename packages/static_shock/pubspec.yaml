@@ -13,7 +13,7 @@ dependencies:
   github: ^9.24.0
   http: ^1.2.1
   intl: ^0.19.0
-  jinja: ^0.4.2
+  jinja: ^0.6.0
   markdown: ^7.0.2
   mason_logger: ^0.2.5
   path: ^1.8.3
