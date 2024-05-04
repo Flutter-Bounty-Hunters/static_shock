@@ -1,5 +1,6 @@
 ---
 title: Use Remote CSS and JS
+draft: true
 ---
 <div class="alert alert-danger" role="alert">
   TODO: Create pipeline hooks to pick up remote file references
