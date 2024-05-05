@@ -18,6 +18,7 @@ export 'src/plugins/github.dart';
 export 'src/plugins/jinja.dart';
 export 'src/plugins/markdown.dart';
 export 'src/plugins/menus.dart';
+export 'src/plugins/paginate.dart';
 export 'src/plugins/pretty_urls.dart';
 export 'src/plugins/pub_package.dart';
 export 'src/plugins/redirects.dart';
