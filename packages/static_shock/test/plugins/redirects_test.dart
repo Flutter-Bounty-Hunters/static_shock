@@ -13,7 +13,7 @@ void main() {
       // and then verifies that a dedicated redirect page was created for the old URL.
       void redirectsFrom(String redirectFrom, String redirectTo) {
         final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
-        final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
+        final page = Page(sourcePath: FileRelativePath("./fake_source", "fake", "md"), sourceContent: "") //
           ..destinationContent = _basicHtml
           ..data["url"] = redirectTo
           ..data["redirectFrom"] = redirectFrom;
@@ -33,7 +33,7 @@ void main() {
     test("does not attempt to redirect a fully specified URL", () {
       // We can't handle something like "http://mysite.com/old/path/" because we're not building "mysite.com"
       final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
-      final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
+      final page = Page(sourcePath: FileRelativePath("./fake_source", "fake", "md"), sourceContent: "") //
         ..destinationContent = _basicHtml
         ..data["url"] = "new/path"
         ..data["redirectFrom"] = "http://mysite.com/old/path";
@@ -48,7 +48,7 @@ void main() {
     test("does not attempt to redirect a partially specified URL", () {
       // We can't handle something like "mysite.com/old/path/" because we're not building "mysite.com"
       final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
-      final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
+      final page = Page(sourcePath: FileRelativePath("./fake_source", "fake", "md"), sourceContent: "") //
         ..destinationContent = _basicHtml
         ..data["url"] = "new/path"
         ..data["redirectFrom"] = "mysite.com/old/path";
@@ -63,7 +63,7 @@ void main() {
     test("inserts redirect tag in variety of HTML", () {
       void insertsRedirectTag(String html) {
         final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
-        final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
+        final page = Page(sourcePath: FileRelativePath("./fake_source", "fake", "md"), sourceContent: "") //
           ..destinationContent = html
           ..data["url"] = "new/dir"
           ..data["redirectFrom"] = "/old/dir";
@@ -92,7 +92,7 @@ void main() {
 
     test("does not redirect when missing HEAD tag", () {
       final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
-      final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
+      final page = Page(sourcePath: FileRelativePath("./fake_source", "fake", "md"), sourceContent: "") //
         ..destinationContent = _missingHeadHtml
         ..data["url"] = "new/dir"
         ..data["redirectFrom"] = "/old/dir";
