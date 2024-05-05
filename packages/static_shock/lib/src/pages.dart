@@ -168,21 +168,55 @@ class SearchQuery {
   static final _lessThanConditionPattern = RegExp(r'''([^\s]+<([^=\s'"]+|'.+'|".+"))''');
   static final _greaterThanEqualConditionPattern = RegExp(r'''([^\s]+>=([^\s'"]+|'.+'|".+"))''');
   static final _greaterThanConditionPattern = RegExp(r'''([^\s]+>([^=\s'"]+|'.+'|".+"))''');
+  static final _tokenConditionPattern = RegExp(r'''^[^\s\^\?\*<>='"]+$''');
   static final _whitespace = RegExp(r"\s+");
 
   factory SearchQuery.parse(String query) {
-    final tokens = query.split(_whitespace);
-    final conditions = <PropertySearchCondition>[];
-    for (final token in tokens) {
-      final condition = PropertySearchCondition.parse(token);
-      if (condition == null) {
-        continue;
-      }
+    final parsedConditions = <PropertySearchCondition>[];
+    parsedConditions.addAll(
+      _equalConditionPattern.allMatches(query).map(
+            (match) => PropertySearchCondition.parse(query.substring(match.start, match.end))!,
+          ),
+    );
+    parsedConditions.addAll(
+      _notEqualConditionPattern.allMatches(query).map(
+            (match) => PropertySearchCondition.parse(query.substring(match.start, match.end))!,
+          ),
+    );
+    parsedConditions.addAll(
+      _containsConditionPattern.allMatches(query).map(
+            (match) => PropertySearchCondition.parse(query.substring(match.start, match.end))!,
+          ),
+    );
+    parsedConditions.addAll(
+      _lessThanConditionPattern.allMatches(query).map(
+            (match) => PropertySearchCondition.parse(query.substring(match.start, match.end))!,
+          ),
+    );
+    parsedConditions.addAll(
+      _lessThanEqualConditionPattern.allMatches(query).map(
+            (match) => PropertySearchCondition.parse(query.substring(match.start, match.end))!,
+          ),
+    );
+    parsedConditions.addAll(
+      _greaterThanConditionPattern.allMatches(query).map(
+            (match) => PropertySearchCondition.parse(query.substring(match.start, match.end))!,
+          ),
+    );
+    parsedConditions.addAll(
+      _greaterThanEqualConditionPattern.allMatches(query).map(
+            (match) => PropertySearchCondition.parse(query.substring(match.start, match.end))!,
+          ),
+    );
 
-      conditions.add(condition);
+    final tokens = query.split(_whitespace);
+    for (final token in tokens) {
+      if (_tokenConditionPattern.hasMatch(token)) {
+        parsedConditions.add(PropertySearchCondition.parse(token)!);
+      }
     }
 
-    return SearchQuery(conditions);
+    return SearchQuery(parsedConditions);
   }
 
   const SearchQuery(this.conditions);
@@ -244,6 +278,12 @@ class PropertySearchCondition {
     }
 
     // The discriminator is actually a string.
+    if ((discriminator.startsWith("'") && discriminator.endsWith("'")) ||
+        (discriminator.startsWith('"') && discriminator.endsWith('"'))) {
+      // The string value is surrounded by quotes. Remove those quotes because
+      // they're only relevant to the query encoding, not the value, itself.
+      return discriminator.substring(1, discriminator.length - 1);
+    }
     return discriminator;
   }
 

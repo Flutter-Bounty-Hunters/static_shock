@@ -10,6 +10,12 @@ void main() {
       expect(pageIndex.search("beta").length, 3);
       expect(pageIndex.search("alpha beta").length, 1);
     });
+
+    test("conditions", () {
+      expect(pageIndex.search("url^=/articles/news").length, 2);
+
+      expect(pageIndex.search("title*=Page").length, 4);
+    });
   });
 
   group("Search query parsing >", () {
@@ -44,6 +50,48 @@ void main() {
           PropertySearchCondition("title", SearchOperator.equals, "Hello, world!"),
         ]),
       );
+      expect(
+        SearchQuery.parse("title^='Hello, '"),
+        SearchQuery([
+          PropertySearchCondition("title", SearchOperator.startsWith, "Hello, "),
+        ]),
+      );
+      expect(
+        SearchQuery.parse("title\$=' world!'"),
+        SearchQuery([
+          PropertySearchCondition("title", SearchOperator.endsWith, " world!"),
+        ]),
+      );
+      expect(
+        SearchQuery.parse("tags*=article"),
+        SearchQuery([
+          PropertySearchCondition("tags", SearchOperator.contains, "article"),
+        ]),
+      );
+      expect(
+        SearchQuery.parse("value<5"),
+        SearchQuery([
+          PropertySearchCondition("value", SearchOperator.lessThan, 5),
+        ]),
+      );
+      expect(
+        SearchQuery.parse("value<=5"),
+        SearchQuery([
+          PropertySearchCondition("value", SearchOperator.lessThanEqualTo, 5),
+        ]),
+      );
+      expect(
+        SearchQuery.parse("value>5"),
+        SearchQuery([
+          PropertySearchCondition("value", SearchOperator.greaterThan, 5),
+        ]),
+      );
+      expect(
+        SearchQuery.parse("value>=5"),
+        SearchQuery([
+          PropertySearchCondition("value", SearchOperator.greaterThanEqualTo, 5),
+        ]),
+      );
     });
   });
 }
@@ -52,28 +100,28 @@ final _fakePages = [
   Page(
     data: {
       "title": "Page one",
-      "url": "/posts",
+      "url": "/articles",
       "tags": ["alpha"],
     },
   ),
   Page(
     data: {
       "title": "Page two",
-      "url": "/posts",
+      "url": "/articles",
       "tags": ["beta"],
     },
   ),
   Page(
     data: {
       "title": "Page three",
-      "url": "/posts",
+      "url": "/articles/news",
       "tags": ["beta"],
     },
   ),
   Page(
     data: {
-      "title": "Page three",
-      "url": "/posts",
+      "title": "Page four",
+      "url": "/articles/news/today",
       "tags": ["alpha", "beta"],
     },
   ),

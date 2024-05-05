@@ -90,16 +90,6 @@ rss: false
         </section>
       </div>
 
-      <section>
-      <h2>Testing search</h2>
-      <ol>
-      {% set results = pages.search("url^=guides") %}
-      {% for result in results %}
-        <li>{{ result.data.title }}</li>
-      {% endfor %}
-      </ol>
-      </section>
-
       <section id="content">
 
       {{
