@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:static_shock/src/data.dart';
@@ -22,7 +23,7 @@ import 'package:static_shock/src/static_shock.dart';
 ///
 /// ```yaml
 /// paginate:
-///   query: tag=articles
+///   query: tags*=articles
 ///   baseUrl: /articles
 ///   pageTitle: archive
 ///   itemsPerPage: 10
@@ -57,11 +58,15 @@ class PaginatePageGenerator implements PageGenerator {
 
   @override
   Future<void> generatePages(StaticShockPipelineContext context) async {
+    print("Generating pages for pagination");
     final requests = _collectAllRequests(context.dataIndex);
 
     for (final request in requests) {
+      print("Paginating for page: ${request.pageTitle}");
       await _paginate(context, request);
     }
+
+    print("Done paginating");
   }
 
   Set<PaginationRequest> _collectAllRequests(DataIndex dataIndex) {
@@ -74,6 +79,7 @@ class PaginatePageGenerator implements PageGenerator {
   Set<PaginationRequest> _findRequestsInData(DataIndex dataIndex) {
     final requests = <PaginationRequest>{};
     dataIndex.visitBreadthFirst((path, data) {
+      print("Visiting data node: $path");
       if (data["paginate"] == null) {
         return;
       }
@@ -93,27 +99,40 @@ class PaginatePageGenerator implements PageGenerator {
   }
 
   Future<void> _paginate(StaticShockPipelineContext context, PaginationRequest request) async {
-    final List<Page> contentPages = context.pagesIndex.search(request.query);
+    final List<Page> contentPages = context.pagesIndex.search(request.query, sortBy: request.sortBy);
     if (contentPages.isEmpty) {
       return;
     }
 
     final paginatedContentPages = contentPages.splitEvery(request.itemsPerPage);
 
+    print("Paginated page layout path: ${FileRelativePath.parse("_includes/${request.layout}")}");
+    print("All available layouts:");
+    for (final layout in context.layouts.keys) {
+      print(" - $layout");
+    }
+    final pageLayout = context.getLayout(FileRelativePath.parse("_includes/${request.layout}"))!;
+
     final searchResultPages = <Page>[];
     for (int i = 0; i < paginatedContentPages.length; i += 1) {
       // Create the search results page, and fill it with pagination data.
       searchResultPages.add(
         Page(
+          sourceContent: pageLayout.value,
+          destinationPath: _createSearchResultPageUrl(request.baseUrl, i),
           data: {
             // Generic page data.
             "title": request.pageTitle,
-            "url": _createSearchResultPageUrl(request.baseUrl, i),
+            "url": _createSearchResultPageUrl(request.baseUrl, i).value,
+            "contentRenderers": ["jinja"],
 
             // Pagination data.
             "paginate": {
               "currentIndex": i,
-              "pageCount": searchResultPages.length,
+              "pageCount": paginatedContentPages.length,
+              "pageItems": paginatedContentPages[i] //
+                  .map((page) => page.data)
+                  .toList(),
               "urlFor": _createUrlForFunction(request, searchResultPages),
               if (i > 0) //
                 "previousPageUrl": _createSearchResultPageUrl(request.baseUrl, i - 1),
@@ -124,6 +143,15 @@ class PaginatePageGenerator implements PageGenerator {
         ),
       );
     }
+
+    for (final page in searchResultPages) {
+      print("Generating paginated results page:");
+      print('''${page.title}
+ - url: ${page.url}
+''');
+    }
+
+    context.pagesIndex.addPages(searchResultPages);
   }
 
   /// A function that creates and returns another function, which assembles the URL path for
@@ -146,15 +174,19 @@ class PaginatePageGenerator implements PageGenerator {
 
 FileRelativePath _createSearchResultPageUrl(DirectoryRelativePath baseUrl, int pageIndex) {
   // Note: +1 on pageIndex so that page "0" becomes page "1".
-  return FileRelativePath(baseUrl.value, "${pageIndex + 1}", "html");
+  return FileRelativePath("${baseUrl.value}${pageIndex + 1}${Platform.pathSeparator}", "index", "html");
 }
 
 extension<T> on List<T> {
   List<List<T>> splitEvery(int count) {
+    print("Splitting every $count items");
     final groupList = <List<T>>[];
     int index = 0;
-    while (index < length - 1) {
-      groupList.add(sublist(index, min(index + count, length)));
+    while (index < length) {
+      print(" - sublist start: $index, end: ${min(index + count, length)}");
+      final groupEnd = min(index + count, length);
+      groupList.add(sublist(index, groupEnd));
+      index = groupEnd;
     }
 
     return groupList;
@@ -170,7 +202,8 @@ class PaginationRequest {
     try {
       return PaginationRequest(
         query: data["query"],
-        baseUrl: data["baseUrl"],
+        sortBy: data["sortBy"],
+        baseUrl: DirectoryRelativePath(data["baseUrl"]),
         pageTitle: data["pageTitle"],
         itemsPerPage: data["itemsPerPage"] ?? 10,
         layout: data["layout"],
@@ -182,6 +215,7 @@ class PaginationRequest {
 
   const PaginationRequest({
     required this.query,
+    this.sortBy,
     required this.baseUrl,
     required this.pageTitle,
     required this.itemsPerPage,
@@ -189,6 +223,7 @@ class PaginationRequest {
   });
 
   final String query;
+  final String? sortBy;
   final DirectoryRelativePath baseUrl;
   final String pageTitle;
   final int itemsPerPage;

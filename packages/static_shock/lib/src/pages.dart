@@ -77,9 +77,20 @@ class PagesIndex {
 
   /// Searches all pages using the given [rawQuery] and returns a list of pages that satisfy the
   /// search.
-  List<Page> search(String rawQuery) {
+  List<Page> search(
+    String rawQuery, {
+    String? sortBy,
+  }) {
     final query = SearchQuery.parse(rawQuery);
-    return query.find(_pages);
+
+    final results = query.find(_indexablePages.toList());
+
+    if (sortBy != null) {
+      final pageSorter = _PageSorter.parseSortBy(sortBy);
+      results.sort(pageSorter.compare);
+    }
+
+    return results;
   }
 
   /// Returns a data structure which represents a "page index" within a Jinja template.
@@ -130,7 +141,7 @@ class PagesIndex {
   Iterable<Map<String, dynamic>> _all({
     String? sortBy,
   }) {
-    final pages = _pages.where((page) => page.data["shouldIndex"] != false).toList();
+    final pages = _indexablePages.toList();
 
     final pageSorter = _PageSorter.parseSortBy(sortBy);
     pages.sort(pageSorter.compare);
@@ -146,13 +157,15 @@ class PagesIndex {
     String tag, {
     String? sortBy,
   }) {
-    final pages = _pages.where((page) => page.hasTag(tag) && page.data["shouldIndex"] != false).toList();
+    final pages = _indexablePages.where((page) => page.hasTag(tag)).toList();
 
     final pageSorter = _PageSorter.parseSortBy(sortBy);
     pages.sort(pageSorter.compare);
 
     return pages.map(_serializePage);
   }
+
+  Iterable<Page> get _indexablePages => _pages.where((page) => page.data["shouldIndex"] != false);
 
   Map<String, dynamic> _serializePage(Page page) => {
         "data": page.data,

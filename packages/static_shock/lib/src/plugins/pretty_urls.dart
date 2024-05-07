@@ -36,11 +36,13 @@ class PrettyPathPageTransformer implements PageTransformer {
       return;
     }
 
+    final destination = originalPath.copyWith(
+      directoryPath: "${originalPath.directoryPath}${originalPath.filename}${Platform.pathSeparator}",
+      filename: "index",
+    );
+    context.log.detail("Pretty Urls: Setting page (${page.title}) destination URL to: ${destination.value}");
     page
       ..url = "${originalPath.directoryPath}${originalPath.filename}${Platform.pathSeparator}"
-      ..destinationPath = originalPath.copyWith(
-        directoryPath: "${originalPath.directoryPath}${originalPath.filename}${Platform.pathSeparator}",
-        filename: "index",
-      );
+      ..destinationPath = destination;
   }
 }

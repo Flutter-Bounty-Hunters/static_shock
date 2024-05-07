@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:meta/meta.dart';
 import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/finishers.dart';
@@ -167,6 +168,9 @@ class StaticShockPipelineContext {
   /// Returns the [Layout] template from the given file [path].
   Layout? getLayout(FileRelativePath path) => _layouts[path];
   final _layouts = <FileRelativePath, Layout>{};
+
+  @visibleForTesting
+  Map<FileRelativePath, Layout> get layouts => Map.from(_layouts);
 
   /// Adds the given [layout] to the pipeline.
   void putLayout(Layout layout) {

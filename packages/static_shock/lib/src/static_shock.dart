@@ -231,14 +231,14 @@ class StaticShock implements StaticShockPipeline {
     // _log.info("Load pages and assets time: ${(stopwatch.elapsedMilliseconds - checkpointMillis) / 1000}s\n");
     // checkpointMillis = stopwatch.elapsedMilliseconds;
 
-    // Transform pages.
-    await _transformPages();
-    // _log.info("Transform pages time: ${(stopwatch.elapsedMilliseconds - checkpointMillis) / 1000}s\n");
-    // checkpointMillis = stopwatch.elapsedMilliseconds;
-
     // Generate pages.
     await _generatePages();
     // _log.info("Generate pages time: ${(stopwatch.elapsedMilliseconds - checkpointMillis) / 1000}s\n");
+    // checkpointMillis = stopwatch.elapsedMilliseconds;
+
+    // Transform pages.
+    await _transformPages();
+    // _log.info("Transform pages time: ${(stopwatch.elapsedMilliseconds - checkpointMillis) / 1000}s\n");
     // checkpointMillis = stopwatch.elapsedMilliseconds;
 
     // Transform assets.
@@ -290,6 +290,7 @@ class StaticShock implements StaticShockPipeline {
     _log.info("⚡ Loading layouts and components");
     for (final sourceFile in _sourceFiles.layouts()) {
       _log.detail("Layout: ${sourceFile.subPath}");
+      _log.detail("FileRelativePath: ${FileRelativePath.parse(sourceFile.subPath)}");
       _context.putLayout(
         Layout(
           FileRelativePath.parse(sourceFile.subPath),
@@ -520,7 +521,7 @@ class StaticShock implements StaticShockPipeline {
       }
       if (page.destinationContent == null) {
         throw Exception(
-            "Tried to write a page to its destination, but it has no content. Page source: ${page.sourcePath}");
+            "Tried to write a page to its destination (${page.title} - ${page.url}), but it has no content. Page source: ${page.sourcePath}");
       }
 
       _log.detail("Writing page to destination: ${page.destinationPath}");
@@ -548,7 +549,13 @@ class StaticShock implements StaticShockPipeline {
   Future<void> _writePage(Page page) async {
     // final stopwatch = Stopwatch()..start();
 
-    final destinationFile = _resolveDestinationFile(page.destinationPath!);
+    // Remove any accidental leading "/" that might be present on the
+    // destination path, so we don't attempt to write to the OS root
+    // directory.
+    final destinationPath = page.destinationPath!.value.startsWith(Platform.pathSeparator)
+        ? page.destinationPath!.copyWith(directoryPath: page.destinationPath!.directoryPath.substring(1))
+        : page.destinationPath!;
+    final destinationFile = _resolveDestinationFile(destinationPath);
     if (!destinationFile.existsSync()) {
       destinationFile.createSync(recursive: true);
     }

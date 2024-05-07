@@ -168,7 +168,7 @@ class DataIndex {
       final node = queue.removeAt(0);
       visitor(node.directory, node.data);
 
-      queue.addAll(_data.children.values);
+      queue.addAll(node.children.values);
     }
   }
 }
