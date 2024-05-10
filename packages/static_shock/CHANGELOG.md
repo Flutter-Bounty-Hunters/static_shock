@@ -1,3 +1,10 @@
+## 0.0.5 - May 9, 2024
+ * Created GitHub plugin
+ * Created Redirects plugin
+ * Global data index is now accessible to all plugins through the context
+ * Jinja syntax can be placed within Markdown pages
+ * Components can include other components
+
 ## 0.0.4 - Apr 9, 2024
  * Pages now have access to a computed table-of-contents when rendering the page.
  * Individual pages can be hidden from the page index, but still made available at their URL.
