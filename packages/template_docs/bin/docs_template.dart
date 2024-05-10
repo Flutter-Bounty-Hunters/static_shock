@@ -18,6 +18,9 @@ Future<void> main(List<String> arguments) async {
     ..plugin(DraftingPlugin(
       showDrafts: arguments.contains("preview"),
     ))
+    ..plugin(const PubPackagePlugin({
+      "super_editor",
+    }))
     ..plugin(
       GitHubContributorsPlugin(
         // To load the contributors for a given GitHub package using credentials,
