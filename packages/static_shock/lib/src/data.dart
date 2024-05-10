@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:static_shock/src/files.dart';
@@ -103,29 +102,17 @@ class DataIndex {
   ///  - "/forum"
   ///  - "/articles/news/today"
   Map<String, Object> inheritDataForPath(RelativePath path) {
-    print("Inheriting data at path: $path");
     final data = Map<String, Object>.from(_data.data);
 
     var node = _data;
     final directories = List.from(path.directories);
-    print("Path segments: $directories");
     while (directories.isNotEmpty && node.children[directories.first] != null) {
       final directory = directories.removeAt(0);
       node = node.children[directory]!;
 
-      print("Indexed data at '$directory':");
-      print(const JsonEncoder.withIndent("  ").convert(node.data));
-      print("");
-
       // data.addEntries(node.data.entries);
       _deepMergeMap(data, node.data);
-
-      print("Available children within the data tree: ${node.children}");
-      print("");
     }
-
-    print("Full merged data:");
-    print(const JsonEncoder.withIndent("  ").convert(data));
 
     return data;
   }
@@ -176,15 +163,6 @@ class DataIndex {
 
     // Now that we've found (or created) the desired node, merge the given data with
     // whatever data already exists at that node.
-    print("Merging new data at path: $path");
-    print("");
-    print("Existing data:");
-    print(const JsonEncoder.withIndent("  ").convert(node.data));
-    print("");
-    print("New data:");
-    print(const JsonEncoder.withIndent("  ").convert(data));
-    print("");
-
     _deepMergeMap(node.data, data);
   }
 }

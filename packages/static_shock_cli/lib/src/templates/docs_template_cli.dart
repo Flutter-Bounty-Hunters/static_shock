@@ -164,13 +164,6 @@ class DocsTemplateCommand extends Command {
   Future<Map<String, dynamic>> _promptForConfiguration(Logger log, ArgResults? cliArgs) async {
     final vars = <String, dynamic>{};
 
-    if (cliArgs != null) {
-      print("Collected args:");
-      for (final optionName in cliArgs.options) {
-        print(" - $optionName: ${cliArgs[optionName]} - ${cliArgs[optionName].runtimeType}");
-      }
-    }
-
     if (cliArgs != null && cliArgs[argArgsOnly]) {
       // The user wants to run this command exclusively with CLI args - no human
       // interaction. Validate the provided information and then return the

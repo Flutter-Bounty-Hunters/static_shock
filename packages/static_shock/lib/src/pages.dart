@@ -294,7 +294,6 @@ class Page {
     this.destinationPath,
     this.destinationContent,
   }) : data = data ?? {} {
-    print("Creating Page instance with tags: '${this.data["tags"]}'");
     if (this.data["tags"] is String) {
       this.data["tags"] = [(this.data["tags"] as String)];
     }
