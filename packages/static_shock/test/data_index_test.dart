@@ -1,7 +1,4 @@
-import 'package:static_shock/src/data.dart';
-import 'package:static_shock/src/files.dart';
 import 'package:static_shock/static_shock.dart';
-import 'package:test/scaffolding.dart';
 import 'package:test/test.dart';
 
 void main() {
