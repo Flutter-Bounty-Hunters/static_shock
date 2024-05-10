@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:static_shock/src/files.dart';
@@ -35,7 +36,11 @@ Future<void> indexSourceData(StaticShockPipelineContext context, SourceFiles sou
 
     context.log.detail("Indexing data from: ${dataFile.path}");
     final yamlData = loadYaml(text) as YamlMap;
+
     final data = _deepMergeMap(<String, dynamic>{}, yamlData);
+    if (data["tags"] is String) {
+      data["tags"] = [(data["tags"] as String)];
+    }
 
     dataIndex.mergeAtPath(DirectoryRelativePath(directory.subPath), data.cast());
   }
@@ -98,14 +103,29 @@ class DataIndex {
   ///  - "/forum"
   ///  - "/articles/news/today"
   Map<String, Object> inheritDataForPath(RelativePath path) {
+    print("Inheriting data at path: $path");
     final data = Map<String, Object>.from(_data.data);
 
     var node = _data;
-    final directories = path.directories;
+    final directories = List.from(path.directories);
+    print("Path segments: $directories");
     while (directories.isNotEmpty && node.children[directories.first] != null) {
-      node = node.children[directories.first]!;
-      data.addEntries(node.data.entries);
+      final directory = directories.removeAt(0);
+      node = node.children[directory]!;
+
+      print("Indexed data at '$directory':");
+      print(const JsonEncoder.withIndent("  ").convert(node.data));
+      print("");
+
+      // data.addEntries(node.data.entries);
+      _deepMergeMap(data, node.data);
+
+      print("Available children within the data tree: ${node.children}");
+      print("");
     }
+
+    print("Full merged data:");
+    print(const JsonEncoder.withIndent("  ").convert(data));
 
     return data;
   }
@@ -156,6 +176,15 @@ class DataIndex {
 
     // Now that we've found (or created) the desired node, merge the given data with
     // whatever data already exists at that node.
+    print("Merging new data at path: $path");
+    print("");
+    print("Existing data:");
+    print(const JsonEncoder.withIndent("  ").convert(node.data));
+    print("");
+    print("New data:");
+    print(const JsonEncoder.withIndent("  ").convert(data));
+    print("");
+
     _deepMergeMap(node.data, data);
   }
 }

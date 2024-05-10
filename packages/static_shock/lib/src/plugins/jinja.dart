@@ -158,6 +158,7 @@ class JinjaPageRenderer implements PageRenderer {
     final jinjaFilters = Map.fromEntries([
       MapEntry("startsWith", _startsWith),
       MapEntry("formatDateTime", _formatDateTime),
+      MapEntry("take", _take),
       ...filters.map((filterBuilder) {
         final filter = filterBuilder(context);
         return MapEntry<String, Function>(filter.$1, filter.$2);
@@ -253,4 +254,6 @@ class JinjaPageRenderer implements PageRenderer {
     final dateTime = DateFormat(from).parse(date);
     return DateFormat(to).format(dateTime);
   }
+
+  List _take(List incoming, int count) => incoming.sublist(0, count);
 }

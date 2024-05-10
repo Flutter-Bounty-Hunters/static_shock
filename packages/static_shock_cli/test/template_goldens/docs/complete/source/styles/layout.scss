@@ -1,0 +1,167 @@
+@import "dark";
+@import "light";
+
+$accent: RED;
+
+.navbar {
+  margin-bottom: 24px;
+
+  font-size: 16px;
+  line-height: 1em;
+
+  .navbar-brand {
+    .name {
+      padding-left: 16px;
+
+      font-size: 16px;
+      font-weight: bold;
+    }
+  }
+
+  .nav-item {
+    margin-left: 0.75em;
+    margin-right: 0.75em;
+
+    > a.nav-link {
+      margin: 0;
+      padding: 0;
+    }
+
+    .fa {
+      cursor: pointer;
+
+      font-size: 22px;
+    }
+  }
+}
+
+#drawerNav {
+  overflow-y: auto;
+
+  padding-top: 48px;
+  padding-bottom: 72px;
+  padding-left: 48px;
+  padding-right: 48px;
+
+  li {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+
+    a {
+      display: block;
+    }
+  }
+
+  .exit {
+    position: absolute;
+
+    top: 16px;
+    right: 24px;
+
+    color: BLACK;
+  }
+}
+
+nav.main {
+  ol.organization-links {
+    a {
+      display: block;
+      margin-top: 8px;
+      margin-bottom: 8px;
+
+      border-radius: 8px;
+    }
+
+    .fa {
+      // Constant width so that icons of different widths still align
+      // label text across multiple buttons.
+      width: 24px;
+    }
+  }
+
+  .organization-nav-divider {
+    margin-top: 32px;
+    margin-bottom: 32px;
+
+    padding: 0;
+
+    height: 1px;
+  }
+
+  ol {
+    margin: 0;
+    padding: 0;
+
+    list-style-type: none;
+  }
+
+  & > ol > li {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  .link-group {
+    margin-top: 50px;
+
+    .title {
+      font-weight: bold;
+    }
+
+    ol {
+      padding-left: 16px;
+      border-left: 2px solid #FF8888;
+
+      li {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+      }
+    }
+  }
+}
+
+main.page-content {
+  padding-left: 48px;
+  padding-right: 48px;
+  padding-bottom: 72px;
+
+  @media(width <= 768px) {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  h2, h3, h4, h5, h6 {
+    margin-top: 1em;
+  }
+
+  pre code {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+}
+
+.table-of-contents {
+  ol {
+    margin: 0;
+    padding-left: 32px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-right: 0;
+
+    list-style-type: none;
+
+    font-size: 14px;
+
+    li {
+      margin-top: 1em;
+      margin-bottom: 1em;
+
+      a {
+        text-decoration: none;
+      }
+    }
+  }
+}

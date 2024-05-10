@@ -1,0 +1,11 @@
+# Build output
+/build
+
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool/
+
+# Android Studio and IntelliJ IDEA
+.idea
+
+.DS_Store
