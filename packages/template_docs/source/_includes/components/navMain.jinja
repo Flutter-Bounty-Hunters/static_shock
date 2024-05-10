@@ -19,18 +19,29 @@
   {% if navigation != null %}
   <ol>
     {% for item in navigation.items %}
-    {% if item.tag == null %}
+    {% if item.tag == null and item.items == null %}
     <!-- Top-level menu item -->
     <li><a href="{{ item.url }}">{{ item.title }}</a></li>
     {% else %}
     <!-- Group of menu items -->
     <div class="link-group">
       <span class="title">{{ item.title }}</span>
+
+      {% if item.tag != null %}
       <ol>
         {% for page in pages.byTag(item.tag, sortBy=item.sortBy) %}
         <li><a href="/{{ page.data.url }}">{{ page.data.title }}</a></li>
         {% endfor %}
       </ol>
+      {% endif %}
+
+      {% if item.items != null %}
+      <ol>
+        {% for subItem in item.items %}
+        <li><a href="/{{ subItem.url }}">{{ subItem.title }}</a></li>
+        {% endfor %}
+      </ol>
+      {% endif %}
     </div>
     {% endif %}
     {% endfor %}

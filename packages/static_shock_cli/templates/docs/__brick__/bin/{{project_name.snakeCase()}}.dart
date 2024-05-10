@@ -18,6 +18,11 @@ Future<void> main(List<String> arguments) async {
     ..plugin(DraftingPlugin(
       showDrafts: arguments.contains("preview"),
     ))
+    {% if package_is_on_pub %}
+    ..plugin(const PubPackagePlugin({
+      {{ package_name }},
+    }))
+    {% endif %}
     ..plugin(
       GitHubContributorsPlugin(
         // To load the contributors for a given GitHub package using credentials,

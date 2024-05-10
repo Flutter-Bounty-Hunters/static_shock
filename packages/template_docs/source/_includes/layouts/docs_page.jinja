@@ -21,10 +21,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" type="text/css">
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/dart.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    {{ components.highlightJs() }}
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3" />
 
@@ -156,6 +153,8 @@
       }
 
       function goToLightMode() {
+        localStorage.setItem('brightness', 'light');
+
         var html = document.getElementsByTagName("html")[0];
         html.setAttribute("data-bs-theme", "light");
 
@@ -166,10 +165,12 @@
         button.classList.remove("fa-sun");
         button.classList.add("fa-moon");
 
-        localStorage.setItem('brightness', 'light');
+        goToHighlightJsLightMode();
       }
 
       function goToDarkMode() {
+        localStorage.setItem('brightness', 'dark');
+
         var html = document.getElementsByTagName("html")[0];
         html.setAttribute("data-bs-theme", "dark");
 
@@ -180,7 +181,7 @@
         button.classList.remove("fa-moon");
         button.classList.add("fa-sun");
 
-        localStorage.setItem('brightness', 'dark');
+        goToHighlightJsDarkMode();
       }
     </script>
   </body>

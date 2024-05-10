@@ -90,7 +90,6 @@ class DataIndex {
 
   final _DataNode _data;
 
-  // FIXME: The implementation returns data that sits outside the given path, e.g., will return "github/users" data even if "github/repositories" is requested.
   /// Returns all data from the global index that should be available to a page at the given [path].
   ///
   /// The global data index is a tree. The data that's made available to a given [path] includes all
@@ -109,7 +108,9 @@ class DataIndex {
   ///  - "/forum"
   ///  - "/articles/news/today"
   Map<String, Object> inheritDataForPath(RelativePath path) {
-    final data = Map<String, Object>.from(_data.data);
+    // Start with a deep merge into an empty Map so that we don't return
+    // any references to the actual data structures held within the root node.
+    final data = _deepMergeMap({}, _data.data);
 
     var node = _data;
     final directories = List.from(path.directories);
@@ -117,10 +118,10 @@ class DataIndex {
       final directory = directories.removeAt(0);
       node = node.children[directory]!;
 
-      _deepMergeMap(data, node.data);
+      _deepMergeMap(data, Map<String, dynamic>.of(node.data));
     }
 
-    return data;
+    return data.cast();
   }
 
   /// Returns the data subtree that begins at the given [path], or `null` if no data subtree
@@ -180,39 +181,71 @@ Map _deepMergeMap(Map destination, Map? newData) {
     return destination;
   }
 
-  newData.forEach((k, v) {
+  for (final entry in newData.entries) {
+    final k = entry.key;
+    final v = entry.value;
+
     if (!destination.containsKey(k)) {
-      if (v is YamlMap) {
+      if (v is YamlMap || v is Map) {
         // We don't want to store any YamlMaps because their Map interface isn't typed. Therefore,
         // if we treat our maps as Map<String, dynamic> it will throw exception due to YamlMap's
         // implied type of Map<dynamic, dynamic>.
+        //
+        // We also don't want to copy Maps because we don't want other branches of
+        // the data tree altering this one.
         destination[k] = <String, dynamic>{};
         _deepMergeMap(destination[k], Map.fromEntries(v.entries));
-        return;
+        continue;
+      }
+
+      if (v is YamlList || v is List) {
+        // We don't want to store any YamlLists because they're unmodifiable.
+        //
+        // We also don't want to copy Lists because we don't want other branches of
+        // the data tree altering this one.
+        //
+        // We need to cascade this copying of Maps and Lists for every item in the list.
+        destination[k] = _deepMergeList([], v);
+        continue;
       }
 
       // Direct copy from new data to destination.
       destination[k] = v;
-      return;
+      continue;
     }
 
     if (destination[k] is Map) {
       // Continue merging maps deeper.
-      _deepMergeMap(destination[k], newData[k]);
-      return;
+      _deepMergeMap(destination[k], Map.of(newData[k]));
+      continue;
     }
 
     if (destination[k] is List && newData[k] is List) {
       // Append the new list to the existing list.
-      (destination[k] as List).addAll(newData[k] as List);
-      return;
+      _deepMergeList(destination[k], newData[k] as List);
+      continue;
     }
 
     // Overwrite existing value.
     destination[k] = newData[k];
-  });
+  }
 
   return destination;
+}
+
+List _deepMergeList(List destination, List source) {
+  return destination
+    ..addAll(
+      source.map((listItem) {
+        if (listItem is Map) {
+          return _deepMergeMap({}, listItem);
+        } else if (listItem is List) {
+          return _deepMergeList([], listItem);
+        } else {
+          return listItem;
+        }
+      }),
+    );
 }
 
 class _DataNode {

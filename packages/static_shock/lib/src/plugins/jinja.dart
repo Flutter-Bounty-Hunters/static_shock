@@ -67,7 +67,7 @@ class JinjaPageLoader implements PageLoader {
 
       final yaml = loadYaml(comment) as YamlMap;
       for (final entry in yaml.entries) {
-        if (entry.key is! String) {
+        if (entry.key is! String || entry.value == null) {
           continue;
         }
         frontMatter[entry.key] = entry.value;
@@ -117,7 +117,9 @@ class JinjaPageRenderer implements PageRenderer {
 
   @override
   FutureOr<void> renderLayout(StaticShockPipelineContext context, Page page) async {
-    if (page.data["layout"] == null) {
+    if (page.data["layout"] == null ||
+        page.data["layout"].trim().isEmpty ||
+        page.data["layout"].trim().toLowerCase() == "none") {
       return;
     }
 
