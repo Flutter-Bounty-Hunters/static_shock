@@ -18,7 +18,6 @@ jobs:
 
       # Run Dart analysis
       - run: dart analyze
-        id: analysis
 
       - name: Check analysis exit code
         run: echo $?
