@@ -13,6 +13,12 @@ jobs:
       # Setup a Dart environment
       - uses: dart-lang/setup-dart@v1
 
+      # Install Melos globally
+      - run: dart pub global activate melos
+
+      # Bootstrap Melos so each package uses the other local packages (instead of Pub)
+      - run: melos bootstrap
+
       # Download all the packages that the app uses
       - run: dart pub get
 
@@ -34,6 +40,12 @@ jobs:
       # Setup a Dart environment
       - uses: dart-lang/setup-dart@v1
 
+      # Install Melos globally
+      - run: dart pub global activate melos
+
+      # Bootstrap Melos so each package uses the other local packages (instead of Pub)
+      - run: melos bootstrap
+
       # Download all the packages that the app uses
       - run: dart pub get
 
@@ -51,6 +63,12 @@ jobs:
 
       # Setup a Dart environment
       - uses: dart-lang/setup-dart@v1
+
+      # Install Melos globally
+      - run: dart pub global activate melos
+
+      # Bootstrap Melos so each package uses the other local packages (instead of Pub)
+      - run: melos bootstrap
 
       # Download all the packages that the app uses
       - run: dart pub get
@@ -73,6 +91,12 @@ jobs:
       # Setup a Dart environment
       - uses: dart-lang/setup-dart@v1
 
+      # Install Melos globally
+      - run: dart pub global activate melos
+
+      # Bootstrap Melos so each package uses the other local packages (instead of Pub)
+      - run: melos bootstrap
+
       # Download all the packages that the app uses
       - run: dart pub get
 
@@ -90,6 +114,12 @@ jobs:
 
       # Setup a Dart environment
       - uses: dart-lang/setup-dart@v1
+
+      # Install Melos globally
+      - run: dart pub global activate melos
+
+      # Bootstrap Melos so each package uses the other local packages (instead of Pub)
+      - run: melos bootstrap
 
       # Download all the packages that the app uses
       - run: dart pub get
@@ -111,6 +141,12 @@ jobs:
 
       # Setup a Dart environment
       - uses: dart-lang/setup-dart@v1
+
+      # Install Melos globally
+      - run: dart pub global activate melos
+
+      # Bootstrap Melos so each package uses the other local packages (instead of Pub)
+      - run: melos bootstrap
 
       # Download all the packages that the app uses
       - run: dart pub get
