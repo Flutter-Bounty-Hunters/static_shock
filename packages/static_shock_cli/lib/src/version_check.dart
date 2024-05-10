@@ -1,7 +1,37 @@
+import 'package:args/command_runner.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pub_updater/pub_updater.dart';
 
 import 'version.dart';
+
+/// Mixin that checks Pub for a new version.
+///
+/// This mixin only notifies the user - it doesn't run an upgrade.
+///
+/// [Command]s that mixin this behavior should begin their [run] method by
+/// calling the mixin's [run] method:
+///
+///     await super.run();
+///
+///
+mixin PubVersionCheck on Command {
+  Logger get log;
+
+  @override
+  Future<void> run() async {
+    final isUpToDate = await StaticShockCliVersion.isAtLeastUpToDateWithPub();
+    if (isUpToDate) {
+      return;
+    }
+
+    final newestVersion = await StaticShockCliVersion.getLatestVersion();
+    log.info(
+      "New version of ${lightYellow.wrap("static_shock_cli")} is available: ${lightRed.wrap(packageVersion)} -> ${lightGreen.wrap(newestVersion)}",
+    );
+    log.info("Run `shock upgrade` to upgrade to the latest version.\n");
+  }
+}
 
 /// Tools for managing the package version for `static_shock_cli`.
 class StaticShockCliVersion {

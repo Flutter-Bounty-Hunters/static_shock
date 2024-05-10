@@ -293,7 +293,17 @@ class Page {
     Map<String, dynamic>? data,
     this.destinationPath,
     this.destinationContent,
-  }) : data = data ?? {};
+  }) : data = data ?? {} {
+    // Special support for tags. We want user to be able to write a single tag value
+    // under "tags", but we also need tags to be mergeable as a list. Therefore, we
+    // explicitly turn a single tag into a single-item tag list.
+    //
+    // This same conversion is done in data.dart
+    // TODO: generalize this auto-conversion so that plugins can do the same thing.
+    if (this.data["tags"] is String) {
+      this.data["tags"] = [(this.data["tags"] as String)];
+    }
+  }
 
   final FileRelativePath sourcePath;
   final String sourceContent;

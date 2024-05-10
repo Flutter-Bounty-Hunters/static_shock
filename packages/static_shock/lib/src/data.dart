@@ -35,7 +35,18 @@ Future<void> indexSourceData(StaticShockPipelineContext context, SourceFiles sou
 
     context.log.detail("Indexing data from: ${dataFile.path}");
     final yamlData = loadYaml(text) as YamlMap;
+
     final data = _deepMergeMap(<String, dynamic>{}, yamlData);
+
+    // Special support for tags. We want user to be able to write a single tag value
+    // under "tags", but we also need tags to be mergeable as a list. Therefore, we
+    // explicitly turn a single tag into a single-item tag list.
+    //
+    // This same conversion is done in pages.dart
+    // TODO: generalize this auto-conversion so that plugins can do the same thing.
+    if (data["tags"] is String) {
+      data["tags"] = [(data["tags"] as String)];
+    }
 
     dataIndex.mergeAtPath(DirectoryRelativePath(directory.subPath), data.cast());
   }
@@ -101,10 +112,12 @@ class DataIndex {
     final data = Map<String, Object>.from(_data.data);
 
     var node = _data;
-    final directories = path.directories;
+    final directories = List.from(path.directories);
     while (directories.isNotEmpty && node.children[directories.first] != null) {
-      node = node.children[directories.first]!;
-      data.addEntries(node.data.entries);
+      final directory = directories.removeAt(0);
+      node = node.children[directory]!;
+
+      _deepMergeMap(data, node.data);
     }
 
     return data;

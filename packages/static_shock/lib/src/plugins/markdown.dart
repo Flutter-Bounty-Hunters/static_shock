@@ -141,7 +141,7 @@ class MarkdownPageLoader implements PageLoader {
     // Create a Markdown list of links for every header. We'll convert it to HTML next.
     final tocMarkdown = StringBuffer();
     for (final link in visibleLinks) {
-      final indent = List.generate((link["level"] - baseLevel), (index) => "  ").join("");
+      final indent = List.generate((link["level"] - baseLevel), (index) => "   ").join("");
       tocMarkdown.writeln("${indent}1. [${link["title"]}](${link["sectionId"]})");
     }
 
