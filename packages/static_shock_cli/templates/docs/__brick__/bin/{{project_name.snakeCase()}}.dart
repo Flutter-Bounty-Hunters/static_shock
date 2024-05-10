@@ -20,6 +20,8 @@ Future<void> main(List<String> arguments) async {
     ))
     ..plugin(
       GitHubContributorsPlugin(
+        // To load the contributors for a given GitHub package using credentials,
+        // place your GitHub API token in an environment variable with the following name.
         authToken: Platform.environment["github_doc_website_token"],
       ),
     );

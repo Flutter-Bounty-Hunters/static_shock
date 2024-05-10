@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:intl/intl.dart';
 import 'package:jinja/jinja.dart';
@@ -255,5 +256,6 @@ class JinjaPageRenderer implements PageRenderer {
     return DateFormat(to).format(dateTime);
   }
 
-  List _take(List incoming, int count) => incoming.sublist(0, count);
+  /// A Jinja filter that returns the first [count] items from the given list.
+  List _take(List incoming, int count) => incoming.sublist(0, min(count, incoming.length));
 }
