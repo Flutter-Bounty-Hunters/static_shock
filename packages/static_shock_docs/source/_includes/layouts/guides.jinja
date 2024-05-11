@@ -1,18 +1,12 @@
 <!doctype html>
 
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8">
     <title>{{ title }} | Static Shock</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {{ components.favicon() }}
-
-    {{ components.bootstrapJs() }}
-
-    {{ components.highlightJs() }}
-
-    {{ components.fontAwesome() }}
+    {{ components.headerResources() }}
 
     <link rel="stylesheet" href="/styles/theme.css">
     <link rel="stylesheet" href="/styles/base_layout.css">
@@ -32,14 +26,14 @@
       <!-- Primary page content -->
       <div class="container">
         <div class="row">
-          <nav class="col-3 d-none d-md-block">
-            {% for menuItem in docs_menu|itemsForExistingPages(["guides"]) %}
-              <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
-            {% endfor %}
-          </nav>
+
           <section class="col-md-9 col-12" style="padding-left: 48px;">
             <h1>{{ title }}</h1>
-
+            <nav class="col-3 d-none d-md-block">
+              {% for menuItem in docs_menu|itemsForExistingPages(["guides"]) %}
+              <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
+              {% endfor %}
+            </nav>
             {% if tableOfContents is defined and tableOfContents.linkCountBeyondLevel(0) > 1 %}
             <div class="table-of-contents">
             {{ tableOfContents.renderHtmlList(startingLevel = 1) }}
@@ -47,7 +41,6 @@
 
             <div class="table-of-contents-divider">&nbsp;</div>
             {% endif %}
-
 
             {{ content }}
           </section>
@@ -58,5 +51,7 @@
     <footer>
       {{ components.footer() }}
     </footer>
+
+    {{ components.endBodyScripts() }}
   </body>
 </html>

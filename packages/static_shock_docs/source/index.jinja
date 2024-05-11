@@ -4,19 +4,13 @@ rss: false
 -->
 <!doctype html>
 
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8">
     <title>{{ title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {{ components.favicon() }}
-
-    {{ components.bootstrapJs() }}
-
-    {{ components.highlightJs() }}
-
-    {{ components.fontAwesome() }}
+    {{ components.headerResources() }}
 
     <link rel="stylesheet" href="/styles/theme.css">
     <link rel="stylesheet" href="/styles/base_layout.css">
@@ -203,5 +197,7 @@ Create a new static website project:
         navigator.clipboard.writeText("dart pub global activate static_shock_cli");
       }
     </script>
+
+    {{ components.endBodyScripts() }}
   </body>
 </html>

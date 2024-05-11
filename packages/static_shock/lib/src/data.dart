@@ -9,11 +9,24 @@ import 'package:yaml/yaml.dart';
 ///
 /// All [DataLoader]s run before any assets or pages are loaded.
 abstract class DataLoader {
+  static DataLoader fromFunction(DataLoaderFunction function) => _FunctionalDataLoader(function);
+
   /// Loads data from any desired data source and returns it.
   ///
   /// The returned data will be made available to all pages.
   Future<Map<String, Object>> loadData(StaticShockPipelineContext context);
 }
+
+class _FunctionalDataLoader implements DataLoader {
+  const _FunctionalDataLoader(this.loader);
+
+  final DataLoaderFunction loader;
+
+  @override
+  Future<Map<String, Object>> loadData(StaticShockPipelineContext context) => loader(context);
+}
+
+typedef DataLoaderFunction = Future<Map<String, Object>> Function(StaticShockPipelineContext context);
 
 /// Inspects all [sourceFiles] for files called `_data.yaml`, accumulates the content of those
 /// files into a [DataIndex], and returns that [DataIndex].
