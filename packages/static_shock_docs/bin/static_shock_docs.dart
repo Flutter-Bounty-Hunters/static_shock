@@ -28,9 +28,15 @@ Future<void> main(List<String> arguments) async {
     ))
     ..plugin(
       GitHubContributorsPlugin(
-        authToken: Platform.environment["github_doc_website_token"],
+        authToken: Platform.environment["ghub_doc_website_token"],
       ),
-    );
+    )
+    ..loadData(DataLoader.fromFunction((context) async {
+      return {
+        "algolia_app_id": Platform.environment["static_shock_algolia_app_id"] ?? "",
+        "algolia_api_key": Platform.environment["static_shock_algolia_api_key"] ?? "",
+      };
+    }));
 
   // Generate the static website.
   await staticShock.generateSite();

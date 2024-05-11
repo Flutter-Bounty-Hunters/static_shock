@@ -3,19 +3,13 @@ title: Guides
 -->
 <!doctype html>
 
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8">
     <title>{{ title }} | Static Shock</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {{ components.favicon() }}
-
-    {{ components.bootstrapJs() }}
-
-    {{ components.highlightJs() }}
-
-    {{ components.fontAwesome() }}
+    {{ components.headerResources() }}
 
     <link rel="stylesheet" href="/styles/theme.css">
     <link rel="stylesheet" href="/styles/base_layout.css">
@@ -45,5 +39,7 @@ title: Guides
     <footer>
       {{ components.footer() }}
     </footer>
+
+    {{ components.endBodyScripts() }}
   </body>
 </html>

@@ -8,8 +8,7 @@ import 'package:yaml/yaml.dart';
 (String testName, Function testFunction) isMenuEmpty(StaticShockPipelineContext context) {
   return (
     "menuEmpty",
-    (YamlList menuItems, List<Object?> pathPrefixFragments) =>
-        !_isMenuNonEmpty(context, menuItems, pathPrefixFragments),
+    (List menuItems, List<Object?> pathPrefixFragments) => !_isMenuNonEmpty(context, menuItems, pathPrefixFragments),
   );
 }
 
@@ -21,13 +20,13 @@ import 'package:yaml/yaml.dart';
 (String testName, Function testFunction) isMenuNonEmpty(StaticShockPipelineContext context) {
   return (
     "menuNonEmpty",
-    (YamlList menuItems, List<Object?> pathPrefixFragments) => _isMenuNonEmpty(context, menuItems, pathPrefixFragments),
+    (List menuItems, List<Object?> pathPrefixFragments) => _isMenuNonEmpty(context, menuItems, pathPrefixFragments),
   );
 }
 
 bool _isMenuNonEmpty(
   StaticShockPipelineContext context,
-  YamlList menuItems,
+  List menuItems,
   List<Object?> prefixPathFragments,
 ) {
   if (menuItems.isEmpty) {
@@ -50,7 +49,7 @@ bool _isMenuNonEmpty(
 (String filterName, Function filterFunction) menuItemsWherePageExistsFilterBuilder(StaticShockPipelineContext context) {
   return (
     "itemsForExistingPages",
-    (YamlList menuItems, List<Object?> pathPrefixFragments) =>
+    (List menuItems, List<Object?> pathPrefixFragments) =>
         _pageExistsForMenuItem(context, menuItems, pathPrefixFragments),
   );
 }
@@ -64,9 +63,9 @@ bool _isMenuNonEmpty(
 /// template code to assemble interpolated strings. Therefore, fragments are used, for example:
 /// Given the fragments ["guides", "getting-started"], this method searches for
 /// a [Page] with the path "guides/getting-started/".
-YamlList _pageExistsForMenuItem(
+List _pageExistsForMenuItem(
   StaticShockPipelineContext context,
-  YamlList menuItems,
+  List menuItems,
   List<Object?> prefixPathFragments,
 ) {
   final filteredMenuItems = <Object>[];
@@ -81,5 +80,5 @@ YamlList _pageExistsForMenuItem(
     }
   }
 
-  return YamlList.wrap(filteredMenuItems);
+  return filteredMenuItems;
 }

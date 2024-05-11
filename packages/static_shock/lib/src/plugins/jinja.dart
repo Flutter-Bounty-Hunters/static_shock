@@ -227,6 +227,7 @@ class JinjaPageRenderer implements PageRenderer {
       filters: jinjaFilters,
       tests: jinjaTests,
     );
+
     final hydratedLayout = template.render(pageData);
 
     // Set the page's final content to the newly hydrated layout, and set the extension to HTML.
