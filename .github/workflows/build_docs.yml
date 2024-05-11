@@ -23,6 +23,10 @@ jobs:
 
       # Build the static site
       - run: dart run bin/static_shock_docs.dart
+        env:
+          GHUB_DOC_WEBSITE_TOKEN: vars.GHUB_DOC_WEBSITE_TOKEN
+          STATIC_SHOCK_ALGOLIA_APP_ID: vars.STATIC_SHOCK_ALGOLIA_APP_ID
+          STATIC_SHOCK_ALGOLIA_API_KEY: vars.STATIC_SHOCK_ALGOLIA_API_KEY
 
       # Zip and upload the static site.
       - name: Upload artifact
