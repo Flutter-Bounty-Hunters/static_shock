@@ -26,14 +26,14 @@
       <!-- Primary page content -->
       <div class="container">
         <div class="row">
+          <nav class="col-3 d-none d-md-block">
+            {% for menuItem in docs_menu|itemsForExistingPages(["guides"]) %}
+            <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
+            {% endfor %}
+          </nav>
 
           <section class="col-md-9 col-12" style="padding-left: 48px;">
             <h1>{{ title }}</h1>
-            <nav class="col-3 d-none d-md-block">
-              {% for menuItem in docs_menu|itemsForExistingPages(["guides"]) %}
-              <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
-              {% endfor %}
-            </nav>
             {% if tableOfContents is defined and tableOfContents.linkCountBeyondLevel(0) > 1 %}
             <div class="table-of-contents">
             {{ tableOfContents.renderHtmlList(startingLevel = 1) }}
