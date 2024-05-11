@@ -33,8 +33,8 @@ Future<void> main(List<String> arguments) async {
     )
     ..loadData(DataLoader.fromFunction((context) async {
       return {
-        "algolia_app_id": Platform.environment["static_shock_algolia_app_id"] ?? "",
-        "algolia_api_key": Platform.environment["static_shock_algolia_api_key"] ?? "",
+        "algolia_app_id": Platform.environment["STATIC_SHOCK_ALGOLIA_APP_ID"] ?? "",
+        "algolia_api_key": Platform.environment["STATIC_SHOCK_ALGOLIA_API_KEY"] ?? "",
       };
     }));
 
