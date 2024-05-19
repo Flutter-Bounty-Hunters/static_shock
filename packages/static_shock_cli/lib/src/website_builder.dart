@@ -42,10 +42,8 @@ Future<int?> buildWebsite({
   final process = await Process.start(
     'dart',
     [executableFile.path, ...appArguments],
+    mode: ProcessStartMode.inheritStdio,
   );
-
-  stdout.addStream(process.stdout);
-  stderr.addStream(process.stderr);
 
   return process.exitCode;
 }
