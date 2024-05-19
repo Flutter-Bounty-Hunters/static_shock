@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import 'package:static_shock/src/files.dart';
+import 'package:static_shock/src/infrastructure/data.dart';
 import 'package:static_shock/src/pipeline.dart';
-import 'package:static_shock/src/source_files.dart';
 import 'package:yaml/yaml.dart';
 
 /// Loads data that might be needed by one or more pages.
@@ -27,43 +25,6 @@ class _FunctionalDataLoader implements DataLoader {
 }
 
 typedef DataLoaderFunction = Future<Map<String, Object>> Function(StaticShockPipelineContext context);
-
-/// Inspects all [sourceFiles] for files called `_data.yaml`, accumulates the content of those
-/// files into a [DataIndex], and returns that [DataIndex].
-Future<void> indexSourceData(StaticShockPipelineContext context, SourceFiles sourceFiles) async {
-  context.log.info("⚡ Indexing local data files into the global data index");
-
-  final dataIndex = context.dataIndex;
-  for (final directory in sourceFiles.sourceDirectories()) {
-    final dataFile = File("${directory.directory.path}${Platform.pathSeparator}_data.yaml");
-    if (!dataFile.existsSync()) {
-      continue;
-    }
-
-    final text = dataFile.readAsStringSync();
-    if (text.trim().isEmpty) {
-      // The file is empty. Ignore it.
-      continue;
-    }
-
-    context.log.detail("Indexing data from: ${dataFile.path}");
-    final yamlData = loadYaml(text) as YamlMap;
-
-    final data = _deepMergeMap(<String, dynamic>{}, yamlData);
-
-    // Special support for tags. We want user to be able to write a single tag value
-    // under "tags", but we also need tags to be mergeable as a list. Therefore, we
-    // explicitly turn a single tag into a single-item tag list.
-    //
-    // This same conversion is done in pages.dart
-    // TODO: generalize this auto-conversion so that plugins can do the same thing.
-    if (data["tags"] is String) {
-      data["tags"] = [(data["tags"] as String)];
-    }
-
-    dataIndex.mergeAtPath(DirectoryRelativePath(directory.subPath), data.cast());
-  }
-}
 
 /// A hierarchical index of data.
 ///
@@ -123,7 +84,7 @@ class DataIndex {
   Map<String, Object> inheritDataForPath(RelativePath path) {
     // Start with a deep merge into an empty Map so that we don't return
     // any references to the actual data structures held within the root node.
-    final data = _deepMergeMap({}, _data.data);
+    final data = deepMergeMap({}, _data.data);
 
     var node = _data;
     final directories = List.from(path.directories);
@@ -131,7 +92,7 @@ class DataIndex {
       final directory = directories.removeAt(0);
       node = node.children[directory]!;
 
-      _deepMergeMap(data, Map<String, dynamic>.of(node.data));
+      deepMergeMap(data, Map<String, dynamic>.of(node.data));
     }
 
     return data.cast();
@@ -183,82 +144,8 @@ class DataIndex {
 
     // Now that we've found (or created) the desired node, merge the given data with
     // whatever data already exists at that node.
-    _deepMergeMap(node.data, data);
+    deepMergeMap(node.data, data);
   }
-}
-
-/// Merges the given [newData] into [destination], replacing any [YamlMap]s along the way with
-/// standard [Map]s so that we can retain map typing as `Map<String, dynamic>`.
-Map _deepMergeMap(Map destination, Map? newData) {
-  if (newData == null) {
-    return destination;
-  }
-
-  for (final entry in newData.entries) {
-    final k = entry.key;
-    final v = entry.value;
-
-    if (!destination.containsKey(k)) {
-      if (v is YamlMap || v is Map) {
-        // We don't want to store any YamlMaps because their Map interface isn't typed. Therefore,
-        // if we treat our maps as Map<String, dynamic> it will throw exception due to YamlMap's
-        // implied type of Map<dynamic, dynamic>.
-        //
-        // We also don't want to copy Maps because we don't want other branches of
-        // the data tree altering this one.
-        destination[k] = <String, dynamic>{};
-        _deepMergeMap(destination[k], Map.fromEntries(v.entries));
-        continue;
-      }
-
-      if (v is YamlList || v is List) {
-        // We don't want to store any YamlLists because they're unmodifiable.
-        //
-        // We also don't want to copy Lists because we don't want other branches of
-        // the data tree altering this one.
-        //
-        // We need to cascade this copying of Maps and Lists for every item in the list.
-        destination[k] = _deepMergeList([], v);
-        continue;
-      }
-
-      // Direct copy from new data to destination.
-      destination[k] = v;
-      continue;
-    }
-
-    if (destination[k] is Map) {
-      // Continue merging maps deeper.
-      _deepMergeMap(destination[k], Map.of(newData[k]));
-      continue;
-    }
-
-    if (destination[k] is List && newData[k] is List) {
-      // Append the new list to the existing list.
-      _deepMergeList(destination[k], newData[k] as List);
-      continue;
-    }
-
-    // Overwrite existing value.
-    destination[k] = newData[k];
-  }
-
-  return destination;
-}
-
-List _deepMergeList(List destination, List source) {
-  return destination
-    ..addAll(
-      source.map((listItem) {
-        if (listItem is Map) {
-          return _deepMergeMap({}, listItem);
-        } else if (listItem is List) {
-          return _deepMergeList([], listItem);
-        } else {
-          return listItem;
-        }
-      }),
-    );
 }
 
 class _DataNode {
