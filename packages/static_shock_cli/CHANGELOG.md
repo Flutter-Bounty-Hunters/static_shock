@@ -1,3 +1,6 @@
+## 0.0.7 - May 20, 2024
+Same as `0.0.6` but with an incremented version number
+
 ## 0.0.6 - May 20, 2024
  * Added a template for doc websites: `shock templates docs`
  * Upgraded `static_shock` to `0.0.5`
