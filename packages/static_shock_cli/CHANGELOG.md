@@ -1,3 +1,10 @@
+## 0.0.6 - May 20, 2024
+ * Added a template for doc websites: `shock templates docs`
+ * Upgraded `static_shock` to `0.0.5`
+ * Version check is now done silently - only visible if version is out of date
+ * Improved instructions for how to upgrade their CLI version
+ * Fixed terminal colors so that they work through `shock build` and `shock serve`
+
 ## 0.0.5 - April 9, 2024
  * Upgraded `static_shock` to `0.0.4` to resolve a dependency conflict.
 
