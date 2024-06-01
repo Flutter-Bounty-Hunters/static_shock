@@ -11,14 +11,18 @@ import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 
 class MarkdownPlugin implements StaticShockPlugin {
-  const MarkdownPlugin();
+  const MarkdownPlugin({
+    this.renderOptions = const MarkdownRenderOptions(),
+  });
+
+  final MarkdownRenderOptions renderOptions;
 
   @override
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
     pipeline
       ..pick(const ExtensionPicker("md"))
       ..loadPages(MarkdownPageLoader(context.log))
-      ..renderPages(MarkdownPageRenderer(context.log));
+      ..renderPages(MarkdownPageRenderer(context.log, renderOptions));
 
     context.putTemplateFunction("md", (String markdown) => markdownToHtml(markdown, inlineOnly: true));
   }
@@ -151,10 +155,11 @@ class MarkdownPageLoader implements PageLoader {
 }
 
 class MarkdownPageRenderer implements PageRenderer {
-  const MarkdownPageRenderer(this._log);
+  const MarkdownPageRenderer(this._log, this._renderOptions);
 
   // ignore: unused_field
   final Logger _log;
+  final MarkdownRenderOptions _renderOptions;
 
   @override
   String get id => "markdown";
@@ -165,7 +170,17 @@ class MarkdownPageRenderer implements PageRenderer {
       page.destinationContent ?? page.sourceContent,
       blockSyntaxes: [
         HeaderWithIdSyntax(),
+        ..._renderOptions.blockSyntaxes,
       ],
+      inlineSyntaxes: _renderOptions.inlineSyntaxes,
+      extensionSet: _renderOptions.extensionSet,
+      linkResolver: _renderOptions.linkResolver,
+      imageLinkResolver: _renderOptions.imageLinkResolver,
+      inlineOnly: _renderOptions.inlineOnly,
+      encodeHtml: _renderOptions.encodeHtml,
+      enableTagfilter: _renderOptions.enableTagFilter,
+      withDefaultBlockSyntaxes: _renderOptions.withDefaultBlockSyntaxes,
+      withDefaultInlineSyntaxes: _renderOptions.withDefaultInlineSyntaxes,
     );
     page.destinationContent = contentHtml;
   }
@@ -174,4 +189,86 @@ class MarkdownPageRenderer implements PageRenderer {
   FutureOr<void> renderLayout(StaticShockPipelineContext context, Page page) async {
     // No-op. Markdown doesn't render page layouts.
   }
+}
+
+/// Options for how to render Markdown to HTML.
+class MarkdownRenderOptions {
+  const MarkdownRenderOptions({
+    this.blockSyntaxes = const [],
+    this.inlineSyntaxes = const [],
+    this.extensionSet,
+    this.linkResolver,
+    this.imageLinkResolver,
+    this.inlineOnly = false,
+    this.encodeHtml = true,
+    this.enableTagFilter = false,
+    this.withDefaultBlockSyntaxes = true,
+    this.withDefaultInlineSyntaxes = true,
+  });
+
+  final Iterable<BlockSyntax> blockSyntaxes;
+  final Iterable<InlineSyntax> inlineSyntaxes;
+  final ExtensionSet? extensionSet;
+  final Resolver? linkResolver;
+  final Resolver? imageLinkResolver;
+  final bool inlineOnly;
+  final bool encodeHtml;
+  final bool enableTagFilter;
+  final bool withDefaultBlockSyntaxes;
+  final bool withDefaultInlineSyntaxes;
+
+  MarkdownRenderOptions copyWith({
+    Iterable<BlockSyntax>? blockSyntaxes,
+    Iterable<InlineSyntax>? inlineSyntaxes,
+    ExtensionSet? extensionSet,
+    Resolver? linkResolver,
+    Resolver? imageLinkResolver,
+    bool? inlineOnly,
+    bool? encodeHtml,
+    bool? enableTagFilter,
+    bool? withDefaultBlockSyntaxes,
+    bool? withDefaultInlineSyntaxes,
+  }) {
+    return MarkdownRenderOptions(
+      blockSyntaxes: blockSyntaxes ?? this.blockSyntaxes,
+      inlineSyntaxes: inlineSyntaxes ?? this.inlineSyntaxes,
+      extensionSet: extensionSet ?? this.extensionSet,
+      linkResolver: linkResolver ?? this.linkResolver,
+      imageLinkResolver: imageLinkResolver ?? this.imageLinkResolver,
+      inlineOnly: inlineOnly ?? this.inlineOnly,
+      encodeHtml: encodeHtml ?? this.encodeHtml,
+      enableTagFilter: enableTagFilter ?? this.enableTagFilter,
+      withDefaultBlockSyntaxes: withDefaultBlockSyntaxes ?? this.withDefaultBlockSyntaxes,
+      withDefaultInlineSyntaxes: withDefaultInlineSyntaxes ?? this.withDefaultInlineSyntaxes,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MarkdownRenderOptions &&
+          runtimeType == other.runtimeType &&
+          blockSyntaxes == other.blockSyntaxes &&
+          inlineSyntaxes == other.inlineSyntaxes &&
+          extensionSet == other.extensionSet &&
+          linkResolver == other.linkResolver &&
+          imageLinkResolver == other.imageLinkResolver &&
+          inlineOnly == other.inlineOnly &&
+          encodeHtml == other.encodeHtml &&
+          enableTagFilter == other.enableTagFilter &&
+          withDefaultBlockSyntaxes == other.withDefaultBlockSyntaxes &&
+          withDefaultInlineSyntaxes == other.withDefaultInlineSyntaxes;
+
+  @override
+  int get hashCode =>
+      blockSyntaxes.hashCode ^
+      inlineSyntaxes.hashCode ^
+      extensionSet.hashCode ^
+      linkResolver.hashCode ^
+      imageLinkResolver.hashCode ^
+      inlineOnly.hashCode ^
+      encodeHtml.hashCode ^
+      enableTagFilter.hashCode ^
+      withDefaultBlockSyntaxes.hashCode ^
+      withDefaultInlineSyntaxes.hashCode;
 }
