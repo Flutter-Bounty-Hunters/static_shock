@@ -511,13 +511,21 @@ class StaticShock implements StaticShockPipeline {
     // Render the content for every page.
     _log.info("\nRendering content for all pages...");
     for (final page in _context.pagesIndex.pages) {
+      var didRender = false;
       for (final rendererId in page.contentRenderers) {
         for (final renderer in _pageRenderers) {
           if (renderer.id == rendererId) {
             _log.detail("Rendering page '${page.title}' content as '$rendererId'");
+            didRender = true;
             await renderer.renderContent(_context, page);
           }
         }
+      }
+
+      if (!didRender) {
+        _log.warn(
+          "Couldn't find any content renderers for page '${page.title}' - requested renderers: ${page.contentRenderers}",
+        );
       }
     }
     _timer.checkpoint(
