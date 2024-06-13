@@ -7,13 +7,13 @@ import 'package:static_shock/src/static_shock.dart';
 /// [StaticShockPlugin] that runs Tailwind CSS against the project's source files.
 ///
 /// This plugin depends on the presence of the Tailwind binary tool. By default,
-/// that tool is expected to be named `tailwind` and to sit at the root of the
+/// that tool is expected to be named `tailwindcss` and to sit at the root of the
 /// website project directory.
 ///
 /// Learn more about the standalone Tailwind tool: https://tailwindcss.com/blog/standalone-cli
 class TailwindPlugin implements StaticShockPlugin {
   const TailwindPlugin({
-    this.tailwindPath = "./tailwind",
+    this.tailwindPath = "./tailwindcss",
     required this.input,
     required this.output,
   });
@@ -78,6 +78,7 @@ class _TailwindGenerator implements Finisher {
   Future<void> execute(StaticShockPipelineContext context) async {
     try {
       context.log.info("Generating Tailwind CSS");
+      context.log.detail("Tailwind executable path: $tailwindPath");
       context.log.detail("Tailwind input file: $input");
       final result = await Process.run(
         tailwindPath,
