@@ -647,6 +647,8 @@ class StaticShock implements StaticShockPipeline {
 /// These plugins include markdown page generation, jinja pages and templates, and
 /// pretty URLs.
 abstract class StaticShockPlugin {
+  const StaticShockPlugin();
+
   /// Configures the [pipeline] to add new features that are associated with
   /// this plugin.
   FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {}

@@ -11,8 +11,8 @@ import 'package:static_shock/src/static_shock.dart';
 /// website project directory.
 ///
 /// Learn more about the standalone Tailwind tool: https://tailwindcss.com/blog/standalone-cli
-class TailwindPlugin extends StaticShockPlugin {
-  TailwindPlugin({
+class TailwindPlugin implements StaticShockPlugin {
+  const TailwindPlugin({
     this.tailwindPath = "./tailwind",
     required this.input,
     required this.output,
