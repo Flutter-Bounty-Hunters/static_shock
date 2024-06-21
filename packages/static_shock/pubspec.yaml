@@ -1,6 +1,6 @@
 name: static_shock
 description: A static site generator for Dart.
-version: 0.0.5
+version: 0.0.6
 repository: https://github.com/flutter-bounty-hunters/static_shock
 
 environment:

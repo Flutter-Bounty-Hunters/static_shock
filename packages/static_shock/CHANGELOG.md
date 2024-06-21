@@ -1,3 +1,7 @@
+## 0.0.6 - June 21, 2024
+ * Added `TailwindPlugin` for TailwindCSS support
+ * Add Markdown plugin APIs to control how it converts to HTML
+
 ## 0.0.5 - May 9, 2024
  * Created GitHub plugin
  * Created Redirects plugin
