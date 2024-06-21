@@ -10,6 +10,8 @@ docs_menu:
     id: copy-assets
   - title: Compile Sass
     id: compile-sass
+  - title: Compile TailwindCSS
+    id: compile-tailwind
   - title: Draft Articles
     id: draft-articles
   - title: Use Remote CSS and JS
