@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fbh_front_matter/fbh_front_matter.dart' as front_matter;
+import 'package:http/http.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:static_shock/src/data.dart';
@@ -36,6 +37,7 @@ class StaticShock implements StaticShockPipeline {
     this.sourceDirectoryRelativePath = "source",
     this.destinationDirectoryRelativePath = "build",
     Set<Picker>? pickers,
+    Set<RemoteFile>? remotePickers,
     Set<Excluder>? excluders,
     Set<DataLoader>? dataLoaders,
     Set<AssetTransformer>? assetTransformers,
@@ -46,6 +48,7 @@ class StaticShock implements StaticShockPipeline {
     Set<Finisher>? finishers,
     Set<StaticShockPlugin>? plugins,
   })  : _pickers = pickers ?? {},
+        _remotePickers = remotePickers ?? {},
         _excluders = excluders ??
             {
               const FilePrefixExcluder("."),
@@ -75,6 +78,20 @@ class StaticShock implements StaticShockPipeline {
   @override
   void pick(Picker picker) => _pickers.add(picker);
   late final Set<Picker> _pickers;
+
+  @override
+  void pickRemoteFile({
+    required String url,
+    required FileRelativePath simulatedLocalPath,
+  }) {
+    final uri = Uri.parse(url);
+
+    _remotePickers.add(
+      RemoteFile(uri, simulatedLocalPath),
+    );
+  }
+
+  late final Set<RemoteFile> _remotePickers;
 
   /// Adds the given [excluder] to the pipeline, which prevents files from entering
   /// the pipeline, even when they're picked by a [Picker].
@@ -200,7 +217,7 @@ class StaticShock implements StaticShockPipeline {
     _applyPlugins();
 
     // Load layouts and components
-    _loadLayoutsAndComponents();
+    await _loadLayoutsAndComponents();
 
     // Collect all data in _data.yaml files in the source set.
     await _indexSourceData(_context, _sourceFiles);
@@ -263,8 +280,10 @@ class StaticShock implements StaticShockPipeline {
     _log.info("");
   }
 
-  void _loadLayoutsAndComponents() {
+  Future<void> _loadLayoutsAndComponents() async {
     _log.info("⚡ Loading layouts and components");
+
+    // Load local layouts and components.
     for (final sourceFile in _sourceFiles.layouts()) {
       _log.detail("Layout: ${sourceFile.subPath}");
       _context.putLayout(
@@ -290,6 +309,31 @@ class StaticShock implements StaticShockPipeline {
           componentContent.content ?? componentContent.value,
         ),
       );
+    }
+
+    // Load remote layouts and components.
+    final client = Client();
+    for (final remoteFile in _remotePickers) {
+      if (remoteFile.simulatedFilePath.directoryPath.startsWith("/_includes/components/") ||
+          remoteFile.simulatedFilePath.directoryPath.startsWith("_includes/components/") ||
+          remoteFile.simulatedFilePath.directoryPath == "/_includes/components" ||
+          remoteFile.simulatedFilePath.directoryPath == "_includes/components") {
+        // This is a remote component. Add it.
+        _log.detail("Loading remote component: ${remoteFile.url}");
+        final response = await client.get(remoteFile.url);
+        final content = response.body;
+        print("Content:\n$content");
+        final componentContent = front_matter.parse(content);
+
+        _context.putComponent(
+          remoteFile.simulatedFilePath.filename,
+          Component(
+            remoteFile.simulatedFilePath,
+            Map.from(componentContent.data),
+            content,
+          ),
+        );
+      }
     }
 
     _timer.checkpoint("Load layouts & components", "Finds all layout and component files and loads them into memory");

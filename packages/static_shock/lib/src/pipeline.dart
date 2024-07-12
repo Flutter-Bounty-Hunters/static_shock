@@ -17,6 +17,13 @@ abstract class StaticShockPipeline {
   /// be pushed through the pipeline.
   void pick(Picker picker);
 
+  /// Downloads the file at the given [url] and makes it available to the rest of the
+  /// pipeline as if the file were located locally at [simulatedLocalPath].
+  void pickRemoteFile({
+    required String url,
+    required FileRelativePath simulatedLocalPath,
+  });
+
   /// Adds the given [excluder] to the pipeline, which prevents files from entering
   /// the pipeline, even when they're picked by a [Picker].
   ///

@@ -81,6 +81,13 @@ class FilePrefixExcluder implements Excluder {
   int get hashCode => _prefix.hashCode;
 }
 
+class RemoteFile {
+  const RemoteFile(this.url, this.simulatedFilePath);
+
+  final Uri url;
+  final FileRelativePath simulatedFilePath;
+}
+
 abstract class RelativePath {
   const RelativePath(this.value);
 
