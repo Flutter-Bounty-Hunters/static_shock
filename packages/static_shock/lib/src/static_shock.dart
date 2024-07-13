@@ -37,7 +37,11 @@ class StaticShock implements StaticShockPipeline {
     this.sourceDirectoryRelativePath = "source",
     this.destinationDirectoryRelativePath = "build",
     Set<Picker>? pickers,
-    Set<RemoteFile>? remotePickers,
+    Set<RemoteInclude>? remoteLayoutPickers,
+    Set<RemoteInclude>? remoteComponentPickers,
+    Set<RemoteFile>? remoteDataPickers,
+    Set<RemoteFile>? remoteAssetPickers,
+    Set<RemoteFile>? remotePagePickers,
     Set<Excluder>? excluders,
     Set<DataLoader>? dataLoaders,
     Set<AssetTransformer>? assetTransformers,
@@ -48,7 +52,11 @@ class StaticShock implements StaticShockPipeline {
     Set<Finisher>? finishers,
     Set<StaticShockPlugin>? plugins,
   })  : _pickers = pickers ?? {},
-        _remotePickers = remotePickers ?? {},
+        _remoteLayouts = remoteLayoutPickers ?? {},
+        _remoteComponents = remoteComponentPickers ?? {},
+        _remoteData = remoteDataPickers ?? {},
+        _remoteAssets = remoteAssetPickers ?? {},
+        _remotePages = remotePagePickers ?? {},
         _excluders = excluders ??
             {
               const FilePrefixExcluder("."),
@@ -80,18 +88,25 @@ class StaticShock implements StaticShockPipeline {
   late final Set<Picker> _pickers;
 
   @override
-  void pickRemoteFile({
-    required String url,
-    required FileRelativePath simulatedLocalPath,
+  void pickRemote({
+    Set<RemoteInclude>? layouts,
+    Set<RemoteInclude>? components,
+    Set<RemoteFile>? data,
+    Set<RemoteFile>? assets,
+    Set<RemoteFile>? pages,
   }) {
-    final uri = Uri.parse(url);
-
-    _remotePickers.add(
-      RemoteFile(uri, simulatedLocalPath),
-    );
+    _remoteLayouts.addAll(layouts ?? {});
+    _remoteComponents.addAll(components ?? {});
+    _remoteData.addAll(data ?? {});
+    _remoteAssets.addAll(assets ?? {});
+    _remotePages.addAll(pages ?? {});
   }
 
-  late final Set<RemoteFile> _remotePickers;
+  late final Set<RemoteInclude> _remoteLayouts;
+  late final Set<RemoteInclude> _remoteComponents;
+  late final Set<RemoteFile> _remoteData;
+  late final Set<RemoteFile> _remoteAssets;
+  late final Set<RemoteFile> _remotePages;
 
   /// Adds the given [excluder] to the pipeline, which prevents files from entering
   /// the pipeline, even when they're picked by a [Picker].
@@ -220,7 +235,7 @@ class StaticShock implements StaticShockPipeline {
     await _loadLayoutsAndComponents();
 
     // Collect all data in _data.yaml files in the source set.
-    await _indexSourceData(_context, _sourceFiles);
+    await _loadData(_context, _sourceFiles);
 
     // Pick the files.
     _pickAllSourceFiles();
@@ -283,7 +298,57 @@ class StaticShock implements StaticShockPipeline {
   Future<void> _loadLayoutsAndComponents() async {
     _log.info("⚡ Loading layouts and components");
 
-    // Load local layouts and components.
+    // Load remote layouts and components. We do this before local layouts and components
+    // so that local layouts and components can overwrite remove values.
+    final client = Client();
+
+    // Load remote layouts.
+    for (final remoteLayout in _remoteLayouts) {
+      _log.detail("Loading remote layout: ${remoteLayout.url}");
+      late final Uri url;
+      try {
+        url = Uri.parse(remoteLayout.url);
+      } catch (exception) {
+        _log.err("Couldn't parse the URL for the remote layout (ignoring it): ${remoteLayout.url}.");
+        continue;
+      }
+      final response = await client.get(url);
+      final content = response.body;
+
+      _context.putLayout(
+        Layout(
+          remoteLayout.simulatedLayoutPath,
+          content,
+        ),
+      );
+    }
+
+    // Load remote components.
+    for (final remoteComponent in _remoteComponents) {
+      _log.detail("Loading remote component: ${remoteComponent.url}");
+      late final Uri url;
+      try {
+        url = Uri.parse(remoteComponent.url);
+      } catch (exception) {
+        _log.err("Couldn't parse the URL for the remote component (ignoring it): ${remoteComponent.url}.");
+        continue;
+      }
+      final response = await client.get(url);
+      final content = response.body;
+      final componentContent = front_matter.parse(content);
+
+      _context.putComponent(
+        remoteComponent.name,
+        Component(
+          remoteComponent.simulatedComponentPath,
+          Map.from(componentContent.data),
+          content,
+        ),
+      );
+    }
+
+    // Load local layouts and components. We do this after loading remove values so
+    // that local values can overwrite remote values.
     for (final sourceFile in _sourceFiles.layouts()) {
       _log.detail("Layout: ${sourceFile.subPath}");
       _context.putLayout(
@@ -311,41 +376,54 @@ class StaticShock implements StaticShockPipeline {
       );
     }
 
-    // Load remote layouts and components.
-    final client = Client();
-    for (final remoteFile in _remotePickers) {
-      if (remoteFile.simulatedFilePath.directoryPath.startsWith("/_includes/components/") ||
-          remoteFile.simulatedFilePath.directoryPath.startsWith("_includes/components/") ||
-          remoteFile.simulatedFilePath.directoryPath == "/_includes/components" ||
-          remoteFile.simulatedFilePath.directoryPath == "_includes/components") {
-        // This is a remote component. Add it.
-        _log.detail("Loading remote component: ${remoteFile.url}");
-        final response = await client.get(remoteFile.url);
-        final content = response.body;
-        print("Content:\n$content");
-        final componentContent = front_matter.parse(content);
-
-        _context.putComponent(
-          remoteFile.simulatedFilePath.filename,
-          Component(
-            remoteFile.simulatedFilePath,
-            Map.from(componentContent.data),
-            content,
-          ),
-        );
-      }
-    }
-
     _timer.checkpoint("Load layouts & components", "Finds all layout and component files and loads them into memory");
     _log.info("");
   }
 
   /// Inspects all [sourceFiles] for files called `_data.yaml`, accumulates the content of those
   /// files into a [DataIndex], and returns that [DataIndex].
-  Future<void> _indexSourceData(StaticShockPipelineContext context, SourceFiles sourceFiles) async {
+  Future<void> _loadData(StaticShockPipelineContext context, SourceFiles sourceFiles) async {
     _log.info("⚡ Indexing local data files into the global data index");
-
     final dataIndex = context.dataIndex;
+
+    // Load remote data. We do this before local data so that remote data can be
+    // overwritten by remote data.
+    final client = Client();
+    for (final remoteData in _remoteData) {
+      _log.detail("Loading remote data: ${remoteData.url}");
+      late final Uri url;
+      try {
+        url = Uri.parse(remoteData.url);
+      } catch (exception) {
+        _log.err("Couldn't parse the URL for the remote data (ignoring it): ${remoteData.url}.");
+        continue;
+      }
+      final response = await client.get(url);
+      final text = response.body;
+      if (text.trim().isEmpty) {
+        // The file is empty. Ignore it.
+        continue;
+      }
+
+      final yamlData = loadYaml(text) as YamlMap;
+
+      final data = deepMergeMap(<String, dynamic>{}, yamlData);
+
+      // Special support for tags. We want user to be able to write a single tag value
+      // under "tags", but we also need tags to be mergeable as a list. Therefore, we
+      // explicitly turn a single tag into a single-item tag list.
+      //
+      // This same conversion is done in pages.dart
+      // TODO: generalize this auto-conversion so that plugins can do the same thing.
+      if (data["tags"] is String) {
+        data["tags"] = [(data["tags"] as String)];
+      }
+
+      dataIndex.mergeAtPath(remoteData.simulatedFilePath.containingDirectory, data.cast());
+    }
+
+    // Load local data. We do this after the remote data so that local data overwrites
+    // duplicated remote paths.
     for (final directory in sourceFiles.sourceDirectories()) {
       final dataFile = File("${directory.directory.path}${Platform.pathSeparator}_data.yaml");
       if (!dataFile.existsSync()) {
@@ -430,13 +508,109 @@ class StaticShock implements StaticShockPipeline {
   Future<void> _loadPagesAndAssets() async {
     _log.info("⚡ Loading pages and assets");
 
+    // Load remote pages and assets. We do this before local page and assets so
+    // that local files can overwrite remote files.
+    final client = Client();
+
+    // Load remote pages.
+    for (final remotePage in _remotePages) {
+      _log.detail("Loading remote page: ${remotePage.url}");
+      late final Uri url;
+      try {
+        url = Uri.parse(remotePage.url);
+      } catch (exception) {
+        _log.err("Couldn't parse the URL for the remote page (ignoring it): ${remotePage.url}.");
+        continue;
+      }
+      final response = await client.get(url);
+      final content = response.body;
+
+      final page = Page(remotePage.simulatedFilePath, content);
+
+      final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath);
+      page.data.addEntries(inheritedData.entries);
+
+      // Check for a desired base path override, and apply it.
+      String? basePath = page.data['basePath'];
+      if (basePath != null && basePath.isNotEmpty) {
+        if (basePath.startsWith("/")) {
+          // Chop off leading "/".
+          //
+          // A "/" is acceptable from a URL perspective, where it refers to the root
+          // of the website. However, from a file system perspective, a "/" refers to
+          // the root of the file system. We don't want to write files to the root of
+          // the file system.
+          basePath = basePath.substring(1);
+        }
+
+        _log.detail("Overriding default page URL:\nFrom: ${page.destinationPath?.value}\nTo: $basePath");
+        page.destinationPath = page.destinationPath!.copyWith(directoryPath: basePath);
+      }
+
+      _context.pagesIndex.addPage(page);
+    }
+
+    // Load remote assets.
+    for (final remoteAsset in _remoteAssets) {
+      _log.detail("Loading remote asset: ${remoteAsset.url}");
+      late final Uri url;
+      try {
+        url = Uri.parse(remoteAsset.url);
+      } catch (exception) {
+        _log.err("Couldn't parse the URL for the remote asset (ignoring it): ${remoteAsset.url}.");
+        continue;
+      }
+      final response = await client.get(url);
+
+      late final AssetContent content;
+      final contentType = response.headers["content-type"];
+      if (contentType == null || contentType.isEmpty) {
+        _log.err("Remote asset didn't report its content type. We don't know how to process it. Ignoring it.");
+        continue;
+      }
+
+      if (contentType.startsWith("text")) {
+        try {
+          // Try to read as plain text, first.
+          final textContent = response.body;
+          content = AssetContent.text(textContent);
+        } catch (exception) {
+          _log.err("The remote asset reported as a text asset, but we encountered an error when treating it as text.");
+          _log.err("$exception");
+          continue;
+        }
+      } else {
+        try {
+          // The content wasn't plain text. Try to read as binary.
+          final binary = response.bodyBytes;
+          content = AssetContent.binary(binary);
+        } catch (exception) {
+          _log.err(
+              "The remote asset reported as a binary asset, but we encountered an error when treating it as binary.");
+          _log.err("$exception");
+          continue;
+        }
+      }
+
+      _context.addAsset(Asset(
+        sourcePath: remoteAsset.simulatedFilePath,
+        sourceContent: content,
+        // By default, we assume a direct copy of each asset. Asset transformers
+        // can change this decision later.
+        destinationPath: remoteAsset.simulatedFilePath,
+        destinationContent: content,
+      ));
+    }
+
+    // Load local pages and assets. We do this 2nd so that they override any remote
+    // pages and assets.
     pickerLoop:
     for (final pickedFile in _files) {
       late AssetContent content;
 
       final file = _resolveSourceFile(pickedFile);
-      // Try to read as plain text, first.
       try {
+        // Try to read as plain text, first.
         final textContent = file.readAsStringSync();
         content = AssetContent.text(textContent);
       } catch (exception) {

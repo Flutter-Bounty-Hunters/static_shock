@@ -81,10 +81,29 @@ class FilePrefixExcluder implements Excluder {
   int get hashCode => _prefix.hashCode;
 }
 
-class RemoteFile {
-  const RemoteFile(this.url, this.simulatedFilePath);
+class RemoteInclude {
+  const RemoteInclude({
+    required this.url,
+    required this.name,
+    this.extension = "jinja",
+  });
 
-  final Uri url;
+  final String url;
+  final String name;
+  final String extension;
+
+  FileRelativePath get simulatedLayoutPath => FileRelativePath("/_includes/layouts/", name, extension);
+
+  FileRelativePath get simulatedComponentPath => FileRelativePath("/_includes/components/", name, extension);
+}
+
+class RemoteFile {
+  const RemoteFile({
+    required this.url,
+    required this.simulatedFilePath,
+  });
+
+  final String url;
   final FileRelativePath simulatedFilePath;
 }
 
@@ -154,6 +173,8 @@ class FileRelativePath implements RelativePath {
   final String directoryPath;
   final String filename;
   final String extension;
+
+  DirectoryRelativePath get containingDirectory => DirectoryRelativePath(directoryPath);
 
   @override
   List<String> get directories => directoryPath.split(Platform.pathSeparator).where((item) => item.isNotEmpty).toList();

@@ -17,13 +17,6 @@ abstract class StaticShockPipeline {
   /// be pushed through the pipeline.
   void pick(Picker picker);
 
-  /// Downloads the file at the given [url] and makes it available to the rest of the
-  /// pipeline as if the file were located locally at [simulatedLocalPath].
-  void pickRemoteFile({
-    required String url,
-    required FileRelativePath simulatedLocalPath,
-  });
-
   /// Adds the given [excluder] to the pipeline, which prevents files from entering
   /// the pipeline, even when they're picked by a [Picker].
   ///
@@ -34,6 +27,16 @@ abstract class StaticShockPipeline {
   ///       .exclude(FilePicker.parse("**/.DS_Store");
   ///
   void exclude(Excluder excluder);
+
+  /// Pick all given remote files, which are then pushed through the pipeline as
+  /// the described type of artifact, e.g., component vs page vs asset.
+  void pickRemote({
+    Set<RemoteInclude>? layouts,
+    Set<RemoteInclude>? components,
+    Set<RemoteFile>? data,
+    Set<RemoteFile>? assets,
+    Set<RemoteFile>? pages,
+  });
 
   /// Adds the given [DataLoader] to the pipeline, which loads external data before
   /// any assets or pages are loaded.
