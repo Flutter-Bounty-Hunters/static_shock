@@ -87,6 +87,12 @@ class StaticShock implements StaticShockPipeline {
   void pick(Picker picker) => _pickers.add(picker);
   late final Set<Picker> _pickers;
 
+  /// Adds the given [excluder] to the pipeline, which prevents files from entering
+  /// the pipeline, even when they're picked by a [Picker].
+  @override
+  void exclude(Excluder excluder) => _excluders.add(excluder);
+  late final Set<Excluder> _excluders;
+
   @override
   void pickRemote({
     Set<RemoteIncludeSource>? layouts,
@@ -107,12 +113,6 @@ class StaticShock implements StaticShockPipeline {
   late final Set<RemoteFileSource> _remoteData;
   late final Set<RemoteFileSource> _remoteAssets;
   late final Set<RemoteFileSource> _remotePages;
-
-  /// Adds the given [excluder] to the pipeline, which prevents files from entering
-  /// the pipeline, even when they're picked by a [Picker].
-  @override
-  void exclude(Excluder excluder) => _excluders.add(excluder);
-  late final Set<Excluder> _excluders;
 
   /// Adds the given [DataLoader] to the pipeline, which loads external data before
   /// any assets or pages are loaded.
