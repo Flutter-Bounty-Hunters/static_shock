@@ -89,11 +89,11 @@ class StaticShock implements StaticShockPipeline {
 
   @override
   void pickRemote({
-    Set<RemoteInclude>? layouts,
-    Set<RemoteInclude>? components,
-    Set<RemoteFile>? data,
-    Set<RemoteFile>? assets,
-    Set<RemoteFile>? pages,
+    Set<RemoteIncludeSource>? layouts,
+    Set<RemoteIncludeSource>? components,
+    Set<RemoteFileSource>? data,
+    Set<RemoteFileSource>? assets,
+    Set<RemoteFileSource>? pages,
   }) {
     _remoteLayouts.addAll(layouts ?? {});
     _remoteComponents.addAll(components ?? {});
@@ -102,11 +102,11 @@ class StaticShock implements StaticShockPipeline {
     _remotePages.addAll(pages ?? {});
   }
 
-  late final Set<RemoteInclude> _remoteLayouts;
-  late final Set<RemoteInclude> _remoteComponents;
-  late final Set<RemoteFile> _remoteData;
-  late final Set<RemoteFile> _remoteAssets;
-  late final Set<RemoteFile> _remotePages;
+  late final Set<RemoteIncludeSource> _remoteLayouts;
+  late final Set<RemoteIncludeSource> _remoteComponents;
+  late final Set<RemoteFileSource> _remoteData;
+  late final Set<RemoteFileSource> _remoteAssets;
+  late final Set<RemoteFileSource> _remotePages;
 
   /// Adds the given [excluder] to the pipeline, which prevents files from entering
   /// the pipeline, even when they're picked by a [Picker].
@@ -301,51 +301,40 @@ class StaticShock implements StaticShockPipeline {
     // Load remote layouts and components. We do this before local layouts and components
     // so that local layouts and components can overwrite remove values.
     final client = Client();
+    final remoteLoadFutures = <Future>[];
 
     // Load remote layouts.
     for (final remoteLayout in _remoteLayouts) {
-      _log.detail("Loading remote layout: ${remoteLayout.url}");
-      late final Uri url;
-      try {
-        url = Uri.parse(remoteLayout.url);
-      } catch (exception) {
-        _log.err("Couldn't parse the URL for the remote layout (ignoring it): ${remoteLayout.url}.");
-        continue;
+      switch (remoteLayout) {
+        case HttpIncludeGroup includes:
+          for (final include in includes) {
+            remoteLoadFutures.add(
+              _loadRemoteLayout(client, include),
+            );
+          }
+        case RemoteInclude include:
+          remoteLoadFutures.add(
+            _loadRemoteLayout(client, include),
+          );
       }
-      final response = await client.get(url);
-      final content = response.body;
-
-      _context.putLayout(
-        Layout(
-          remoteLayout.simulatedLayoutPath,
-          content,
-        ),
-      );
     }
 
     // Load remote components.
     for (final remoteComponent in _remoteComponents) {
-      _log.detail("Loading remote component: ${remoteComponent.url}");
-      late final Uri url;
-      try {
-        url = Uri.parse(remoteComponent.url);
-      } catch (exception) {
-        _log.err("Couldn't parse the URL for the remote component (ignoring it): ${remoteComponent.url}.");
-        continue;
+      switch (remoteComponent) {
+        case HttpIncludeGroup includes:
+          for (final include in includes) {
+            remoteLoadFutures.add(
+              _loadRemoteComponent(client, include),
+            );
+          }
+        case RemoteInclude include:
+          remoteLoadFutures.add(
+            _loadRemoteComponent(client, include),
+          );
       }
-      final response = await client.get(url);
-      final content = response.body;
-      final componentContent = front_matter.parse(content);
-
-      _context.putComponent(
-        remoteComponent.name,
-        Component(
-          remoteComponent.simulatedComponentPath,
-          Map.from(componentContent.data),
-          content,
-        ),
-      );
     }
+    await Future.wait(remoteLoadFutures);
 
     // Load local layouts and components. We do this after loading remove values so
     // that local values can overwrite remote values.
@@ -380,6 +369,49 @@ class StaticShock implements StaticShockPipeline {
     _log.info("");
   }
 
+  Future<void> _loadRemoteLayout(Client client, RemoteInclude remoteLayout) async {
+    _log.detail("Loading remote layout: ${remoteLayout.url}");
+    late final Uri url;
+    try {
+      url = Uri.parse(remoteLayout.url);
+    } catch (exception) {
+      _log.err("Couldn't parse the URL for the remote layout (ignoring it): ${remoteLayout.url}.");
+      return;
+    }
+    final response = await client.get(url);
+    final content = response.body;
+
+    _context.putLayout(
+      Layout(
+        remoteLayout.simulatedLayoutPath,
+        content,
+      ),
+    );
+  }
+
+  Future<void> _loadRemoteComponent(Client client, RemoteInclude remoteComponent) async {
+    _log.detail("Loading remote component: ${remoteComponent.url}");
+    late final Uri url;
+    try {
+      url = Uri.parse(remoteComponent.url);
+    } catch (exception) {
+      _log.err("Couldn't parse the URL for the remote component (ignoring it): ${remoteComponent.url}.");
+      return;
+    }
+    final response = await client.get(url);
+    final content = response.body;
+    final componentContent = front_matter.parse(content);
+
+    _context.putComponent(
+      remoteComponent.name,
+      Component(
+        remoteComponent.simulatedComponentPath,
+        Map.from(componentContent.data),
+        content,
+      ),
+    );
+  }
+
   /// Inspects all [sourceFiles] for files called `_data.yaml`, accumulates the content of those
   /// files into a [DataIndex], and returns that [DataIndex].
   Future<void> _loadData(StaticShockPipelineContext context, SourceFiles sourceFiles) async {
@@ -389,38 +421,22 @@ class StaticShock implements StaticShockPipeline {
     // Load remote data. We do this before local data so that remote data can be
     // overwritten by remote data.
     final client = Client();
+    final remoteLoadFutures = <Future>[];
     for (final remoteData in _remoteData) {
-      _log.detail("Loading remote data: ${remoteData.url}");
-      late final Uri url;
-      try {
-        url = Uri.parse(remoteData.url);
-      } catch (exception) {
-        _log.err("Couldn't parse the URL for the remote data (ignoring it): ${remoteData.url}.");
-        continue;
+      switch (remoteData) {
+        case HttpFileGroup remoteDataGroup:
+          for (final remoteData in remoteDataGroup) {
+            remoteLoadFutures.add(
+              _loadRemoteData(client, remoteData),
+            );
+          }
+        case RemoteFile remoteData:
+          remoteLoadFutures.add(
+            _loadRemoteData(client, remoteData),
+          );
       }
-      final response = await client.get(url);
-      final text = response.body;
-      if (text.trim().isEmpty) {
-        // The file is empty. Ignore it.
-        continue;
-      }
-
-      final yamlData = loadYaml(text) as YamlMap;
-
-      final data = deepMergeMap(<String, dynamic>{}, yamlData);
-
-      // Special support for tags. We want user to be able to write a single tag value
-      // under "tags", but we also need tags to be mergeable as a list. Therefore, we
-      // explicitly turn a single tag into a single-item tag list.
-      //
-      // This same conversion is done in pages.dart
-      // TODO: generalize this auto-conversion so that plugins can do the same thing.
-      if (data["tags"] is String) {
-        data["tags"] = [(data["tags"] as String)];
-      }
-
-      dataIndex.mergeAtPath(remoteData.simulatedFilePath.containingDirectory, data.cast());
     }
+    await Future.wait(remoteLoadFutures);
 
     // Load local data. We do this after the remote data so that local data overwrites
     // duplicated remote paths.
@@ -459,6 +475,39 @@ class StaticShock implements StaticShockPipeline {
       "Finds all local data files and loads that data into the global pipeline index",
     );
     _log.info("");
+  }
+
+  Future<void> _loadRemoteData(Client client, RemoteFile remoteData) async {
+    _log.detail("Loading remote data: ${remoteData.url}");
+    late final Uri url;
+    try {
+      url = Uri.parse(remoteData.url);
+    } catch (exception) {
+      _log.err("Couldn't parse the URL for the remote data (ignoring it): ${remoteData.url}.");
+      return;
+    }
+    final response = await client.get(url);
+    final text = response.body;
+    if (text.trim().isEmpty) {
+      // The file is empty. Ignore it.
+      return;
+    }
+
+    final yamlData = loadYaml(text) as YamlMap;
+
+    final data = deepMergeMap(<String, dynamic>{}, yamlData);
+
+    // Special support for tags. We want user to be able to write a single tag value
+    // under "tags", but we also need tags to be mergeable as a list. Therefore, we
+    // explicitly turn a single tag into a single-item tag list.
+    //
+    // This same conversion is done in pages.dart
+    // TODO: generalize this auto-conversion so that plugins can do the same thing.
+    if (data["tags"] is String) {
+      data["tags"] = [(data["tags"] as String)];
+    }
+
+    _context.dataIndex.mergeAtPath(remoteData.buildPath.containingDirectory, data.cast());
   }
 
   void _pickAllSourceFiles() {
@@ -511,96 +560,34 @@ class StaticShock implements StaticShockPipeline {
     // Load remote pages and assets. We do this before local page and assets so
     // that local files can overwrite remote files.
     final client = Client();
+    final remoteLoadFutures = <Future>[];
 
     // Load remote pages.
     for (final remotePage in _remotePages) {
-      _log.detail("Loading remote page: ${remotePage.url}");
-      late final Uri url;
-      try {
-        url = Uri.parse(remotePage.url);
-      } catch (exception) {
-        _log.err("Couldn't parse the URL for the remote page (ignoring it): ${remotePage.url}.");
-        continue;
+      switch (remotePage) {
+        case HttpFileGroup remotePageGroup:
+          for (final remotePage in remotePageGroup) {
+            remoteLoadFutures.add(
+              _loadRemotePage(client, remotePage),
+            );
+          }
+        case RemoteFile remotePage:
+          remoteLoadFutures.add(_loadRemotePage(client, remotePage));
       }
-      final response = await client.get(url);
-      final content = response.body;
-
-      final page = Page(remotePage.simulatedFilePath, content);
-
-      final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath);
-      page.data.addEntries(inheritedData.entries);
-
-      // Check for a desired base path override, and apply it.
-      String? basePath = page.data['basePath'];
-      if (basePath != null && basePath.isNotEmpty) {
-        if (basePath.startsWith("/")) {
-          // Chop off leading "/".
-          //
-          // A "/" is acceptable from a URL perspective, where it refers to the root
-          // of the website. However, from a file system perspective, a "/" refers to
-          // the root of the file system. We don't want to write files to the root of
-          // the file system.
-          basePath = basePath.substring(1);
-        }
-
-        _log.detail("Overriding default page URL:\nFrom: ${page.destinationPath?.value}\nTo: $basePath");
-        page.destinationPath = page.destinationPath!.copyWith(directoryPath: basePath);
-      }
-
-      _context.pagesIndex.addPage(page);
     }
 
     // Load remote assets.
     for (final remoteAsset in _remoteAssets) {
-      _log.detail("Loading remote asset: ${remoteAsset.url}");
-      late final Uri url;
-      try {
-        url = Uri.parse(remoteAsset.url);
-      } catch (exception) {
-        _log.err("Couldn't parse the URL for the remote asset (ignoring it): ${remoteAsset.url}.");
-        continue;
+      switch (remoteAsset) {
+        case HttpFileGroup remoteAssetGroup:
+          for (final remoteAsset in remoteAssetGroup) {
+            remoteLoadFutures.add(_loadRemoteAsset(client, remoteAsset));
+          }
+        case RemoteFile remoteAsset:
+          remoteLoadFutures.add(_loadRemoteAsset(client, remoteAsset));
       }
-      final response = await client.get(url);
-
-      late final AssetContent content;
-      final contentType = response.headers["content-type"];
-      if (contentType == null || contentType.isEmpty) {
-        _log.err("Remote asset didn't report its content type. We don't know how to process it. Ignoring it.");
-        continue;
-      }
-
-      if (contentType.startsWith("text")) {
-        try {
-          // Try to read as plain text, first.
-          final textContent = response.body;
-          content = AssetContent.text(textContent);
-        } catch (exception) {
-          _log.err("The remote asset reported as a text asset, but we encountered an error when treating it as text.");
-          _log.err("$exception");
-          continue;
-        }
-      } else {
-        try {
-          // The content wasn't plain text. Try to read as binary.
-          final binary = response.bodyBytes;
-          content = AssetContent.binary(binary);
-        } catch (exception) {
-          _log.err(
-              "The remote asset reported as a binary asset, but we encountered an error when treating it as binary.");
-          _log.err("$exception");
-          continue;
-        }
-      }
-
-      _context.addAsset(Asset(
-        sourcePath: remoteAsset.simulatedFilePath,
-        sourceContent: content,
-        // By default, we assume a direct copy of each asset. Asset transformers
-        // can change this decision later.
-        destinationPath: remoteAsset.simulatedFilePath,
-        destinationContent: content,
-      ));
     }
+    await Future.wait(remoteLoadFutures);
 
     // Load local pages and assets. We do this 2nd so that they override any remote
     // pages and assets.
@@ -672,6 +659,94 @@ class StaticShock implements StaticShockPipeline {
 
     _timer.checkpoint("Load pages & assets", "Finds all local page and asset files and loads them into memory");
     _log.info("");
+  }
+
+  Future<void> _loadRemotePage(Client client, RemoteFile remotePage) async {
+    _log.detail("Loading remote page: ${remotePage.url}");
+    late final Uri url;
+    try {
+      url = Uri.parse(remotePage.url);
+    } catch (exception) {
+      _log.err("Couldn't parse the URL for the remote page (ignoring it): ${remotePage.url}.");
+      return;
+    }
+    final response = await client.get(url);
+    final content = response.body;
+
+    final page = Page(remotePage.buildPath, content);
+
+    final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath);
+    page.data.addEntries(inheritedData.entries);
+
+    // Check for a desired base path override, and apply it.
+    String? basePath = page.data['basePath'];
+    if (basePath != null && basePath.isNotEmpty) {
+      if (basePath.startsWith("/")) {
+        // Chop off leading "/".
+        //
+        // A "/" is acceptable from a URL perspective, where it refers to the root
+        // of the website. However, from a file system perspective, a "/" refers to
+        // the root of the file system. We don't want to write files to the root of
+        // the file system.
+        basePath = basePath.substring(1);
+      }
+
+      _log.detail("Overriding default page URL:\nFrom: ${page.destinationPath?.value}\nTo: $basePath");
+      page.destinationPath = page.destinationPath!.copyWith(directoryPath: basePath);
+    }
+
+    _context.pagesIndex.addPage(page);
+  }
+
+  Future<void> _loadRemoteAsset(Client client, RemoteFile remoteAsset) async {
+    _log.detail("Loading remote asset: ${remoteAsset.url}");
+    late final Uri url;
+    try {
+      url = Uri.parse(remoteAsset.url);
+    } catch (exception) {
+      _log.err("Couldn't parse the URL for the remote asset (ignoring it): ${remoteAsset.url}.");
+      return;
+    }
+    final response = await client.get(url);
+
+    late final AssetContent content;
+    final contentType = response.headers["content-type"];
+    if (contentType == null || contentType.isEmpty) {
+      _log.err("Remote asset didn't report its content type. We don't know how to process it. Ignoring it.");
+      return;
+    }
+
+    if (contentType.startsWith("text")) {
+      try {
+        // Try to read as plain text, first.
+        final textContent = response.body;
+        content = AssetContent.text(textContent);
+      } catch (exception) {
+        _log.err("The remote asset reported as a text asset, but we encountered an error when treating it as text.");
+        _log.err("$exception");
+        return;
+      }
+    } else {
+      try {
+        // The content wasn't plain text. Try to read as binary.
+        final binary = response.bodyBytes;
+        content = AssetContent.binary(binary);
+      } catch (exception) {
+        _log.err(
+            "The remote asset reported as a binary asset, but we encountered an error when treating it as binary.");
+        _log.err("$exception");
+        return;
+      }
+    }
+
+    _context.addAsset(Asset(
+      sourcePath: remoteAsset.buildPath,
+      sourceContent: content,
+      // By default, we assume a direct copy of each asset. Asset transformers
+      // can change this decision later.
+      destinationPath: remoteAsset.buildPath,
+      destinationContent: content,
+    ));
   }
 
   Future<void> _transformPages() async {

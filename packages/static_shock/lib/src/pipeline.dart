@@ -31,11 +31,11 @@ abstract class StaticShockPipeline {
   /// Pick all given remote files, which are then pushed through the pipeline as
   /// the described type of artifact, e.g., component vs page vs asset.
   void pickRemote({
-    Set<RemoteInclude>? layouts,
-    Set<RemoteInclude>? components,
-    Set<RemoteFile>? data,
-    Set<RemoteFile>? assets,
-    Set<RemoteFile>? pages,
+    Set<RemoteIncludeSource>? layouts,
+    Set<RemoteIncludeSource>? components,
+    Set<RemoteFileSource>? data,
+    Set<RemoteFileSource>? assets,
+    Set<RemoteFileSource>? pages,
   });
 
   /// Adds the given [DataLoader] to the pipeline, which loads external data before
