@@ -1,3 +1,6 @@
+## 0.0.7 - July 13, 2024
+ * Added picking of remote files and remote layouts/components
+
 ## 0.0.6 - June 21, 2024
  * Added `TailwindPlugin` for TailwindCSS support
  * Add Markdown plugin APIs to control how it converts to HTML
