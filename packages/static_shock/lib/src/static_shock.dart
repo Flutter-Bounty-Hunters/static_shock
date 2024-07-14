@@ -765,8 +765,11 @@ class StaticShock implements StaticShockPipeline {
   Future<void> _transformAssets() async {
     _log.info("⚡ Transforming assets");
 
-    for (final asset in _context.assets) {
-      for (final transformer in _assetTransformers) {
+    // Order is important: Each transformer should be given every asset before going
+    // to the next transformer. This allows transformers to be added in phases, for
+    // example, to first cache all the Sass stylsheets, and then second to compile them.
+    for (final transformer in _assetTransformers) {
+      for (final asset in _context.assets) {
         await transformer.transformAsset(_context, asset);
       }
     }
