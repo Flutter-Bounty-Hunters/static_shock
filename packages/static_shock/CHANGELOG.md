@@ -1,3 +1,6 @@
+## 0.0.8 - July 13, 2024
+ * Fix: Path bug with remote includes in `v0.0.7`
+
 ## 0.0.7 - July 13, 2024
  * Added picking of remote files and remote layouts/components
 
