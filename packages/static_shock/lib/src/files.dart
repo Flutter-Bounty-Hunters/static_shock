@@ -268,14 +268,14 @@ class RemoteInclude implements RemoteIncludeSource {
   ///
   /// This path allows the Static Shock pipeline to treat this remote layout as
   /// if it were a local layout.
-  FileRelativePath get simulatedLayoutPath => FileRelativePath("/_includes/layouts/", name, extension);
+  FileRelativePath get simulatedLayoutPath => FileRelativePath("_includes/layouts/", name, extension);
 
   /// A simulated file path that pretends this remote component came from the
   /// source directory at the given relative path.
   ///
   /// This path allows the Static Shock pipeline to treat this remote component as
   /// if it were a local component.
-  FileRelativePath get simulatedComponentPath => FileRelativePath("/_includes/components/", name, extension);
+  FileRelativePath get simulatedComponentPath => FileRelativePath("_includes/components/", name, extension);
 }
 
 /// A source of one or more remote include files (e.g., layouts and components).
