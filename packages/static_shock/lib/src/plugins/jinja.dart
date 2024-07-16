@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -228,7 +229,19 @@ class JinjaPageRenderer implements PageRenderer {
       tests: jinjaTests,
     );
 
-    final hydratedLayout = template.render(pageData);
+    late final String hydratedLayout;
+    try {
+      hydratedLayout = template.render(pageData);
+    } catch (exception) {
+      _log.err("Failed to hydrate template for page: ${page.title}");
+      _log.err("Error: $exception");
+      _log.warn("Available data:");
+      for (final entry in pageData.entries) {
+        _log.warn(" - ${entry.key}: ${entry.value}");
+      }
+
+      rethrow;
+    }
 
     // Set the page's final content to the newly hydrated layout, and set the extension to HTML.
     page.destinationContent = hydratedLayout;
