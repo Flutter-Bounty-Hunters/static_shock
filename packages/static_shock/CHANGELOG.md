@@ -1,3 +1,7 @@
+## 0.0.9 - July 13, 2024
+ * Fix: Remote Sass files can import other remote Sass files that sit in the same directory 
+   (still need to add support for relative and absolute paths)
+
 ## 0.0.8 - July 13, 2024
  * Fix: Path bug with remote includes in `v0.0.7`
 
