@@ -144,9 +144,13 @@ class SassEnvironment extends sass.Importer {
 
   @override
   sass.ImporterResult? load(Uri url) {
-    final content = cache[url.path];
+    final content = cache[url.path] ?? cache["${url.path}.scss"] ?? cache["${url.path}.sass"];
     if (content == null || content.isEmpty) {
-      _log.warn("Tried to import a Sass file that isn't available in the SassEnvironment: $url");
+      _log.warn("Tried to import a Sass file that isn't available in the SassEnvironment: ${url.path}");
+      _log.warn("Available Sass files in environment:");
+      for (final path in cache.keys) {
+        _log.warn(" - $path");
+      }
       return null;
     }
 
