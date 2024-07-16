@@ -1,3 +1,6 @@
+## 0.0.10 - July 16, 2024
+ * Fix: When resolving Sass imports, check for `<name>`, `<name>.scss`, and `<name>.sass`.
+
 ## 0.0.9 - July 13, 2024
  * Fix: Remote Sass files can import other remote Sass files that sit in the same directory 
    (still need to add support for relative and absolute paths)
