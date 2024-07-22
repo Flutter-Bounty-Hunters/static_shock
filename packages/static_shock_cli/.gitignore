@@ -1,4 +1,4 @@
-/test/.template_test_output
+.template_test_output/
 
 # https://dart.dev/guides/libraries/private-files
 # Created by `dart pub`

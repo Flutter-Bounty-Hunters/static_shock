@@ -32,7 +32,31 @@ Activate the local package from the `static_shock_cli` directory:
 
     dart pub global activate --source=path .
 
-## Working with templates
+## Project Templates
+The Static Shock CLI helps users get started by creating an initial project
+structure. The user can choose from multiple options, e.g., blog, documentation,
+empty. Each of these starting project structures are called project templates.
+
+Each template requires 3 representations:
+* A buildable/runnable version to verify the correctness of the template.
+    * Located at `/template_sources/**`
+* A Mason "brick" version with values replaced by Mustache variables so it can be configured by users.
+    * Located at `/static_shock_cli/templates/**`
+* A Mason "bundle", which reduces the "brick" down to a single file to be included in the CLI package.
+    * Located at `/static_shock_cli/lib/templates/**`
+
+### Update a template for distribution
+From time to time, it may be necessary to alter a Static Shock project template.
+To do this, follow these three steps:
+
+1. Update and verify the correctness of the runnable template under `/static_shock_cli/template_sources/**`.
+2. Copy the new/changed files from the runnable template and overwrite the the files in `/static_shock_cli/templates/`.
+3. In the template files you just pasted in `/static_shock_cli/templates/`, find and replace every
+   hard-coded value with a variable. For changed files, you'll need to inspect the original files
+   to ensure that you recover whatever variables you just overwrote.
+4. Use `mason` to compile the template and overwrite the existing `bundle` file in `/static_shock_cli/lib/templates/`.
+
+### Working with templates
 Static Shock uses Mason to structure and read templates for project generation. Those templates are 
 stored under:
 
