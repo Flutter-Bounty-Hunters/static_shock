@@ -1,2 +1,2 @@
-#basePath: /
+layout: layouts/post.jinja
 tags: posts

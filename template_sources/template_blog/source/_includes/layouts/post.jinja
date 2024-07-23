@@ -17,25 +17,18 @@
   <meta name="theme-color" content="#ffffff">
 
   <link href="/styles/styles.css" rel="stylesheet">
-  <link href="/styles/home.css" rel="stylesheet">
+  <link href="/styles/post.css" rel="stylesheet">
 </head>
 
 <body>
   <header>
-    <h1>My Blog</h1>
+    <div>
+      <a href="/" class="title">My Blog</a>
+    </div>
   </header>
 
   <main>
-    <div>
-      <ol class="post-list">
-      {% for page in pages.byTag("posts", sortBy="publishDate=desc") %}
-        <li>
-          <a href="{{ page.data['url'] }}"><p class="title">{{ page.data['title'] }}</p></a>
-          <p class="description">{{ page.data['description'] }}</p>
-        </li>
-      {% endfor %}
-      </ol>
-    </div>
+  {{ content }}
   </main>
 
   {{ components.footer() }}
