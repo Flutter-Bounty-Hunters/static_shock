@@ -2,7 +2,7 @@
 title: Sustainable Living - Simple Steps to Make a Difference
 description: Explore practical ways to adopt a sustainable lifestyle and contribute to a healthier planet.
 publishDate: 2024-07-13
-author: John Smith
+header: header.jpeg
 ---
 # Sustainable Living: Simple Steps to Make a Difference
 In a world facing environmental challenges, adopting a sustainable lifestyle is more important than ever. Sustainable living involves making choices that reduce your impact on the environment and promote the well-being of our planet. From small daily habits to larger lifestyle changes, there are numerous ways to live more sustainably. Let’s explore some practical steps you can take to make a difference.

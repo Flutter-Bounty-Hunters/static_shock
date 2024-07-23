@@ -21,11 +21,13 @@
 </head>
 
 <body>
-  <header>
-    <div>
-      <a href="/" class="title">My Blog</a>
-    </div>
-  </header>
+  <div id="NavBar">
+    <a href="/" class="title">My Blog</a>
+  </div>
+
+  {% if header %}
+  <header style="background-image: url('{{header}}'); background-repeat: none; background-size: cover;"></header>
+  {% endif %}
 
   <main>
   {{ content }}

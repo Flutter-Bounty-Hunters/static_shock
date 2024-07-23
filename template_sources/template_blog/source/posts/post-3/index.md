@@ -2,7 +2,7 @@
 title: The Art of Mindful Eating
 description: Learn about mindful eating practices and how they can improve your relationship with food and enhance overall well-being.
 publishDate: 2024-07-12
-author: John Smith
+header: header.jpeg
 ---
 # The Art of Mindful Eating
 In today’s fast-paced world, it’s easy to fall into the habit of eating on the go and mindlessly consuming meals. Mindful eating is a practice that encourages a more conscious and thoughtful approach to eating, which can lead to better health and a more satisfying relationship with food. Let’s explore the principles of mindful eating and how you can incorporate them into your daily life.

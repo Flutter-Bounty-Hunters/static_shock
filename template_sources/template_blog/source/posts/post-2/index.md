@@ -2,7 +2,7 @@
 title: Exploring the World of Indoor Gardening
 description: Discover the benefits and joys of indoor gardening, and learn how to create your own lush indoor oasis.
 publishDate: 2024-07-11
-author: John Smith
+header: header.jpeg
 ---
 # Exploring the World of Indoor Gardening
 Indoor gardening is more than just a trend—it's a fulfilling hobby that brings the joy of gardening into the comfort of your home. Whether you live in a small apartment or a spacious house, creating an indoor garden can transform your living space into a lush, vibrant retreat. Let’s delve into the world of indoor gardening and discover how you can cultivate your green thumb indoors.
