@@ -151,7 +151,8 @@ class FileRelativePath implements RelativePath {
   DirectoryRelativePath get containingDirectory => DirectoryRelativePath(directoryPath);
 
   @override
-  List<String> get directories => directoryPath.split(Platform.pathSeparator).where((item) => item.isNotEmpty).toList();
+  List<String> get directories => directoryPath.split(Platform.pathSeparator).where((item) => item.isNotEmpty).toList()
+    ..removeWhere((dirName) => dirName == "." || dirName == "..");
 
   FileRelativePath copyWith({
     String? directoryPath,

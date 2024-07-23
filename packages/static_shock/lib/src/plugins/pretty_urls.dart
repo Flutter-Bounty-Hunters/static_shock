@@ -24,17 +24,28 @@ class PrettyPathPageTransformer implements PageTransformer {
 
   @override
   FutureOr<void> transformPage(StaticShockPipelineContext context, Page page) async {
-    if (page.destinationPath?.filename == "index") {
-      // The file is already an index file. Nothing to prettify.
+    final originalPath = page.destinationPath ?? page.sourcePath;
+    if (originalPath.directories.isEmpty && originalPath.filename == "index") {
+      // This is the root index file.
+      page.url = "/";
       return;
     }
 
-    final originalPath = page.destinationPath ?? page.sourcePath;
-    page
-      ..url = "${originalPath.directoryPath}${originalPath.filename}${Platform.pathSeparator}"
-      ..destinationPath = originalPath.copyWith(
+    final pathBeforePageFile = originalPath.directories.isNotEmpty ? "/${originalPath.directories.join("/")}/" : "/";
+
+    page.url = originalPath.filename != "index"
+        // First case is like "posts/news/hello-world.md" -> "/posts/news/hello-world/"
+        ? "$pathBeforePageFile${originalPath.filename}/"
+        // Second case is like "posts/news/hello-world/index.md" -> "/posts/news/hello-world/"
+        : pathBeforePageFile;
+
+    if (page.destinationPath?.filename != "index") {
+      // This page's destination hasn't been fully configured yet. Set
+      // destination page to an index file so webservers can serve it.
+      page.destinationPath = originalPath.copyWith(
         directoryPath: "${originalPath.directoryPath}${originalPath.filename}${Platform.pathSeparator}",
         filename: "index",
       );
+    }
   }
 }
