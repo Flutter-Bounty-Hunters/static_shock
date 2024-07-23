@@ -60,6 +60,34 @@ void main() {
       });
     });
 
+    group("blog >", () {
+      test("standard", () async {
+        final testGoldenDirectory = Directory("${rootTestGoldenDirectory.path}blog${Platform.pathSeparator}standard");
+        final testOutputDirectory = Directory("${rootTestOutputDirectory.path}blog${Platform.pathSeparator}standard");
+        testOutputDirectory.createSync(recursive: true);
+
+        final process = await Process.start(
+          'dart',
+          [
+            '../../../../bin/static_shock_cli.dart',
+            'template',
+            'blog',
+            '--project-name=my_blog',
+            '--project-description="My blog website project"',
+            '--blog-title="Better Living"',
+            '--blog-description="Articles about living a better life"',
+            '--no-auto-initialize',
+          ],
+          workingDirectory: testOutputDirectory.path,
+        );
+
+        // We have to connect to stderr to get the command to run. Not sure why.
+        print(await utf8.decodeStream(process.stderr));
+
+        expect(testOutputDirectory, hasSameFiles(testGoldenDirectory));
+      });
+    });
+
     group("docs >", () {
       test("minimal", () async {
         final testGoldenDirectory = Directory("${rootTestGoldenDirectory.path}docs${Platform.pathSeparator}minimal");
