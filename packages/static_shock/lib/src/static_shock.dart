@@ -644,8 +644,11 @@ class StaticShock implements StaticShockPipeline {
             basePath = basePath.substring(1);
           }
 
-          _log.detail("Overriding default page URL:\nFrom: ${page.destinationPath?.value}\nTo: $basePath");
+          _log.detail("Overriding default page URL:");
+          _log.detail("From: ${page.destinationPath?.value}");
+
           page.destinationPath = page.destinationPath!.copyWith(directoryPath: basePath);
+          _log.detail("To: ${page.destinationPath?.value}");
         }
 
         _context.pagesIndex.addPage(page);

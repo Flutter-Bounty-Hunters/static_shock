@@ -1,0 +1,3 @@
+layout: layouts/post.jinja
+tags: posts
+author: John Smith

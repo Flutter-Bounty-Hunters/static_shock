@@ -1,0 +1,15 @@
+name: empty_template
+description: Template for an empty Static Shock website
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  static_shock:
+    path: ../../packages/static_shock
+
+dev_dependencies:
+  lints: ^2.0.0
+  test: ^1.21.0

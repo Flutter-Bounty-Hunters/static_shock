@@ -1,4 +1,6 @@
 name: static_shock
 
 packages:
-  - packages/*
+  - packages/static_shock
+  - packages/static_shock_cli
+  - packages/static_shock_docs

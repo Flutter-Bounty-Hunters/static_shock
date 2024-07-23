@@ -1,5 +1,5 @@
-name: docs_template
-description: Template for Docs websites
+name: blog_template
+description: Template for a blog.
 version: 1.0.0
 publish_to: none
 
@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   static_shock:
-    path: ../static_shock
+    path: ../../packages/static_shock
 
 dev_dependencies:
   lints: ^2.0.0

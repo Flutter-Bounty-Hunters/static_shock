@@ -1,4 +1,8 @@
-/test/.template_test_output
+# Build output for the CLI binary
+build/
+
+# Temporary output from file system golden tests.
+.template_test_output/
 
 # https://dart.dev/guides/libraries/private-files
 # Created by `dart pub`
