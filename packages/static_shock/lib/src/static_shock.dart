@@ -621,7 +621,10 @@ class StaticShock implements StaticShockPipeline {
         final page = await pageLoader.loadPage(pickedFile, content.text!);
 
         final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath);
-        page.data.addEntries(inheritedData.entries);
+        page.data.addEntries({
+          ...inheritedData.entries,
+          ...page.data.entries,
+        });
 
         // Check for a desired base path override, and apply it.
         String? basePath = page.data['basePath'];
