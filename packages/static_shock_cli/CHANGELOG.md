@@ -1,3 +1,10 @@
+## 0.0.8 - July 25, 2024
+ * [BREAKING] - `shock create` now offers 3 templates with walkthrough
+   * blog
+   * multi-page docs
+   * empty
+ * [BREAKING] - `shock template ...` commands now expect all values to be provided as arguments - no more user prompts
+
 ## 0.0.7 - May 20, 2024
 Same as `0.0.6` but with an incremented version number
 

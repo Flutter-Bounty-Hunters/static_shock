@@ -1,0 +1,37 @@
+# Configuration for the package that this website documents.
+package:
+  name: super_editor
+  title: Super Editor
+  description: A document editing toolkit for Flutter
+  is_on_pub: false
+  
+  discord: 
+  sponsorship: 
+
+# Configuration of the GitHub plugin for loading info about GitHub repositories.
+github:
+  contributors:
+    repositories:
+      
+
+# The default layout applied to all pages in this website.
+layout: layouts/docs_page.jinja
+
+# The global navigation manu for all documentation pages in this website.
+navigation:
+  
+
+  items:
+    - title: Welcome
+      url: /
+
+    - title: "Get Started"
+      url: /get-started
+
+    - title: Guides
+      tag: guides
+      sortBy: navOrder
+
+    - title: Concepts
+      tag: concepts
+      sortBy: navOrder

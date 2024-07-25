@@ -8,8 +8,12 @@ docs_menu:
     id: display-a-menu-in-a-page
   - title: Copy CSS, JS, Images
     id: copy-assets
+  - title: Include Remote Files
+    id: remote-files
   - title: Compile Sass
     id: compile-sass
+  - title: Compile TailwindCSS
+    id: compile-tailwind
   - title: Draft Articles
     id: draft-articles
   - title: Use Remote CSS and JS

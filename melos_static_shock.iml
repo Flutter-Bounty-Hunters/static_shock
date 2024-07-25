@@ -19,6 +19,9 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/template_docs/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/template_docs/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/packages/template_docs/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/template_sources/template_docs/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/template_sources/template_docs/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/template_sources/template_docs/.pub" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />

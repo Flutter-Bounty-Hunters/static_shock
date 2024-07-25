@@ -23,3 +23,4 @@ export 'src/plugins/pub_package.dart';
 export 'src/plugins/redirects.dart';
 export 'src/plugins/rss.dart';
 export 'src/plugins/sass.dart';
+export 'src/plugins/tailwind_css.dart';

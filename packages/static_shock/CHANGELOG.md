@@ -1,3 +1,24 @@
+## 0.0.11 - July 25, 2024
+ * Fix: Pretty URLs work with files explicitly named "index".
+ * Fix: Local page data overrides inherited data.
+
+## 0.0.10 - July 16, 2024
+ * Fix: When resolving Sass imports, check for `<name>`, `<name>.scss`, and `<name>.sass`.
+
+## 0.0.9 - July 13, 2024
+ * Fix: Remote Sass files can import other remote Sass files that sit in the same directory 
+   (still need to add support for relative and absolute paths)
+
+## 0.0.8 - July 13, 2024
+ * Fix: Path bug with remote includes in `v0.0.7`
+
+## 0.0.7 - July 13, 2024
+ * Added picking of remote files and remote layouts/components
+
+## 0.0.6 - June 21, 2024
+ * Added `TailwindPlugin` for TailwindCSS support
+ * Add Markdown plugin APIs to control how it converts to HTML
+
 ## 0.0.5 - May 9, 2024
  * Created GitHub plugin
  * Created Redirects plugin
