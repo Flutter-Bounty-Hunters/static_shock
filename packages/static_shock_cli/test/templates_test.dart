@@ -88,6 +88,71 @@ void main() {
       });
     });
 
+    group("docs multi page >", () {
+      test("minimal", () async {
+        final testGoldenDirectory =
+            Directory("${rootTestGoldenDirectory.path}docs_multi_page${Platform.pathSeparator}minimal");
+        final testOutputDirectory =
+            Directory("${rootTestOutputDirectory.path}docs_multi_page${Platform.pathSeparator}minimal");
+        testOutputDirectory.createSync(recursive: true);
+
+        final process = await Process.start(
+          'dart',
+          [
+            '../../../../bin/static_shock_cli.dart',
+            'template',
+            'docs-multi-page',
+            '--project-name=super_editor_docs',
+            '--project-description="Documentation for Super Editor"',
+            '--package-name=super_editor',
+            '--package-title="Super Editor"',
+            '--package-description="A document editing toolkit for Flutter"',
+            '--no-auto-initialize',
+          ],
+          workingDirectory: testOutputDirectory.path,
+        );
+
+        // We have to connect to stderr to get the command to run. Not sure why.
+        print(await utf8.decodeStream(process.stderr));
+
+        expect(testOutputDirectory, hasSameFiles(testGoldenDirectory));
+      });
+
+      test("complete", () async {
+        final testGoldenDirectory =
+            Directory("${rootTestGoldenDirectory.path}docs_multi_page${Platform.pathSeparator}complete");
+        final testOutputDirectory =
+            Directory("${rootTestOutputDirectory.path}docs_multi_page${Platform.pathSeparator}complete");
+        testOutputDirectory.createSync(recursive: true);
+
+        final process = await Process.start(
+          'dart',
+          [
+            '../../../../bin/static_shock_cli.dart',
+            'template',
+            'docs-multi-page',
+            '--project-name=super_editor_docs',
+            '--project-description="Documentation for Super Editor"',
+            '--package-name=super_editor',
+            '--package-title="Super Editor"',
+            '--package-description="A document editing toolkit for Flutter"',
+            '--package-is-on-pub',
+            '--github-organization=superlistapp',
+            '--github-repo-name=super_editor',
+            '--sponsorship=https://flutterbountyhunters.com',
+            '--discord=https://discord.gg/8hna2VD32s',
+            '--no-auto-initialize',
+          ],
+          workingDirectory: testOutputDirectory.path,
+        );
+
+        // We have to connect to stderr to get the command to run. Not sure why.
+        print(await utf8.decodeStream(process.stderr));
+
+        expect(testOutputDirectory, hasSameFiles(testGoldenDirectory));
+      });
+    });
+
     group("docs >", () {
       test("minimal", () async {
         final testGoldenDirectory = Directory("${rootTestGoldenDirectory.path}docs${Platform.pathSeparator}minimal");
