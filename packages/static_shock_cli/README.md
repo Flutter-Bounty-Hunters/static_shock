@@ -79,12 +79,12 @@ To bundle a Brick directory into a single file, use:
 
     mason bundle path/to/brick/directory
 
-For example, to update the existing template for `new_project`, first run:
+For example, to update the existing template for `blog`, first run:
 
-    mason bundle templates/new_project
+    mason bundle templates/blog
 
 The bundle will be generated at the root of that package. The bundle then needs to be moved to its
-final location at `lib/templates/new_project.bundle`.
+final location at `lib/templates/blog.bundle`.
 
 Mason uses Mustache templates to insert values in source file content and file names. Static Shock
 uses Jinja templates, which also use "{{" and "}}" to insert values. Jinja brackets inside

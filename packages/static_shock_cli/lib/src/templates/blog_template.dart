@@ -4,6 +4,53 @@ import 'dart:isolate';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:static_shock_cli/src/project_maintenance/build_project.dart';
+import 'package:static_shock_cli/src/templates/basic_template_cli.dart';
+
+/// Walks the user through a selection of details that are required to generate
+/// a blog project, and then generates the project.
+Future<Directory> runBlogTemplateWizard(Logger log) async {
+  final basicProjectConfiguration = BasicTemplateConfigurator.promptForConfiguration(log);
+
+  final blogConfiguration = _promptForBlogConfiguration(log);
+
+  final targetDirectory = BasicTemplateConfigurator.promptForOutputDirectory(log);
+
+  await generateBlogTemplate(
+    targetDirectory,
+    projectName: basicProjectConfiguration.projectName,
+    projectDescription: basicProjectConfiguration.projectDescription,
+    blogTitle: blogConfiguration.title,
+    blogDescription: blogConfiguration.description,
+  );
+
+  return targetDirectory;
+}
+
+/// A CLI command that can be directly run with provided arguments, to generate
+/// a new Static Shock project for a blog.
+BlogConfiguration _promptForBlogConfiguration(Logger log) {
+  String title = "";
+  while (title.isEmpty) {
+    title = log.prompt("Choose a title for your blog (e.g., 'My Adventures'):");
+    if (title.isEmpty) {
+      log.warn("Your blog title can't be empty.");
+      log.info("");
+    }
+  }
+  log.info("");
+
+  final description = log.prompt("Choose a description for your blog (e.g., 'A log of my traveling adventures'):");
+  log.info("");
+
+  return BlogConfiguration(title: title, description: description);
+}
+
+class BlogConfiguration {
+  const BlogConfiguration({required this.title, required this.description});
+
+  final String title;
+  final String description;
+}
 
 class BlogTemplateCommand extends Command {
   static const argProjectName = "project-name";

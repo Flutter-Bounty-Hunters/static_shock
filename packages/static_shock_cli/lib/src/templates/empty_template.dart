@@ -4,7 +4,25 @@ import 'dart:isolate';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:static_shock_cli/src/project_maintenance/build_project.dart';
+import 'package:static_shock_cli/src/templates/basic_template_cli.dart';
 
+/// Walks the user through a selection of details that are required to generate
+/// an empty project, and then generates the project.
+Future<Directory> runEmptyTemplateWizard(Logger log) async {
+  final configuration = BasicTemplateConfigurator.promptForConfiguration(log);
+  final targetDirectory = BasicTemplateConfigurator.promptForOutputDirectory(log);
+
+  await generateEmptyTemplate(
+    targetDirectory,
+    projectName: configuration.projectName,
+    projectDescription: configuration.projectDescription,
+  );
+
+  return targetDirectory;
+}
+
+/// A CLI command that can be directly run with provided arguments, to generate
+/// a new Static Shock project with a minimal collection of files.
 class EmptyTemplateCommand extends Command {
   static const argProjectName = "project-name";
   static const argProjectDescription = "project-description";

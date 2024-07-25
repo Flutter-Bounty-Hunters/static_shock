@@ -88,10 +88,12 @@ void main() {
       });
     });
 
-    group("docs >", () {
+    group("docs multi page >", () {
       test("minimal", () async {
-        final testGoldenDirectory = Directory("${rootTestGoldenDirectory.path}docs${Platform.pathSeparator}minimal");
-        final testOutputDirectory = Directory("${rootTestOutputDirectory.path}docs${Platform.pathSeparator}minimal");
+        final testGoldenDirectory =
+            Directory("${rootTestGoldenDirectory.path}docs_multi_page${Platform.pathSeparator}minimal");
+        final testOutputDirectory =
+            Directory("${rootTestOutputDirectory.path}docs_multi_page${Platform.pathSeparator}minimal");
         testOutputDirectory.createSync(recursive: true);
 
         final process = await Process.start(
@@ -99,27 +101,28 @@ void main() {
           [
             '../../../../bin/static_shock_cli.dart',
             'template',
-            'docs',
-            '--args-only',
+            'docs-multi-page',
             '--project-name=super_editor_docs',
+            '--project-description="Documentation for Super Editor"',
             '--package-name=super_editor',
-            '--package-title=Super Editor',
+            '--package-title="Super Editor"',
+            '--package-description="A document editing toolkit for Flutter"',
             '--no-auto-initialize',
           ],
           workingDirectory: testOutputDirectory.path,
-          // stdoutEncoding: utf8,
-          // stderrEncoding: utf8,
         );
 
         // We have to connect to stderr to get the command to run. Not sure why.
-        await utf8.decodeStream(process.stderr);
+        print(await utf8.decodeStream(process.stderr));
 
         expect(testOutputDirectory, hasSameFiles(testGoldenDirectory));
       });
 
       test("complete", () async {
-        final testGoldenDirectory = Directory("${rootTestGoldenDirectory.path}docs${Platform.pathSeparator}complete");
-        final testOutputDirectory = Directory("${rootTestOutputDirectory.path}docs${Platform.pathSeparator}complete");
+        final testGoldenDirectory =
+            Directory("${rootTestGoldenDirectory.path}docs_multi_page${Platform.pathSeparator}complete");
+        final testOutputDirectory =
+            Directory("${rootTestOutputDirectory.path}docs_multi_page${Platform.pathSeparator}complete");
         testOutputDirectory.createSync(recursive: true);
 
         final process = await Process.start(
@@ -127,28 +130,24 @@ void main() {
           [
             '../../../../bin/static_shock_cli.dart',
             'template',
-            'docs',
-            '--args-only',
+            'docs-multi-page',
             '--project-name=super_editor_docs',
-            '--project-description=Documentation for Super Editor',
+            '--project-description="Documentation for Super Editor"',
             '--package-name=super_editor',
-            '--package-title=Super Editor',
-            '--package-description=A document editing toolkit for Flutter',
+            '--package-title="Super Editor"',
+            '--package-description="A document editing toolkit for Flutter"',
             '--package-is-on-pub',
-            '--github-repo-url=https://github.com/superlistapp/super_editor',
-            '--github-repo-organization=superlistapp',
+            '--github-organization=superlistapp',
             '--github-repo-name=super_editor',
             '--sponsorship=https://flutterbountyhunters.com',
             '--discord=https://discord.gg/8hna2VD32s',
             '--no-auto-initialize',
           ],
           workingDirectory: testOutputDirectory.path,
-          // stdoutEncoding: utf8,
-          // stderrEncoding: utf8,
         );
 
         // We have to connect to stderr to get the command to run. Not sure why.
-        await utf8.decodeStream(process.stderr);
+        print(await utf8.decodeStream(process.stderr));
 
         expect(testOutputDirectory, hasSameFiles(testGoldenDirectory));
       });

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:mason/mason.dart';
 
 class Project {
-  static Future<void> build({
+  static Future<void> pubGet({
     Logger? log,
     Directory? workingDirectory,
   }) async {
@@ -22,7 +22,7 @@ class Project {
     log?.info("Successfully initialized your project. Now we'll run an initial build of your static site.");
   }
 
-  static Future<void> pubGet({
+  static Future<void> build({
     Logger? log,
     Directory? workingDirectory,
     String executablePath = 'bin/main.dart',
@@ -34,7 +34,8 @@ class Project {
     );
     log?.detail(buildResult.stdout);
     if (buildResult.exitCode != 0) {
-      log?.err("Failed to build your static site. Please check your project for errors.");
+      log?.err(
+          "Failed to build your static site. Please check your project for errors. Error code: ${buildResult.exitCode}");
       return;
     }
   }

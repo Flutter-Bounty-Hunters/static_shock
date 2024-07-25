@@ -1,13 +1,23 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
-import 'package:static_shock_cli/src/templates/basic_template_cli.dart';
+import 'package:static_shock_cli/src/project_maintenance/build_project.dart';
+import 'package:static_shock_cli/src/templates/blog_template.dart';
+import 'package:static_shock_cli/src/templates/docs_multi_page_template.dart';
+import 'package:static_shock_cli/src/templates/empty_template.dart';
 import 'package:static_shock_cli/src/version_check.dart';
 
 /// CLI [Command] that generates a new Static Shock project based on user preferences.
 class CreateCommand extends Command with PubVersionCheck {
+  static const _templateNamesById = {
+    _TemplateType.blog: "Blog",
+    _TemplateType.docsMultiPage: "Documentation (multiple pages)",
+    // TODO: create single-page docs template
+    // _TemplateType.docsSinglePage: "Documentation (single page)",
+    _TemplateType.empty: "Empty",
+  };
+
   CreateCommand(this.log);
 
   @override
@@ -26,61 +36,56 @@ class CreateCommand extends Command with PubVersionCheck {
   Future<void> run() async {
     await super.run();
 
-    log.info("Creating a new Static Shock project...");
+    log.info("Welcome to Static Shock! Let's get you started with a new project!");
+    log.info("");
+    log.info("We'll ask you a series of questions, and then we'll generate a custom website project just for you.");
+    log.info("");
 
-    final workingDirectory = Directory.current;
-    log.detail("Current directory: ${workingDirectory.path}");
+    final templateType = log.chooseOne(
+      "First, please choose a template for your project:",
+      choices: _TemplateType.values,
+      display: (templateId) => _templateNamesById[templateId]!,
+    );
+    log.info("");
 
-    final projectConfiguration = await BasicTemplateConfigurator.promptForConfiguration(log, {});
+    log.info("You chose: ${_templateNamesById[templateType]}.");
+    log.info("");
+    log.info("We'll ask you a series of questions to configure the template for your specific needs...");
+    log.info("");
 
-    final bundle = await _loadNewProjectTemplateBundle();
-    final generator = await MasonGenerator.fromBundle(bundle);
-    final target = DirectoryGeneratorTarget(Directory.current);
-
-    await generator.generate(target, vars: projectConfiguration);
-
-    log.success("Successfully created a new Static Shock project!\n");
-
-    log.info("Running 'pub get' to initialize your project...");
-    final pubGetResult = await Process.run('dart', ['pub', 'get']);
-    log.detail(pubGetResult.stdout);
-    if (pubGetResult.exitCode != 0) {
-      log.err("Command 'pub get' failed. Please check your project for errors.");
-      return;
+    late final Directory targetDirectory;
+    switch (templateType) {
+      case _TemplateType.blog:
+        targetDirectory = await runBlogTemplateWizard(log);
+      // case _TemplateType.docsSinglePage:
+      //   // TODO: Handle this case.
+      case _TemplateType.docsMultiPage:
+        targetDirectory = await runMultiPageDocsTemplateWizard(log);
+      case _TemplateType.empty:
+        targetDirectory = await runEmptyTemplateWizard(log);
     }
 
-    log.info("Successfully initialized your project. Now we'll run an initial build of your static site.");
-    final buildResult = await Process.run('dart', ['run', 'bin/${projectConfiguration['project_name']}.dart']);
-    log.detail(buildResult.stdout);
-    if (buildResult.exitCode != 0) {
-      log.err("Failed to build your static site. Please check your project for errors.");
-      return;
+    log.success("Your new Static Shock website has been generated!\n");
+    final shouldInitialize = log.confirm("Would you like to immediately run a build of your new website?");
+    log.info("");
+
+    log.info("--------------------------------------");
+    if (shouldInitialize) {
+      await Project.pubGet(log: log, workingDirectory: targetDirectory);
+      await Project.build(log: log, workingDirectory: targetDirectory);
     }
+    log.info("--------------------------------------");
+    log.info("");
 
-    log.success("Congratulations, your Static Shock project is ready to go!");
-
-    log.info("\nTo learn how to use Static Shock, check out staticshock.io\n");
+    log.success("Congratulations, your new Static Shock website is ready!");
+    log.detail("To learn how to further configure your website, please check our guides at https://staticshock.io");
   }
+}
 
-  Future<MasonBundle> _loadNewProjectTemplateBundle() async {
-    // We expect to run as a globally activated Dart package. To access assets bundled
-    // with our package, we need to resolve a package path to a file system path, as
-    // shown below.
-    //
-    // Note: Dart automatically looks under "lib/" within a package. When reading the
-    // path below, mentally insert "/lib/" between the package name and the first sub-directory.
-    //
-    // Reference: https://stackoverflow.com/questions/72255508/how-to-get-the-file-path-to-an-asset-included-in-a-dart-package
-    final packageUri = Uri.parse('package:static_shock_cli/templates/new_project.bundle');
-    final absoluteUri = await Isolate.resolvePackageUri(packageUri);
-
-    final file = File.fromUri(absoluteUri!);
-    if (!file.existsSync()) {
-      throw Exception(
-          "Couldn't locate the Static Shock 'new project' template in the package assets. Looked in: '${file.path}'");
-    }
-
-    // Decode the file's bytes into a Mason bundle. Return it.
-    return await MasonBundle.fromUniversalBundle(file.readAsBytesSync());
-  }
+enum _TemplateType {
+  blog,
+  // TODO: add single page template
+  // docsSinglePage,
+  docsMultiPage,
+  empty,
 }
