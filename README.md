@@ -27,7 +27,7 @@ Once you've created a project, you can (re)build your static site as needed:
 
 ```sh
 # Build directly
-dart bin/my_site.dart
+dart bin/main.dart
 
 # Or, build with the CLI tool
 shock build
