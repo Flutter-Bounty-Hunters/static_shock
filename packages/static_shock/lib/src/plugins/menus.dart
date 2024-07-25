@@ -71,7 +71,7 @@ List _pageExistsForMenuItem(
   final filteredMenuItems = <Object>[];
   for (final menuItem in menuItems) {
     final pathFragments = [...prefixPathFragments, menuItem['id']];
-    final url = "${pathFragments.join("/")}/";
+    final url = "${pathFragments.isNotEmpty ? "/" : ""}${pathFragments.join("/")}/";
     for (final page in context.pagesIndex.pages) {
       if (page.url == url) {
         filteredMenuItems.add(menuItem);
