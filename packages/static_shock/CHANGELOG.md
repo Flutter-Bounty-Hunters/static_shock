@@ -1,3 +1,7 @@
+## 0.0.11 - July 25, 2024
+ * Fix: Pretty URLs work with files explicitly named "index".
+ * Fix: Local page data overrides inherited data.
+
 ## 0.0.10 - July 16, 2024
  * Fix: When resolving Sass imports, check for `<name>`, `<name>.scss`, and `<name>.sass`.
 
