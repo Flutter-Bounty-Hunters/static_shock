@@ -19,6 +19,53 @@ Future<void> main(List<String> arguments) async {
       showDrafts: arguments.contains("preview"),
     ))
     ..plugin(const PubPackagePlugin())
+    ..plugin(WebsiteScreenshotsPlugin({
+      WebsiteScreenshot(
+        "staticshock_io",
+        Uri.parse("https://staticshock.io"),
+        FileRelativePath("images/screenshots/", "staticshock_io", "png"),
+      ),
+      WebsiteScreenshot(
+        "superdeclarative_com",
+        Uri.parse("https://superdeclarative.com"),
+        FileRelativePath("images/screenshots/", "superdeclarative_com", "png"),
+      ),
+      WebsiteScreenshot(
+        "flutterbountyhunters_com",
+        Uri.parse("https://flutterbountyhunters.com"),
+        FileRelativePath("images/screenshots/", "flutterbountyhunters_com", "png"),
+      ),
+      WebsiteScreenshot(
+        "blog_flutterbountyhunters_com",
+        Uri.parse("https://blog.flutterbountyhunters.com"),
+        FileRelativePath("images/screenshots/", "blog_flutterbountyhunters_com", "png"),
+      ),
+      WebsiteScreenshot(
+        "flutterarbiter_com",
+        Uri.parse("https://flutterarbiter.com"),
+        FileRelativePath("images/screenshots/", "flutterarbiter_com", "png"),
+      ),
+      WebsiteScreenshot(
+        "flutterspaces_com",
+        Uri.parse("https://flutterspaces.com"),
+        FileRelativePath("images/screenshots/", "flutterspaces_com", "png"),
+      ),
+      WebsiteScreenshot(
+        "fluttershaders_com",
+        Uri.parse("https://fluttershaders.com"),
+        FileRelativePath("images/screenshots/", "fluttershaders_com", "png"),
+      ),
+      WebsiteScreenshot(
+        "flutter_test_robots",
+        Uri.parse("https://flutter-bounty-hunters.github.io/flutter_test_robots/"),
+        FileRelativePath("images/screenshots/", "docs_flutter_test_robots", "png"),
+      ),
+      WebsiteScreenshot(
+        "ffmpeg_cli",
+        Uri.parse("https://flutter-bounty-hunters.github.io/ffmpeg_cli/"),
+        FileRelativePath("images/screenshots/", "docs_ffmpeg_cli", "png"),
+      ),
+    }))
     ..plugin(const RssPlugin(
       site: RssSiteConfiguration(
         title: "Static Shock Docs",

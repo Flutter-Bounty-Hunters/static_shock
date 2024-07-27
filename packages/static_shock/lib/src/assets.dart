@@ -4,6 +4,10 @@ import 'dart:typed_data';
 import 'files.dart';
 import 'pipeline.dart';
 
+abstract class AssetLoader {
+  FutureOr<Asset> loadAssets();
+}
+
 abstract class AssetTransformer {
   FutureOr<void> transformAsset(StaticShockPipelineContext context, Asset asset);
 }

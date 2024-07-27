@@ -1,6 +1,9 @@
 # Build output
 /build
 
+# Puppeteer cached output
+.local-chrome
+
 # Firebase
 /.firebase
 
