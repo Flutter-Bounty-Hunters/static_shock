@@ -162,6 +162,7 @@ class JinjaPageRenderer implements PageRenderer {
       MapEntry("startsWith", _startsWith),
       MapEntry("formatDateTime", _formatDateTime),
       MapEntry("take", _take),
+      MapEntry("pathRelativeToPage", (String relativePath) => _pathRelativeToPage(page, relativePath)),
       ...filters.map((filterBuilder) {
         final filter = filterBuilder(context);
         return MapEntry<String, Function>(filter.$1, filter.$2);
@@ -273,4 +274,16 @@ class JinjaPageRenderer implements PageRenderer {
 
   /// A Jinja filter that returns the first [count] items from the given list.
   List _take(List incoming, int count) => incoming.sublist(0, min(count, incoming.length));
+
+  /// A Jinja filter (with a [Page] for context), which treats [relativePath] as a path
+  /// that's relative the [page], and returns the full URL path that combines the two.
+  ///
+  /// Example:
+  ///  - Page URL: `/posts/my-article/index.html`
+  ///  - relativePath: `images/my-photo.png`
+  ///  - return value: `/posts/my-article/images/my-photo.png`
+  String _pathRelativeToPage(Page page, String relativePath) {
+    final pageUrl = Uri.parse(page.url!);
+    return pageUrl.resolve(relativePath).path;
+  }
 }
