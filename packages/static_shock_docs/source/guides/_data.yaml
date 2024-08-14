@@ -16,6 +16,8 @@ docs_menu:
     id: compile-tailwind
   - title: Draft Articles
     id: draft-articles
+  - title: Website Screenshots
+    id: website-screenshots
   - title: Use Remote CSS and JS
     id: use-remote-css-and-js
   - title: Create a Plugin

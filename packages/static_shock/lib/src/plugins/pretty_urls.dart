@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 
@@ -9,8 +10,14 @@ import '../pages.dart';
 class PrettyUrlsPlugin implements StaticShockPlugin {
   const PrettyUrlsPlugin();
 
+  final id = "io.staticshock.prettyurls";
+
   @override
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline.transformPages(const PrettyPathPageTransformer());
   }
 }

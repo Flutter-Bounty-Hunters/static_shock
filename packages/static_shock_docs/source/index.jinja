@@ -173,6 +173,31 @@ Create a new static website project:
       }}
       </section>
 
+      <section style="max-width: 1200px; margin: auto; margin-bottom: 200px;">
+        <h2 style="text-align: center; text-transform: uppercase;">Showcase</h2>
+        <p style="text-align: center; color: rgba(255, 255, 255, 0.5);">Websites generated with Static Shock.</p>
+        <ul style="list-style-type: none; margin: 0; padding: 0; text-align: center;">
+          {% for screenshot in showcase.screenshots.marketing %}
+          <li style="display: inline-block; margin: 0; padding: 0;">
+            <a href="{{ screenshot.url }}" target="_blank" title="{{ screenshot.title }}">
+              <img src="{{ screenshot.output }}" style="display: inline-block; border-radius: 4px; margin: 16px;">
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <h3 style="margin-top: 72px; font-size: 24px; text-align: center; text-transform: uppercase;">Documentation Websites</h3>
+        <ul style="list-style-type: none; margin: 0; padding: 0; text-align: center;">
+          {% for screenshot in showcase.screenshots.docs %}
+          <li style="display: inline-block; margin: 0; padding: 0;">
+            <a href="{{ screenshot.url }}" target="_blank" title="{{ screenshot.title }}">
+              <img src="{{ screenshot.output }}" style="display: inline-block; border-radius: 4px; margin: 16px;">
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+
       <section style="max-width: 800px; margin: auto; margin-bottom: 200px;">
         <h2 style="text-align: center; text-transform: uppercase;">Contributors</h2>
         <p style="text-align: center; color: rgba(255, 255, 255, 0.5);">Built by the following contributors.</p>

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:pub_updater/pub_updater.dart';
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
@@ -27,10 +28,17 @@ import 'package:yaml/yaml.dart';
 class PubPackagePlugin implements StaticShockPlugin {
   const PubPackagePlugin([this._packageNames = const <String>{}]);
 
+  @override
+  final id = "io.staticshock.pubpackage";
+
   final Set<String> _packageNames;
 
   @override
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline.loadData(
       _PubPackageDataLoader(_packageNames),
     );

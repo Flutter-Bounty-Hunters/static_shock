@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
@@ -25,10 +26,17 @@ class DraftingPlugin implements StaticShockPlugin {
     this.showDrafts = false,
   });
 
+  @override
+  final id = "io.staticshock.drafting";
+
   final bool showDrafts;
 
   @override
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline.filterPages(
       _DraftPageFilter(showDrafts: showDrafts),
     );

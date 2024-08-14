@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:jinja/jinja.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
@@ -17,11 +18,18 @@ class JinjaPlugin implements StaticShockPlugin {
     this.tests = const [],
   });
 
+  @override
+  final id = "io.staticshock.jinja";
+
   final List<StaticShockJinjaFunctionBuilder> filters;
   final List<StaticShockJinjaFunctionBuilder> tests;
 
   @override
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline.pick(const ExtensionPicker("jinja"));
     pipeline.loadPages(JinjaPageLoader(context.log));
     pipeline.renderPages(JinjaPageRenderer(

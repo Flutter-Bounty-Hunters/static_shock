@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:github/github.dart';
 import 'package:http/http.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
@@ -32,6 +33,9 @@ class GitHubContributorsPlugin extends StaticShockPlugin {
     this.repositories = const {},
   });
 
+  @override
+  final id = "io.staticshock.githubcontributors";
+
   /// GitHub auth token that's tied to a GitHub account.
   ///
   /// GitHub allows many more API calls given an auth token. If [authToken] is `null` then
@@ -46,7 +50,11 @@ class GitHubContributorsPlugin extends StaticShockPlugin {
   final Set<GitHubRepository> repositories;
 
   @override
-  void configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  void configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline.loadData(_GitHubDataLoader(authToken, repositories));
   }
 }
@@ -134,7 +142,14 @@ class _GitHubDataLoader implements DataLoader {
 
   Future<_GitHubRepositoryContributors> _fetchRepositoryContributors(
       Logger log, GitHub github, GitHubRepository repository) async {
-    final json = await github.requestJson("GET", "repos/${repository.organization}/${repository.name}/contributors");
+    late final Object json;
+    try {
+      json = await github.requestJson("GET", "repos/${repository.organization}/${repository.name}/contributors");
+    } catch (exception) {
+      log.warn("Failed to load GitHub contributors:\n${exception}");
+      return _GitHubRepositoryContributors(repository, const []);
+    }
+
     if (json is! List<dynamic>) {
       log.warn("Received unexpected response from GitHub:");
       log.warn(const JsonEncoder.withIndent("  ").convert(json));

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:static_shock/src/finishers.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
+import 'package:static_shock/static_shock.dart';
 
 /// [StaticShockPlugin] that runs Tailwind CSS against the project's source files.
 ///
@@ -17,6 +18,9 @@ class TailwindPlugin implements StaticShockPlugin {
     required this.input,
     required this.output,
   });
+
+  @override
+  final id = "io.staticshock.tailwind";
 
   /// Path and name of the Tailwind executable.
   final String tailwindPath;
@@ -49,7 +53,11 @@ class TailwindPlugin implements StaticShockPlugin {
   final String output;
 
   @override
-  void configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  void configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline.finish(_TailwindGenerator(
       tailwindPath: tailwindPath,
       input: input,

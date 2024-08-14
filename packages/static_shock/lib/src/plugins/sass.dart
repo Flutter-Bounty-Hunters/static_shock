@@ -15,7 +15,14 @@ class SassPlugin implements StaticShockPlugin {
   const SassPlugin();
 
   @override
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  final id = "io.staticshock.sass";
+
+  @override
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     // We assemble our own Sass importer that we call SassEnvironment where we
     // collect all the available Sass files so they can reference each other.
     //

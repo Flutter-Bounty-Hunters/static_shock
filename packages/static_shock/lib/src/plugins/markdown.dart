@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:fbh_front_matter/fbh_front_matter.dart' as front_matter;
 import 'package:markdown/markdown.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:static_shock/src/cache.dart';
 
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/pages.dart';
@@ -15,10 +16,17 @@ class MarkdownPlugin implements StaticShockPlugin {
     this.renderOptions = const MarkdownRenderOptions(),
   });
 
+  @override
+  final id = "io.staticshock.markdown";
+
   final MarkdownRenderOptions renderOptions;
 
   @override
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline
       ..pick(const ExtensionPicker("md"))
       ..loadPages(MarkdownPageLoader(context.log))
