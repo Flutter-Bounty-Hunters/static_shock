@@ -1,3 +1,6 @@
+## 0.0.9 - Aug 14, 2024
+ * [CRITICAL] - Exclude `.shock` temp directory from file system watcher for dev server to avoid endless loop of builds
+
 ## 0.0.8 - July 25, 2024
  * [BREAKING] - `shock create` now offers 3 templates with walkthrough
    * blog
