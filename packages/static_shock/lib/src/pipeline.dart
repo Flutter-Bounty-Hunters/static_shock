@@ -42,6 +42,11 @@ abstract class StaticShockPipeline {
   /// any assets or pages are loaded.
   void loadData(DataLoader dataLoader);
 
+  /// Adds the given [AssetLoader] to the pipeline, which loads and adds assets that
+  /// weren't [pick]'ed, e.g., loading an image from network, or generating an image
+  /// during the build process.
+  void loadAssets(AssetLoader loader);
+
   /// Adds the given [AssetTransformer] to the pipeline, which copies, alters, and
   /// saves assets from the source set to the build set.
   void transformAssets(AssetTransformer transformer);

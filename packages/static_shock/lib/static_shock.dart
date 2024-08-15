@@ -2,6 +2,7 @@ library static_shock;
 
 // ----- Core constructs -----
 export 'src/assets.dart';
+export 'src/cache.dart';
 export 'src/data.dart';
 export 'src/files.dart';
 export 'src/finishers.dart';
@@ -24,3 +25,4 @@ export 'src/plugins/redirects.dart';
 export 'src/plugins/rss.dart';
 export 'src/plugins/sass.dart';
 export 'src/plugins/tailwind_css.dart';
+export 'src/plugins/website_screenshots.dart';

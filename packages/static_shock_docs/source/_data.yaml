@@ -7,3 +7,63 @@ github:
   contributors:
     repositories:
       - { organization: flutter-bounty-hunters, name: static_shock }
+
+showcase:
+  screenshots:
+    marketing:
+      -
+        id: "staticshock_io"
+        title: "Static Shock"
+        url: "https://staticshock.io"
+        output: "/images/screenshots/staticshock_io.png"
+      -
+        id: "superdeclarative_com"
+        title: "SuperDeclarative!"
+        url: "https://superdeclarative.com"
+        output: "/images/screenshots/superdeclarative_com.png"
+      -
+        id: "flutterbountyhunters_com"
+        title: "Flutter Bounty Hunters"
+        url: "https://flutterbountyhunters.com"
+        output: "/images/screenshots/flutterbountyhunters_com.png"
+      -
+        id: "blog_flutterbountyhunters_com"
+        title: "FBH Blog"
+        url: "https://blog.flutterbountyhunters.com"
+        output: "/images/screenshots/blog_flutterbountyhunters_com.png"
+      -
+        id: "flutterarbiter_com"
+        title: "Flutter Arbiter"
+        url: "https://flutterarbiter.com"
+        output: "/images/screenshots/flutterarbiter_com.png"
+      -
+        id: "flutterspaces_com"
+        title: "Flutter Spaces"
+        url: "https://flutterspaces.com"
+        output: "/images/screenshots/flutterspaces_com.png"
+      -
+        id: "fluttershaders_com"
+        title: "Flutter Shaders"
+        url: "https://fluttershaders.com"
+        output: "/images/screenshots/fluttershaders_com.png"
+    docs:
+      -
+        id: "flutter_test_robots"
+        title: "Flutter Test Robots"
+        url: "https://flutter-bounty-hunters.github.io/flutter_test_robots/"
+        output: "/images/screenshots/docs_flutter_test_robots.png"
+      -
+        id: "ffmpeg_cli"
+        title: "FFMPEG CLI"
+        url: "https://flutter-bounty-hunters.github.io/ffmpeg_cli/"
+        output: "/images/screenshots/docs_ffmpeg_cli.png"
+      -
+        id: "golden_bricks"
+        title: "Golden Bricks"
+        url: "https://flutter-bounty-hunters.github.io/golden_bricks/"
+        output: "/images/screenshots/golden_bricks.png"
+      -
+        id: "dart_rss"
+        title: "Dart RSS"
+        url: "https://flutter-bounty-hunters.github.io/dart-rss/"
+        output: "/images/screenshots/dart_rss.png"

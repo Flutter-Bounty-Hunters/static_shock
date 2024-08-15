@@ -22,6 +22,15 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/template_sources/template_docs/build" />
       <excludeFolder url="file://$MODULE_DIR$/packages/template_sources/template_docs/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/template_sources/template_docs/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_blog/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_blog/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_blog/build" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_docs_multi_page/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_docs_multi_page/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_docs_multi_page/build" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_empty/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_empty/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/template_sources/template_empty/build" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />

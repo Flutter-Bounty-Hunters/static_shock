@@ -4,6 +4,14 @@ import 'dart:typed_data';
 import 'files.dart';
 import 'pipeline.dart';
 
+/// Loads some number of assets, possibly by loading them from remote sources,
+/// or by generating them locally.
+///
+/// Asset loading runs before asset transformation.
+abstract class AssetLoader {
+  FutureOr<void> loadAssets(StaticShockPipelineContext context);
+}
+
 abstract class AssetTransformer {
   FutureOr<void> transformAsset(StaticShockPipelineContext context, Asset asset);
 }

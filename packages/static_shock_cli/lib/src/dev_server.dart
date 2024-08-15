@@ -167,6 +167,12 @@ class StaticShockDevServer {
   }
 
   Future<void> _onSourceFileChange(WatchEvent event) async {
+    if (event.path.contains(".shock")) {
+      // Don't track changes to the Static Shock cache so that `shock serve`
+      // doesn't get stuck in an endless build loop.
+      return;
+    }
+
     // WARNING: Don't log anything with mason_logger if we're already running a
     // build. Something is causing the logger to blow up. https://github.com/felangel/mason/issues/1280
     if (isBuilding) {

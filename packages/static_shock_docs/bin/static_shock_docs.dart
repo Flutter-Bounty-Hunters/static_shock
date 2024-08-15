@@ -19,6 +19,36 @@ Future<void> main(List<String> arguments) async {
       showDrafts: arguments.contains("preview"),
     ))
     ..plugin(const PubPackagePlugin())
+    ..plugin(WebsiteScreenshotsPlugin(
+      selector: (context) {
+        final rootData = context.dataIndex.inheritDataForPath(DirectoryRelativePath("/"));
+        final showcase = rootData['showcase'];
+        if (showcase == null) {
+          return {};
+        }
+        if (showcase is! Map<String, dynamic>) {
+          return {};
+        }
+
+        final screenshots = <WebsiteScreenshot>{};
+        final marketingScreenshotsYaml = showcase['screenshots']['marketing'] as List<dynamic>;
+        final docsScreenshotsYaml = showcase['screenshots']['docs'] as List<dynamic>;
+        final screenshotsYaml = List.from(marketingScreenshotsYaml)..addAll(docsScreenshotsYaml);
+
+        for (final screenshotYaml in screenshotsYaml) {
+          screenshots.add(
+            WebsiteScreenshot(
+              id: screenshotYaml['id'],
+              url: Uri.parse(screenshotYaml['url']),
+              output: FileRelativePath.parse(screenshotYaml['output']),
+            ),
+          );
+        }
+
+        return screenshots;
+      },
+      outputWidth: 256,
+    ))
     ..plugin(const RssPlugin(
       site: RssSiteConfiguration(
         title: "Static Shock Docs",
@@ -28,6 +58,10 @@ Future<void> main(List<String> arguments) async {
     ))
     ..plugin(
       GitHubContributorsPlugin(
+        // GitHub allows a certain number of API requests per hour. If you're below
+        // that number, you don't need to worry about an API token. If you need to exceed
+        // that request limit, you can provide your own GitHub API token as an environment
+        // variable, as shown here.
         authToken: Platform.environment["GHUB_DOC_WEBSITE_TOKEN"],
       ),
     )

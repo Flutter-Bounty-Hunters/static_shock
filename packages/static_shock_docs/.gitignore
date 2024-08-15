@@ -1,6 +1,12 @@
 # Build output
 /build
 
+# Shock cache and temp files
+/source/.shock/
+
+# Puppeteer cached output
+.local-chrome
+
 # Firebase
 /.firebase
 

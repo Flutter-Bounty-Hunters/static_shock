@@ -5,6 +5,7 @@ import 'package:fbh_front_matter/fbh_front_matter.dart' as front_matter;
 import 'package:http/http.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as path;
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/finishers.dart';
 import 'package:static_shock/src/infrastructure/data.dart';
@@ -44,6 +45,7 @@ class StaticShock implements StaticShockPipeline {
     Set<RemoteFile>? remoteAssetPickers,
     Set<RemoteFile>? remotePagePickers,
     Set<DataLoader>? dataLoaders,
+    Set<AssetLoader>? assetLoaders,
     Set<AssetTransformer>? assetTransformers,
     Set<PageLoader>? pageLoaders,
     Set<PageTransformer>? pageTransformers,
@@ -62,6 +64,7 @@ class StaticShock implements StaticShockPipeline {
               const FilePrefixExcluder("."),
             },
         _dataLoaders = dataLoaders ?? {},
+        _assetLoaders = assetLoaders ?? {},
         _assetTransformers = assetTransformers ?? {},
         _pageLoaders = pageLoaders ?? {},
         _pageTransformers = pageTransformers ?? {},
@@ -119,6 +122,11 @@ class StaticShock implements StaticShockPipeline {
   @override
   void loadData(DataLoader dataLoader) => _dataLoaders.add(dataLoader);
   late final Set<DataLoader> _dataLoaders;
+
+  /// Adds the given [AssetLoader] to the pipeline, which loads external assets.
+  @override
+  void loadAssets(AssetLoader assetLoader) => _assetLoaders.add(assetLoader);
+  late final Set<AssetLoader> _assetLoaders;
 
   /// Adds the given [AssetTransformer] to the pipeline, which copies, alters, and
   /// saves assets from the source set to the build set.
@@ -243,6 +251,9 @@ class StaticShock implements StaticShockPipeline {
     // Load all external data that will be injected into all pages.
     await _loadExternalData();
 
+    // Load all external assets.
+    await _loadExternalAssets();
+
     // Load pages and assets.
     await _loadPagesAndAssets();
 
@@ -288,7 +299,8 @@ class StaticShock implements StaticShockPipeline {
     _log.info("⚡ Applying plugins");
 
     for (final plugin in _plugins) {
-      plugin.configure(this, _context);
+      final pluginCache = StaticShockCache(_sourceDirectory.subDir([".shock", "cache", plugin.id]));
+      plugin.configure(this, _context, pluginCache);
     }
 
     _timer.checkpoint("Apply plugins", "Every plugin configures the pipeline as desired");
@@ -551,6 +563,20 @@ class StaticShock implements StaticShockPipeline {
     }
 
     _timer.checkpoint("Load external data", "Loads all data from non-local sources, such as APIs");
+    _log.info("");
+  }
+
+  Future<void> _loadExternalAssets() async {
+    _log.info("⚡ Loading external assets");
+
+    final loadingFutures = <FutureOr<void>>[];
+    for (final loader in _assetLoaders) {
+      loadingFutures.add(loader.loadAssets(_context));
+    }
+
+    await Future.wait(loadingFutures.whereType<Future<void>>());
+
+    _timer.checkpoint("Load external assets", "Loads all assets from non-local sources, such as network images");
     _log.info("");
   }
 
@@ -956,7 +982,19 @@ class StaticShock implements StaticShockPipeline {
 abstract class StaticShockPlugin {
   const StaticShockPlugin();
 
+  /// ID that uniquely differentiates this plugin from all other plugins.
+  ///
+  /// The plugin ID is used, for example, to segregate caches for each plugin.
+  ///
+  /// One strategy to help avoid ID conflicts is to use a domain name that
+  /// you own, e.g., "com.mydomain.myplugin".
+  String get id;
+
   /// Configures the [pipeline] to add new features that are associated with
   /// this plugin.
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {}
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {}
 }

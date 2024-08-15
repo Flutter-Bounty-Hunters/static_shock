@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:path/path.dart' as path;
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/finishers.dart';
 import 'package:static_shock/src/pipeline.dart';
@@ -28,7 +29,14 @@ class RedirectsPlugin implements StaticShockPlugin {
   const RedirectsPlugin();
 
   @override
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  final id = "io.staticshock.redirects";
+
+  @override
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline.finish(
       RedirectsFinisher(),
     );

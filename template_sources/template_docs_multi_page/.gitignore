@@ -1,6 +1,12 @@
 # Build output
 /build
 
+# Shock cache and temp files
+/source/.shock/
+
+# Puppeteer cached output
+.local-chrome
+
 # https://dart.dev/guides/libraries/private-files
 # Created by `dart pub`
 .dart_tool/

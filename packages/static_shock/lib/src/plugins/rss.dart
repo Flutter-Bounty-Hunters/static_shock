@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dart_rss/dart_rss.dart';
 import 'package:intl/intl.dart';
 import 'package:static_shock/src/assets.dart';
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/finishers.dart';
 import 'package:static_shock/src/pages.dart';
@@ -32,6 +33,9 @@ class RssPlugin implements StaticShockPlugin {
     this.pageToRssItemMapper = defaultPageToRssItemMapper,
   });
 
+  @override
+  final id = "io.staticshock.rss";
+
   /// Top-level website information for the `<channel>` configuration.
   final RssSiteConfiguration site;
 
@@ -50,7 +54,11 @@ class RssPlugin implements StaticShockPlugin {
   final PageToRssItemMapper pageToRssItemMapper;
 
   @override
-  FutureOr<void> configure(StaticShockPipeline pipeline, StaticShockPipelineContext context) {
+  FutureOr<void> configure(
+    StaticShockPipeline pipeline,
+    StaticShockPipelineContext context,
+    StaticShockCache pluginCache,
+  ) {
     pipeline.finish(_RssFinisher(
       site: site,
       rssFeedPath: rssFeedPath,
