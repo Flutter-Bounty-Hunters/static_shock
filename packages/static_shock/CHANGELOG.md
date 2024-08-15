@@ -1,3 +1,7 @@
+## 0.0.12 - Aug 14, 2024
+ * Feature: Generate screenshots of other websites with `WebsiteScreenshotsPlugin`.
+ * Feature: Store data in a cache between builds with `StaticShockCache`.
+
 ## 0.0.11 - July 25, 2024
  * Fix: Pretty URLs work with files explicitly named "index".
  * Fix: Local page data overrides inherited data.
