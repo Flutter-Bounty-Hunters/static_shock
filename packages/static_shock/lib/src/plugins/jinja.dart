@@ -218,10 +218,15 @@ class JinjaPageRenderer implements PageRenderer {
     }
 
     // Assemble all data that should be available to the page during template rendering.
+    final globalPageFunctions = <String, Function>{
+      "isCurrentPage": (String urlPath) => _isCurrentPage(page, urlPath),
+    };
+
     final pageData = {
       ...page.data,
       if (content != null) //
         "content": content,
+      ...globalPageFunctions,
       ...context.templateFunctions,
       ...context.pagesIndex.buildPageIndexDataForTemplates(),
       "components": {
@@ -293,5 +298,17 @@ class JinjaPageRenderer implements PageRenderer {
   String _pathRelativeToPage(Page page, String relativePath) {
     final pageUrl = Uri.parse(page.url!);
     return pageUrl.resolve(relativePath).path;
+  }
+
+  /// A global function available to a page, which returns `true` if the
+  /// given [urlPath] is the path of the current [page], or `false` otherwise.
+  ///
+  /// This is useful for activating menu items when viewing the page for that
+  /// menu item.
+  bool _isCurrentPage(Page page, String urlPath) {
+    final pageUrlWithTrailingSlash = page.url!;
+    final pageUrlNoTrailingSlash = pageUrlWithTrailingSlash.substring(0, pageUrlWithTrailingSlash.length - 1);
+
+    return pageUrlNoTrailingSlash == urlPath || pageUrlNoTrailingSlash == urlPath;
   }
 }
