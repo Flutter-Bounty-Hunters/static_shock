@@ -44,7 +44,8 @@ Configure the layout file to display a menu, based on the menu data in `_data.ya
       <!-- This is where we generate all the menu items -->
       <nav class="guides-menu">
         {% for menuItem in my_menu %}
-          <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
+          {% set menuItemUrlPath = "/guides/" + menuItem.id %}
+          <a class="btn btn-primary btn-sm {{ 'active' if isCurrentPage(menuItemUrlPath) else '' }}" href="{{ menuItemUrlPath }}" role="button">{{ menuItem.title }}</a>
         {% endfor %}
       </nav>
         

@@ -69,6 +69,12 @@ p {
     background: $primaryLighter;
     border: 1px solid $accent;
   }
+
+  &.active, &:active, &:active:focus {
+    color: BLACK;
+    background: $accent;
+    border: 0;
+  }
 }
 
 .btn + .btn {

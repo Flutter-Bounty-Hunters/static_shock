@@ -28,7 +28,10 @@
         <div class="row">
           <nav class="col-3 d-none d-md-block">
             {% for menuItem in docs_menu|itemsForExistingPages(["guides"]) %}
-            <a class="btn btn-primary btn-sm" href="/guides/{{ menuItem.id }}" role="button">{{ menuItem.title }}</a>
+
+              {% set menuItemUrlPath = "/guides/" + menuItem.id %}
+              <a class="btn btn-primary btn-sm {{ 'active' if isCurrentPage(menuItemUrlPath) else '' }}" href="{{ menuItemUrlPath }}" role="button" style="margin-top: 1em; margin-bottom: 1em;">{{ menuItem.title }}</a>
+
             {% endfor %}
           </nav>
 
