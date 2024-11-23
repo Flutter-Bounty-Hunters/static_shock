@@ -1,3 +1,6 @@
+## 0.0.13 - Nov 23, 2024
+ * Feature: Add global page template function `isCurrentPage`.
+
 ## 0.0.12 - Aug 14, 2024
  * Feature: Generate screenshots of other websites with `WebsiteScreenshotsPlugin`.
  * Feature: Store data in a cache between builds with `StaticShockCache`.
