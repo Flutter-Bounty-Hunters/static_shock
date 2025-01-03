@@ -177,8 +177,8 @@ class MarkdownPageRenderer implements PageRenderer {
     final contentHtml = markdownToHtml(
       page.destinationContent ?? page.sourceContent,
       blockSyntaxes: [
-        HeaderWithIdSyntax(),
         ..._renderOptions.blockSyntaxes,
+        HeaderWithIdSyntax(),
       ],
       inlineSyntaxes: _renderOptions.inlineSyntaxes,
       extensionSet: _renderOptions.extensionSet,
