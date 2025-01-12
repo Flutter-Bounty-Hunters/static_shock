@@ -1,28 +1,61 @@
 layout: layouts/guides.jinja
 docs_menu:
-  - title: Add a Page
-    id: add-a-page
-  - title: Directory of Pages
-    id: directory-of-pages
-  - title: Display a Menu in a Page
-    id: display-a-menu-in-a-page
-  - title: Copy CSS, JS, Images
-    id: copy-assets
-  - title: Include Remote Files
-    id: remote-files
-  - title: Compile Sass
-    id: compile-sass
-  - title: Compile TailwindCSS
-    id: compile-tailwind
-  - title: Draft Articles
-    id: draft-articles
-  - title: Website Screenshots
-    id: website-screenshots
-  - title: Use Remote CSS and JS
-    id: use-remote-css-and-js
-  - title: Create a Plugin
-    id: create-a-plugin
-  - title: Create RSS Feed
-    id: create-rss-feed
-  - title: Deploy to GitHub Pages
-    id: deploy-to-github-pages
+  base_path: /guides
+  items:
+    - title: Get Started
+      id: get-started
+      items:
+        - title: Add a Page
+          id: add-a-page
+        - title: Copy CSS, JS, Images
+          id: copy-assets
+        - title: Compile Sass
+          id: compile-sass
+        - title: Compile TailwindCSS
+          id: compile-tailwind
+    - title: Navigation
+      id: navigation
+      items:
+        - title: Display a List of Pages
+          id: directory-of-pages
+        - title: Display a Menu in a Page
+          id: display-a-menu-in-a-page
+    - title: Page Layouts
+      id: page-layouts
+      items:
+        - title: Create a Page Layout
+          id: create-a-page-layout
+        - title: Create a Component
+          id: create-a-component
+    - title: Drafting
+      id: drafting
+      items:
+        - title: Draft Articles
+          id: draft-articles
+    - title: Remote Files
+      id: remote-files
+      items:
+        - title: Include Remote Files
+          id: remote-files
+        - title: Use Remote CSS and JS
+          id: use-remote-css-and-js
+    - title: Blogs
+      id: blogs
+      items:
+        - title: Create RSS Feed
+          id: create-rss-feed
+    - title: Plugins
+      id: plugins
+      items:
+        - title: Create a Plugin
+          id: create-a-plugin
+    - title: Deploy
+      id: deploy
+      items:
+        - title: Deploy to GitHub Pages
+          id: deploy-to-github-pages
+    - title: Cool Abilities
+      id: cool-abilities
+      items:
+        - title: Website Screenshots
+          id: website-screenshots

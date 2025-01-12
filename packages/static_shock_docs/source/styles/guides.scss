@@ -1,5 +1,10 @@
 @import "theme";
 
+#content {
+  // Push content down below app bar.
+  margin-top: 200px;
+}
+
 h1 {
   color: $accent;
 }
@@ -51,6 +56,24 @@ p {
   height: 1px;
 
   background: rgba(255, 255, 255, 0.05);
+}
+
+.side-menu {
+  .title {
+    margin-left: 16px;
+    margin-bottom: 4px;
+
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .btn {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+  }
 }
 
 .btn {

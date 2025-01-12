@@ -26,11 +26,21 @@
       <!-- Primary page content -->
       <div class="container">
         <div class="row">
-          <nav class="col-3 d-none d-md-block">
-            {% for menuItem in docs_menu|itemsForExistingPages(["guides"]) %}
+          <nav class="side-menu col-3 d-none d-md-block">
+            {% for menuItem in docs_menu.items %}
 
-              {% set menuItemUrlPath = "/guides/" + menuItem.id %}
-              <a class="btn btn-primary btn-sm {{ 'active' if isCurrentPage(menuItemUrlPath) else '' }}" href="{{ menuItemUrlPath }}" role="button" style="margin-top: 1em; margin-bottom: 1em;">{{ menuItem.title }}</a>
+              {% if menuItem.items %}
+                {# Show a menu sub-group with a header and child items #}
+                <p class="title">{{ menuItem.title }}</p>
+
+                {% for item in menuItem.items|itemsForExistingPages(["guides"]) %}
+                  {% set menuItemUrlPath = docs_menu.base_path + "/" + item.id %}
+                  <a class="btn btn-primary btn-sm {{ 'active' if isCurrentPage(menuItemUrlPath) else '' }}" href="{{ menuItemUrlPath }}" role="button">{{ item.title }}</a>
+                {% endfor %}
+              {% else %}
+                {% set menuItemUrlPath = docs_menu.base_path + "/" + menuItem.id %}
+                <a class="btn btn-primary btn-sm {{ 'active' if isCurrentPage(menuItemUrlPath) else '' }}" href="{{ menuItemUrlPath }}" role="button">{{ menuItem.title }}</a>
+              {% endif %}
 
             {% endfor %}
           </nav>
