@@ -190,10 +190,12 @@ class JinjaPageRenderer implements PageRenderer {
       componentsLookup[entry.key] = ([Map<Object?, Object?>? vars]) {
         if (vars != null) {
           for (final varEntry in vars.entries) {
-            String replaceBrackets = varEntry.value as String;
-            replaceBrackets = replaceBrackets.replaceAll("<", "&lt;");
-            replaceBrackets = replaceBrackets.replaceAll(">", "&gt;");
-            vars[varEntry.key] = replaceBrackets;
+            if (varEntry.value is String) {
+              String replaceBrackets = varEntry.value as String;
+              replaceBrackets = replaceBrackets.replaceAll("<", "&lt;");
+              replaceBrackets = replaceBrackets.replaceAll(">", "&gt;");
+              vars[varEntry.key] = replaceBrackets;
+            }
           }
         }
 
