@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:static_shock/static_shock.dart';
 
 Future<void> main(List<String> arguments) async {

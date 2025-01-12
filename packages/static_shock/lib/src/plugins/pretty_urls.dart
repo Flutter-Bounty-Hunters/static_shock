@@ -10,6 +10,7 @@ import '../pages.dart';
 class PrettyUrlsPlugin implements StaticShockPlugin {
   const PrettyUrlsPlugin();
 
+  @override
   final id = "io.staticshock.prettyurls";
 
   @override

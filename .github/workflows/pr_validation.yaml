@@ -1,6 +1,28 @@
 name: Run tests on every PR
 on: [pull_request]
 jobs:
+  build_docs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/static_shock_docs
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup a Dart environment
+      - uses: dart-lang/setup-dart@v1
+
+      # Download all the packages that the app uses
+      - run: dart pub get
+
+      # Build the static site
+      - run: dart run bin/static_shock_docs.dart ci
+        env:
+          GHUB_DOC_WEBSITE_TOKEN: ${{ vars.GHUB_DOC_WEBSITE_TOKEN }}
+          STATIC_SHOCK_ALGOLIA_APP_ID: ${{ vars.STATIC_SHOCK_ALGOLIA_APP_ID }}
+          STATIC_SHOCK_ALGOLIA_API_KEY: ${{ vars.STATIC_SHOCK_ALGOLIA_API_KEY }}
+
   analyze-static-shock:
     runs-on: ubuntu-latest
     defaults:
