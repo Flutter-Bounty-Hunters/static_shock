@@ -17,7 +17,7 @@ jobs:
       - run: dart pub get
 
       # Build the static site
-      - run: dart run bin/static_shock_docs.dart
+      - run: dart run bin/static_shock_docs.dart ci
         env:
           GHUB_DOC_WEBSITE_TOKEN: ${{ vars.GHUB_DOC_WEBSITE_TOKEN }}
           STATIC_SHOCK_ALGOLIA_APP_ID: ${{ vars.STATIC_SHOCK_ALGOLIA_APP_ID }}
