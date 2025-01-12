@@ -146,7 +146,7 @@ class _GitHubDataLoader implements DataLoader {
     try {
       json = await github.requestJson("GET", "repos/${repository.organization}/${repository.name}/contributors");
     } catch (exception) {
-      log.warn("Failed to load GitHub contributors:\n${exception}");
+      log.warn("Failed to load GitHub contributors:\n$exception");
       return _GitHubRepositoryContributors(repository, const []);
     }
 

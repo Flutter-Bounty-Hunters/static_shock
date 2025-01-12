@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/finishers.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
-import 'package:static_shock/static_shock.dart';
 
 /// [StaticShockPlugin] that runs Tailwind CSS against the project's source files.
 ///
