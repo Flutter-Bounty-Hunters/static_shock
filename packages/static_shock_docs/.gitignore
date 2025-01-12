@@ -2,7 +2,9 @@
 /build
 
 # Shock cache and temp files
-/source/.shock/
+# (Jan 12, 2024) - I started committing the cache because we're able to generate screenshots
+#                  locally, but puppeteer is broken on CI.
+#/source/.shock/
 
 # Puppeteer cached output
 .local-chrome
