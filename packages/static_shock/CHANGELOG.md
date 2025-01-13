@@ -1,3 +1,6 @@
+## 0.0.14 - Jan 12, 2024
+ * Fix: Jinja component lookup bug.
+
 ## 0.0.13 - Nov 23, 2024
  * Feature: Add global page template function `isCurrentPage`.
 
