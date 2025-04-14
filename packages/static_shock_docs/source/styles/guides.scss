@@ -28,6 +28,20 @@ p {
   line-height: 1.8em;
 }
 
+.callout {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 16px 24px;
+
+  font-size: 0.7em;
+
+  .title {
+    display: block;
+    padding-bottom: 16px;
+
+    font-size: 1.3em;
+  }
+}
+
 .table-of-contents {
   margin-top: 3em;
   margin-bottom: 3em;

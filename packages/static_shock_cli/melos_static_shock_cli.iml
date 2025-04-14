@@ -29,6 +29,24 @@
       <excludeFolder url="file://$MODULE_DIR$/test/.template_test_output/empty/minimal/--no-auto-initialize/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/test/.template_test_output/empty/minimal/--no-auto-initialize/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/test/.template_test_output/empty/minimal/--no-auto-initialize/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/empty/minimal/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/empty/minimal/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/empty/minimal/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/blog/standard/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/blog/standard/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/blog/standard/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/templates/blog/__brick__/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/templates/blog/__brick__/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/templates/blog/__brick__/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/docs_multi_page/complete/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/docs_multi_page/complete/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/docs_multi_page/complete/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/docs_multi_page/minimal/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/docs_multi_page/minimal/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/test/template_goldens/docs_multi_page/minimal/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/templates/docs_multi_page/__brick__/build" />
+      <excludeFolder url="file://$MODULE_DIR$/templates/docs_multi_page/__brick__/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/templates/docs_multi_page/__brick__/.pub" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />

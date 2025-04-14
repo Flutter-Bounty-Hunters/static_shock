@@ -236,6 +236,11 @@ class StaticShock implements StaticShockPipeline {
     _context = StaticShockPipelineContext(_log, _sourceDirectory);
     _files.clear();
 
+    // Configure the site-wide base path for all URLs.
+    _context.dataIndex.mergeAtPath(DirectoryRelativePath("/"), {
+      "websiteBasePath": "/",
+    });
+
     // Run plugin configuration - we do this first so that plugins can contribute pickers.
     _applyPlugins();
 

@@ -13,6 +13,11 @@ docs_menu:
           id: compile-sass
         - title: Compile TailwindCSS
           id: compile-tailwind
+    - title: Website
+      id: website
+      items:
+        - title: Configure Base URL
+          id: configure-website-base-url
     - title: Navigation
       id: navigation
       items:
