@@ -120,7 +120,7 @@ class RedirectsFinisher implements Finisher {
             "${originalHtml.substring(0, headMatch.end)}\n$redirectTags\n${originalHtml.substring(headMatch.end)}";
 
         final redirectPage = page.copy() //
-          ..url = redirect
+          ..pagePath = redirect
           ..destinationPath = redirectDestinationFilePath
           ..destinationContent = redirectPageHtml;
 

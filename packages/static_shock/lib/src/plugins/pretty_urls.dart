@@ -35,16 +35,16 @@ class PrettyPathPageTransformer implements PageTransformer {
     final originalPath = page.destinationPath ?? page.sourcePath;
     if (originalPath.directories.isEmpty && originalPath.filename == "index") {
       // This is the root index file.
-      page.url = "/";
+      page.pagePath = "";
       return;
     }
 
-    final pathBeforePageFile = originalPath.directories.isNotEmpty ? "/${originalPath.directories.join("/")}/" : "/";
+    final pathBeforePageFile = originalPath.directories.isNotEmpty ? "${originalPath.directories.join("/")}/" : "";
 
-    page.url = originalPath.filename != "index"
-        // First case is like "posts/news/hello-world.md" -> "/posts/news/hello-world/"
+    page.pagePath = originalPath.filename != "index"
+        // First case is like "posts/news/hello-world.html" -> "posts/news/hello-world/"
         ? "$pathBeforePageFile${originalPath.filename}/"
-        // Second case is like "posts/news/hello-world/index.md" -> "/posts/news/hello-world/"
+        // Second case is like "posts/news/hello-world/index.html" -> "posts/news/hello-world/"
         : pathBeforePageFile;
 
     if (page.destinationPath?.filename != "index") {

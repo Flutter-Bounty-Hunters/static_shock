@@ -88,10 +88,10 @@ class JinjaPageLoader implements PageLoader {
       path,
       trimmedContent,
       data: {
-        // Note: assign "url" before including frontMatter so that the frontMatter can override it.
-        "url": destinationPath.value,
-        if (!frontMatter.containsKey("contentRenderers")) //
-          "contentRenderers": ["jinja"],
+        // Note: assign "pagePath" before including frontMatter so that the frontMatter can override it.
+        PageKeys.pagePath: destinationPath.value,
+        if (!frontMatter.containsKey(PageKeys.contentRenderers)) //
+          PageKeys.contentRenderers: ["jinja"],
         ...frontMatter
       },
       destinationPath: destinationPath,
@@ -125,14 +125,14 @@ class JinjaPageRenderer implements PageRenderer {
 
   @override
   FutureOr<void> renderLayout(StaticShockPipelineContext context, Page page) async {
-    if (page.data["layout"] == null ||
-        page.data["layout"].trim().isEmpty ||
-        page.data["layout"].trim().toLowerCase() == "none") {
+    if (page.data[PageKeys.layout] == null ||
+        page.data[PageKeys.layout].trim().isEmpty ||
+        page.data[PageKeys.layout].trim().toLowerCase() == "none") {
       return;
     }
 
     // Treat the page's source content as content to be injected in the specified layout.
-    final layoutPathString = page.data["layout"] as String?;
+    final layoutPathString = page.data[PageKeys.layout] as String?;
     if (layoutPathString == null || layoutPathString.isEmpty) {
       return;
     }
@@ -167,10 +167,11 @@ class JinjaPageRenderer implements PageRenderer {
     String? content,
   }) {
     final jinjaFilters = Map.fromEntries([
-      MapEntry("startsWith", _startsWith),
-      MapEntry("formatDateTime", _formatDateTime),
-      MapEntry("take", _take),
-      MapEntry("pathRelativeToPage", (String relativePath) => _pathRelativeToPage(page, relativePath)),
+      MapEntry(PageRenderKeys.localLink, _createLocalLinkFilter(page.basePath)),
+      MapEntry(PageRenderKeys.startsWith, _startsWith),
+      MapEntry(PageRenderKeys.formatDateTime, _formatDateTime),
+      MapEntry(PageRenderKeys.take, _take),
+      MapEntry(PageRenderKeys.pathRelativeToPage, (String relativePath) => _pathRelativeToPage(page, relativePath)),
       ...filters.map((filterBuilder) {
         final filter = filterBuilder(context);
         return MapEntry<String, Function>(filter.$1, filter.$2);
@@ -202,7 +203,7 @@ class JinjaPageRenderer implements PageRenderer {
         final componentData = <String, Object?>{
           ...page.data,
           ...context.pagesIndex.buildPageIndexDataForTemplates(),
-          "components": {
+          PageRenderKeys.components: {
             // Maps component name to a factory method: "footer": () -> "<div>...</div>"
             ...componentsLookup,
           },
@@ -221,17 +222,18 @@ class JinjaPageRenderer implements PageRenderer {
 
     // Assemble all data that should be available to the page during template rendering.
     final globalPageFunctions = <String, Function>{
-      "isCurrentPage": (String urlPath) => _isCurrentPage(page, urlPath),
+      PageRenderKeys.isCurrentPage: (String urlPath) => _isCurrentPage(page, urlPath),
     };
 
     final pageData = {
       ...page.data,
+      PageRenderKeys.url: page.url,
       if (content != null) //
-        "content": content,
+        PageRenderKeys.content: content,
       ...globalPageFunctions,
       ...context.templateFunctions,
       ...context.pagesIndex.buildPageIndexDataForTemplates(),
-      "components": {
+      PageRenderKeys.components: {
         // Maps component name to a factory method: "footer": () -> "<div>...</div>"
         ...componentsLookup,
       },
@@ -250,6 +252,19 @@ class JinjaPageRenderer implements PageRenderer {
     } catch (exception) {
       _log.err("Failed to hydrate template for page: ${page.title}");
       _log.err("Error: $exception");
+
+      _log.warn("Available filters:");
+      for (final entry in jinjaFilters.entries) {
+        _log.warn(" - ${entry.key}: ${entry.value}");
+      }
+      _log.warn("");
+
+      _log.warn("Available tests:");
+      for (final entry in jinjaTests.entries) {
+        _log.warn(" - ${entry.key}: ${entry.value}");
+      }
+      _log.warn("");
+
       _log.warn("Available data:");
       for (final entry in pageData.entries) {
         _log.warn(" - ${entry.key}: ${entry.value}");
@@ -260,6 +275,16 @@ class JinjaPageRenderer implements PageRenderer {
 
     // Set the page's final content to the newly hydrated layout, and set the extension to HTML.
     page.destinationContent = hydratedLayout;
+  }
+
+  String Function(String pagePage) _createLocalLinkFilter(String websiteBasePath) {
+    return (String pagePath) {
+      final localPath = pagePath.startsWith("/") //
+          ? pagePath.substring(1)
+          : pagePath;
+
+      return "$websiteBasePath$localPath";
+    };
   }
 
   bool _startsWith(String? candidate, String? prefix) {
@@ -298,7 +323,7 @@ class JinjaPageRenderer implements PageRenderer {
   ///  - relativePath: `images/my-photo.png`
   ///  - return value: `/posts/my-article/images/my-photo.png`
   String _pathRelativeToPage(Page page, String relativePath) {
-    final pageUrl = Uri.parse(page.url!);
+    final pageUrl = Uri.parse(page.url);
     return pageUrl.resolve(relativePath).path;
   }
 
@@ -308,9 +333,36 @@ class JinjaPageRenderer implements PageRenderer {
   /// This is useful for activating menu items when viewing the page for that
   /// menu item.
   bool _isCurrentPage(Page page, String urlPath) {
-    final pageUrlWithTrailingSlash = page.url!;
+    final pageUrlWithTrailingSlash = page.url;
     final pageUrlNoTrailingSlash = pageUrlWithTrailingSlash.substring(0, pageUrlWithTrailingSlash.length - 1);
 
     return pageUrlNoTrailingSlash == urlPath || pageUrlNoTrailingSlash == urlPath;
   }
+}
+
+abstract class PageKeys {
+  static const layout = "layout";
+  static const pagePath = "pagePath";
+  static const contentRenderers = "contentRenderers";
+}
+
+abstract class JinjaFilterKeys {
+  //
+}
+
+abstract class JinjaTestKeys {
+  //
+}
+
+abstract class PageRenderKeys {
+  static const url = "url";
+  static const localLink = "local_link";
+  static const content = "content";
+  static const components = "components";
+  static const isCurrentPage = "isCurrentPage";
+
+  static const startsWith = "startsWith";
+  static const formatDateTime = "formatDateTime";
+  static const take = "take";
+  static const pathRelativeToPage = "pathRelativeToPage";
 }

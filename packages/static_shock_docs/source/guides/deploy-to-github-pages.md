@@ -1,6 +1,9 @@
 ---
 title: Deploy to GitHub Pages
 tags: publishing
+contentRenderers:
+  - jinja
+  - markdown
 ---
 GitHub provides a free tool for building, deploying, and serving static websites - it's called
 [GitHub Pages](https://pages.github.com/).
@@ -8,6 +11,38 @@ GitHub provides a free tool for building, deploying, and serving static websites
 If you want fully automated GitHub Pages deployment without any intervention, you have to use a
 static site generator called Jekyll. However, with a little bit of custom configuration, you can
 setup an automatic build and deployment Action for Static Shock on GitHub Pages.
+
+## Set the website base path
+Are you using a custom domain, or are you using the domain provided by GitHub Pages?
+
+A custom domain looks like `https://staticshock.io/`.
+
+A GitHub Pages domain looks like `https://flutterbountyhunters.github.io/static_shock/`.
+
+The GitHub Pages domain automatically inserts the name of your GitHub package as a base path
+for all URLs in your website.
+
+Custom domains don't require any additional configuration. However, if you're using the GitHub Pages 
+domain, you **must** configure the base path of your Static Shock website.
+
+{% raw %}
+```dart
+StaticShock(
+  site: SiteMetadata(
+    basePath: "/static_shock/",
+    // ^ replace with your actual base path.
+  ),
+);
+```
+{% endraw %}
+
+Learn more about [base paths]({{ "guides/base-url" | local_link }}).
+
+### Run locally with a base path
+When running your Static Shock website locally, the Static Shock dev server supports
+simulating a custom base path.
+
+See the [base paths guide]({{ "guides/base-url" | local_link }}) for more information.
 
 ## Build and deploy a GitHub Pages website with Static Shock
 First, configure your Static Shock website project as you would for any other purpose. Make sure
@@ -28,6 +63,7 @@ this file as an Action definition. GitHub will then follow whatever instructions
 
 In the `build_gh_pages.yaml` file, add the following configuration:
 
+{% raw %}
 ```yaml
 name: Build and deploy website
 on:
@@ -35,6 +71,7 @@ on:
     branches:
       main
 ```
+{% endraw %}
 
 This configuration gives your Action a name, and tells GitHub to trigger this action whenever you
 push a commit to `main`, or merge a PR into `main`.
@@ -45,6 +82,7 @@ process.
 
 Add the following job to your `build_gh_pages.yaml` file:
 
+{% raw %}
 ```yaml
 jobs:
   build:
@@ -77,6 +115,7 @@ jobs:
           # to your Static Shock build directory.
           path: ./packages/static_shock_docs/build
 ```
+{% endraw %}
 
 GitHub will now run Static Shock to build your static website. Then, GitHub will upload your website
 `/build` directory to the GitHub Pages system. However, you still need a step for deployment. We
@@ -86,6 +125,7 @@ separate build from deployment so that if one of those steps fail, it's easy to 
 Tell GitHub to deploy your static website by adding the following step to your `build_gh_pages.yaml` 
 file:
 
+{% raw %}
 ```yaml
   deploy:
     name: Deploy
@@ -106,6 +146,7 @@ file:
         id: deployment
         uses: actions/deploy-pages@v2
 ```
+{% endraw %}
 
 Your Static Shock website will now build and deploy every time you push a commit to `main`.
 

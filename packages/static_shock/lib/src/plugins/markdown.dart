@@ -62,8 +62,8 @@ class MarkdownPageLoader implements PageLoader {
       path,
       markdown.content ?? "",
       data: {
-        // Note: assign "url" before including Markdown data so that the Markdown data can override it.
-        "url": destinationPath.value,
+        // Note: assign "pagePath" before including Markdown data so that the Markdown data can override it.
+        "pagePath": destinationPath.value,
         if (!markdown.data.containsKey("contentRenderers")) //
           "contentRenderers": ["markdown"],
         ...markdown.data,

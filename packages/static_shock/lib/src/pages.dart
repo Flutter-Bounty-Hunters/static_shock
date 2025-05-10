@@ -142,7 +142,10 @@ class PagesIndex {
   }
 
   Map<String, dynamic> _serializePage(Page page) => {
-        "data": page.data,
+        "data": {
+          ...page.data,
+          "url": page.url,
+        },
       };
 }
 
@@ -307,16 +310,20 @@ class Page {
 
   final FileRelativePath sourcePath;
   final String sourceContent;
-  final Map<String, dynamic> data;
 
   FileRelativePath? destinationPath;
   String? destinationContent;
 
-  // TODO: decide if these properties should exist on Page, or if we should have a PageData sub-object
+  final Map<String, dynamic> data;
+
   String? get title => data["title"];
 
-  String? get url => data["url"];
-  set url(String? url) => data["url"] = url;
+  String get url => "$basePath$pagePath";
+
+  String get basePath => data["basePath"];
+
+  String? get pagePath => data["pagePath"];
+  set pagePath(String? pagePath) => data["pagePath"] = pagePath;
 
   List<String> get contentRenderers {
     final renderers = data["contentRenderers"];
