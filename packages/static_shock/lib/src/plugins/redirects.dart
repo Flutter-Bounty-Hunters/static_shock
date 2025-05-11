@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/finishers.dart';
+import 'package:static_shock/src/pages.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 import 'package:yaml/yaml.dart';
@@ -53,7 +54,7 @@ class RedirectsFinisher implements Finisher {
   @override
   void execute(StaticShockPipelineContext context) {
     final pagesWithRedirects = context.pagesIndex.pages.where(
-      (page) => page.data['redirectFrom'] != null,
+      (page) => page.data[PageKeys.redirectFrom] != null,
     );
     if (pagesWithRedirects.isEmpty) {
       return;
@@ -62,7 +63,7 @@ class RedirectsFinisher implements Finisher {
     for (final page in pagesWithRedirects) {
       // Parse the 1+ redirects from YAML front-matter.
       final redirects = <String>{};
-      final redirectsValue = page.data['redirectFrom'];
+      final redirectsValue = page.data[PageKeys.redirectFrom];
       if (redirectsValue is YamlList) {
         redirects.addAll(redirectsValue.value.cast());
       } else if (redirectsValue is String) {
@@ -94,11 +95,6 @@ class RedirectsFinisher implements Finisher {
           context.log.warn("Failed to convert a 'redirectFrom' URL path to a file path. URL path: '$redirect'");
           continue;
         }
-        if (page.url == null) {
-          context.log.warn(
-              "Tried to setup a direct for page '${page.title}' - but the page has no URL so we don't know where to redirect TO.");
-          continue;
-        }
         if (page.destinationContent == null) {
           context.log.warn(
               "Tried to setup a redirect for page at URL '${page.url}' - but the page has no content. Therefore, no redirect will be created.");
@@ -108,7 +104,7 @@ class RedirectsFinisher implements Finisher {
         // Add a redirect tag to the original HTML.
         final originalHtml = page.destinationContent!;
         final redirectTags =
-            '    <!-- Page redirect tags -->\n    <meta http-equiv="refresh" content="0; url=/${page.url}" />\n    <link rel="canonical" href="/${page.url}" />';
+            '    <!-- Page redirect tags -->\n    <meta http-equiv="refresh" content="0; url=${page.url}" />\n    <link rel="canonical" href="${page.url}" />';
         final headRegExp = RegExp(r'<head>', caseSensitive: false);
         final headMatch = headRegExp.firstMatch(originalHtml);
         if (headMatch == null) {
@@ -120,7 +116,7 @@ class RedirectsFinisher implements Finisher {
             "${originalHtml.substring(0, headMatch.end)}\n$redirectTags\n${originalHtml.substring(headMatch.end)}";
 
         final redirectPage = page.copy() //
-          ..pagePath = redirect
+          ..pagePath = redirect.startsWith("/") ? redirect.substring(1) : redirect
           ..destinationPath = redirectDestinationFilePath
           ..destinationContent = redirectPageHtml;
 

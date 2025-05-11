@@ -167,11 +167,11 @@ class JinjaPageRenderer implements PageRenderer {
     String? content,
   }) {
     final jinjaFilters = Map.fromEntries([
-      MapEntry(PageRenderKeys.localLink, _createLocalLinkFilter(page.basePath)),
-      MapEntry(PageRenderKeys.startsWith, _startsWith),
-      MapEntry(PageRenderKeys.formatDateTime, _formatDateTime),
-      MapEntry(PageRenderKeys.take, _take),
-      MapEntry(PageRenderKeys.pathRelativeToPage, (String relativePath) => _pathRelativeToPage(page, relativePath)),
+      MapEntry(JinjaFilterKeys.localLink, _createLocalLinkFilter(page.basePath)),
+      MapEntry(JinjaFilterKeys.startsWith, _startsWith),
+      MapEntry(JinjaFilterKeys.formatDateTime, _formatDateTime),
+      MapEntry(JinjaFilterKeys.take, _take),
+      MapEntry(JinjaFilterKeys.pathRelativeToPage, (String relativePath) => _pathRelativeToPage(page, relativePath)),
       ...filters.map((filterBuilder) {
         final filter = filterBuilder(context);
         return MapEntry<String, Function>(filter.$1, filter.$2);
@@ -203,7 +203,7 @@ class JinjaPageRenderer implements PageRenderer {
         final componentData = <String, Object?>{
           ...page.data,
           ...context.pagesIndex.buildPageIndexDataForTemplates(),
-          PageRenderKeys.components: {
+          JinjaTemplateKeys.components: {
             // Maps component name to a factory method: "footer": () -> "<div>...</div>"
             ...componentsLookup,
           },
@@ -222,18 +222,18 @@ class JinjaPageRenderer implements PageRenderer {
 
     // Assemble all data that should be available to the page during template rendering.
     final globalPageFunctions = <String, Function>{
-      PageRenderKeys.isCurrentPage: (String urlPath) => _isCurrentPage(page, urlPath),
+      JinjaTestKeys.isCurrentPage: (String urlPath) => _isCurrentPage(page, urlPath),
     };
 
     final pageData = {
       ...page.data,
-      PageRenderKeys.url: page.url,
+      JinjaTemplateKeys.url: page.url,
       if (content != null) //
-        PageRenderKeys.content: content,
+        JinjaTemplateKeys.content: content,
       ...globalPageFunctions,
       ...context.templateFunctions,
       ...context.pagesIndex.buildPageIndexDataForTemplates(),
-      PageRenderKeys.components: {
+      JinjaTemplateKeys.components: {
         // Maps component name to a factory method: "footer": () -> "<div>...</div>"
         ...componentsLookup,
       },
@@ -323,7 +323,7 @@ class JinjaPageRenderer implements PageRenderer {
   ///  - relativePath: `images/my-photo.png`
   ///  - return value: `/posts/my-article/images/my-photo.png`
   String _pathRelativeToPage(Page page, String relativePath) {
-    final pageUrl = Uri.parse(page.url);
+    final pageUrl = Uri.parse(page.url!);
     return pageUrl.resolve(relativePath).path;
   }
 
@@ -333,36 +333,27 @@ class JinjaPageRenderer implements PageRenderer {
   /// This is useful for activating menu items when viewing the page for that
   /// menu item.
   bool _isCurrentPage(Page page, String urlPath) {
-    final pageUrlWithTrailingSlash = page.url;
+    final pageUrlWithTrailingSlash = page.url!;
     final pageUrlNoTrailingSlash = pageUrlWithTrailingSlash.substring(0, pageUrlWithTrailingSlash.length - 1);
 
     return pageUrlNoTrailingSlash == urlPath || pageUrlNoTrailingSlash == urlPath;
   }
 }
 
-abstract class PageKeys {
-  static const layout = "layout";
-  static const pagePath = "pagePath";
-  static const contentRenderers = "contentRenderers";
+abstract class JinjaTemplateKeys {
+  static const url = "url";
+  static const content = "content";
+  static const components = "components";
 }
 
 abstract class JinjaFilterKeys {
-  //
+  static const localLink = "local_link";
+  static const pathRelativeToPage = "pathRelativeToPage";
+  static const formatDateTime = "formatDateTime";
+  static const take = "take";
+  static const startsWith = "startsWith";
 }
 
 abstract class JinjaTestKeys {
-  //
-}
-
-abstract class PageRenderKeys {
-  static const url = "url";
-  static const localLink = "local_link";
-  static const content = "content";
-  static const components = "components";
   static const isCurrentPage = "isCurrentPage";
-
-  static const startsWith = "startsWith";
-  static const formatDateTime = "formatDateTime";
-  static const take = "take";
-  static const pathRelativeToPage = "pathRelativeToPage";
 }

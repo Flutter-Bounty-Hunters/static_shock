@@ -117,7 +117,7 @@ class PagesIndex {
   Iterable<Map<String, dynamic>> _all({
     String? sortBy,
   }) {
-    final pages = _pages.where((page) => page.data["shouldIndex"] != false).toList();
+    final pages = _pages.where((page) => page.data[PageKeys.shouldIndex] != false).toList();
 
     final pageSorter = _PageSorter.parseSortBy(sortBy);
     pages.sort(pageSorter.compare);
@@ -133,7 +133,7 @@ class PagesIndex {
     String tag, {
     String? sortBy,
   }) {
-    final pages = _pages.where((page) => page.hasTag(tag) && page.data["shouldIndex"] != false).toList();
+    final pages = _pages.where((page) => page.hasTag(tag) && page.data[PageKeys.shouldIndex] != false).toList();
 
     final pageSorter = _PageSorter.parseSortBy(sortBy);
     pages.sort(pageSorter.compare);
@@ -144,7 +144,7 @@ class PagesIndex {
   Map<String, dynamic> _serializePage(Page page) => {
         "data": {
           ...page.data,
-          "url": page.url,
+          PageKeys.url: page.url,
         },
       };
 }
@@ -303,8 +303,8 @@ class Page {
     //
     // This same conversion is done in data.dart
     // TODO: generalize this auto-conversion so that plugins can do the same thing.
-    if (this.data["tags"] is String) {
-      this.data["tags"] = [(this.data["tags"] as String)];
+    if (this.data[PageKeys.tags] is String) {
+      this.data[PageKeys.tags] = [(this.data[PageKeys.tags] as String)];
     }
   }
 
@@ -316,17 +316,23 @@ class Page {
 
   final Map<String, dynamic> data;
 
-  String? get title => data["title"];
+  String? get title => data[PageKeys.title];
 
-  String get url => "$basePath$pagePath";
+  String? get url {
+    if (pagePath == null) {
+      return null;
+    }
 
-  String get basePath => data["basePath"];
+    return "$basePath$pagePath";
+  }
 
-  String? get pagePath => data["pagePath"];
-  set pagePath(String? pagePath) => data["pagePath"] = pagePath;
+  String get basePath => data[PageKeys.basePath] ?? "/";
+
+  String? get pagePath => data[PageKeys.pagePath];
+  set pagePath(String? pagePath) => data[PageKeys.pagePath] = pagePath;
 
   List<String> get contentRenderers {
-    final renderers = data["contentRenderers"];
+    final renderers = data[PageKeys.contentRenderers];
     if (renderers == null) {
       return [];
     }
@@ -340,13 +346,14 @@ class Page {
     return List.from(
       // Note: We map the value and cast each renderer ID because the data might be a YamlList,
       // which isn't a typed list. We'll get an exception if we try to return `List<String>`.
-      data["contentRenderers"].map((rendererId) => rendererId as String),
+      data[PageKeys.contentRenderers].map((rendererId) => rendererId as String),
     );
   }
 
   bool hasTag(String tag) => tags.contains(tag);
-  List<String> get tags =>
-      data["tags"] != null ? List.from(data["tags"] is List ? data["tags"] : [data["tags"] as String]) : [];
+  List<String> get tags => data[PageKeys.tags] != null
+      ? List.from(data[PageKeys.tags] is List ? data[PageKeys.tags] : [data[PageKeys.tags] as String])
+      : [];
 
   String describe() {
     return '''Page:
@@ -386,4 +393,17 @@ $destinationContent
 
   @override
   String toString() => "[Page] - source: $sourcePath, destination: $destinationPath";
+}
+
+abstract class PageKeys {
+  static const title = "title";
+  static const layout = "layout";
+  static const url = "url";
+  static const basePath = "basePath";
+  static const pagePath = "pagePath";
+  static const content = "content";
+  static const contentRenderers = "contentRenderers";
+  static const tags = "tags";
+  static const shouldIndex = "shouldIndex";
+  static const redirectFrom = "redirectFrom";
 }

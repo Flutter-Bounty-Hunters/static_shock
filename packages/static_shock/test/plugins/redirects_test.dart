@@ -15,8 +15,8 @@ void main() {
         final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
         final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
           ..destinationContent = _basicHtml
-          ..data["url"] = redirectTo
-          ..data["redirectFrom"] = redirectFrom;
+          ..pagePath = redirectTo
+          ..data[PageKeys.redirectFrom] = redirectFrom;
         context.pagesIndex.addPage(page);
 
         RedirectsFinisher().execute(context);
@@ -35,8 +35,8 @@ void main() {
       final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
       final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
         ..destinationContent = _basicHtml
-        ..data["url"] = "new/path"
-        ..data["redirectFrom"] = "http://mysite.com/old/path";
+        ..pagePath = "new/path"
+        ..data[PageKeys.redirectFrom] = "http://mysite.com/old/path";
       context.pagesIndex.addPage(page);
 
       RedirectsFinisher().execute(context);
@@ -50,8 +50,8 @@ void main() {
       final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
       final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
         ..destinationContent = _basicHtml
-        ..data["url"] = "new/path"
-        ..data["redirectFrom"] = "mysite.com/old/path";
+        ..pagePath = "new/path"
+        ..data[PageKeys.redirectFrom] = "mysite.com/old/path";
       context.pagesIndex.addPage(page);
 
       RedirectsFinisher().execute(context);
@@ -65,8 +65,8 @@ void main() {
         final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
         final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
           ..destinationContent = html
-          ..data["url"] = "new/dir"
-          ..data["redirectFrom"] = "/old/dir";
+          ..pagePath = "new/dir"
+          ..data[PageKeys.redirectFrom] = "/old/dir";
         context.pagesIndex.addPage(page);
 
         RedirectsFinisher().execute(context);
@@ -94,8 +94,8 @@ void main() {
       final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
       final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
         ..destinationContent = _missingHeadHtml
-        ..data["url"] = "new/dir"
-        ..data["redirectFrom"] = "/old/dir";
+        ..pagePath = "new/dir"
+        ..data[PageKeys.redirectFrom] = "/old/dir";
       context.pagesIndex.addPage(page);
 
       RedirectsFinisher().execute(context);

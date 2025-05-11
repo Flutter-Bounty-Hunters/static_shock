@@ -98,15 +98,10 @@ class RssSiteConfiguration {
 
 /// The default [PageToRssItemMapper] used by the [RssPlugin].
 RssItem? defaultPageToRssItemMapper(RssSiteConfiguration config, Page page) {
-  if (page.url == null) {
-    // This page isn't going to be built because it has no destination. Ignore it.
-    return null;
-  }
-
   // Note: The `page.url` has no leading "/". We need to add that leading "/" so
   // that the url can be appended to the website base URL, and also to clarify in
   // the guid that this URL path is based on the site root.
-  String urlPath = "/${page.url!}";
+  String urlPath = "/${page.url}";
   if (urlPath.endsWith("index.html")) {
     // The name "index.html" is redundant. E.g., "/index.html" can be represented as
     // "/", which is shorter and probably more canonical among web development.
