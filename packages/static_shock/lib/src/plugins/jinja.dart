@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:jinja/jinja.dart';
 import 'package:mason_logger/mason_logger.dart';
@@ -166,8 +167,14 @@ class JinjaPageRenderer implements PageRenderer {
     required String templateSource,
     String? content,
   }) {
+    // TODO: create an accessor on the context for the base path
+    final basePath = context.dataIndex.getAtPath(["basePath"]) as String;
+
     final jinjaFilters = Map.fromEntries([
-      MapEntry(JinjaFilterKeys.localLink, _createLocalLinkFilter(page.basePath)),
+      MapEntry(
+        JinjaFilterKeys.localLink,
+        _createLocalLinkFilter(basePath),
+      ),
       MapEntry(JinjaFilterKeys.startsWith, _startsWith),
       MapEntry(JinjaFilterKeys.formatDateTime, _formatDateTime),
       MapEntry(JinjaFilterKeys.take, _take),
@@ -202,7 +209,7 @@ class JinjaPageRenderer implements PageRenderer {
 
         final componentData = <String, Object?>{
           ...page.data,
-          ...context.pagesIndex.buildPageIndexDataForTemplates(),
+          ...context.pagesIndex.buildPageIndexDataForTemplates(basePath: basePath),
           JinjaTemplateKeys.components: {
             // Maps component name to a factory method: "footer": () -> "<div>...</div>"
             ...componentsLookup,
@@ -227,12 +234,12 @@ class JinjaPageRenderer implements PageRenderer {
 
     final pageData = {
       ...page.data,
-      JinjaTemplateKeys.url: page.url,
+      JinjaTemplateKeys.url: page.makeUrl(basePath),
       if (content != null) //
         JinjaTemplateKeys.content: content,
       ...globalPageFunctions,
       ...context.templateFunctions,
-      ...context.pagesIndex.buildPageIndexDataForTemplates(),
+      ...context.pagesIndex.buildPageIndexDataForTemplates(basePath: basePath),
       JinjaTemplateKeys.components: {
         // Maps component name to a factory method: "footer": () -> "<div>...</div>"
         ...componentsLookup,
@@ -319,11 +326,11 @@ class JinjaPageRenderer implements PageRenderer {
   /// that's relative the [page], and returns the full URL path that combines the two.
   ///
   /// Example:
-  ///  - Page URL: `/posts/my-article/index.html`
+  ///  - Page URL: `posts/my-article/index.html`
   ///  - relativePath: `images/my-photo.png`
-  ///  - return value: `/posts/my-article/images/my-photo.png`
+  ///  - return value: `posts/my-article/images/my-photo.png`
   String _pathRelativeToPage(Page page, String relativePath) {
-    final pageUrl = Uri.parse(page.url!);
+    final pageUrl = Uri.parse(page.pagePath!);
     return pageUrl.resolve(relativePath).path;
   }
 
@@ -333,7 +340,7 @@ class JinjaPageRenderer implements PageRenderer {
   /// This is useful for activating menu items when viewing the page for that
   /// menu item.
   bool _isCurrentPage(Page page, String urlPath) {
-    final pageUrlWithTrailingSlash = page.url!;
+    final pageUrlWithTrailingSlash = page.pagePath!;
     final pageUrlNoTrailingSlash = pageUrlWithTrailingSlash.substring(0, pageUrlWithTrailingSlash.length - 1);
 
     return pageUrlNoTrailingSlash == urlPath || pageUrlNoTrailingSlash == urlPath;
@@ -356,4 +363,235 @@ abstract class JinjaFilterKeys {
 
 abstract class JinjaTestKeys {
   static const isCurrentPage = "isCurrentPage";
+}
+
+extension on PagesIndex {
+  /// Returns a data structure which represents a "page index" within a Jinja template.
+  ///
+  /// For example, when the returned data structure is added to a Jinja context, a developer
+  /// can list all pages with a "flutter" tag as follows:
+  ///
+  /// ```jinja
+  /// <body>
+  ///   <ul>
+  ///     {% for page in pages.byTag("flutter") %}
+  ///       <li>
+  ///         <a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a>
+  ///       </li>
+  ///     {% endfor %}
+  ///   </ul>
+  /// </body>
+  /// ```
+  ///
+  Map<String, dynamic> buildPageIndexDataForTemplates({
+    required String basePath,
+  }) {
+    return {
+      "pages": {
+        "hasPageWithUrl": _hasPageWithUrl,
+        "hasPagesAtPath": _hasPagesAtPath,
+        "all": ({
+          String? sortBy,
+        }) =>
+            _all(basePath: basePath, sortBy: sortBy),
+        "byTag": (
+          String tag, {
+          String? sortBy,
+        }) =>
+            _byTag(tag, basePath: basePath, sortBy: sortBy),
+      },
+    };
+  }
+
+  /// Returns `true` if a page exists with a destination path that's the same as the given
+  /// [path].
+  bool _hasPageWithUrl(String path) {
+    return pages.firstWhereOrNull(
+            (page) => page.destinationPath?.value == path || page.destinationPath?.value == "${path}index.html") !=
+        null;
+  }
+
+  /// Returns `true` if at least one page has a destination path that begins with [path].
+  bool _hasPagesAtPath(String path) {
+    return pages.firstWhereOrNull((page) => page.destinationPath?.value.startsWith(path) == true) != null;
+  }
+
+  /// Return an `Iterable` of page data for all pages, optionally ordered by [sortBy].
+  ///
+  /// {@macro sortBy}
+  Iterable<Map<String, dynamic>> _all({
+    required String basePath,
+    String? sortBy,
+  }) {
+    final indexedPages = pages.where((page) => page.data[PageKeys.shouldIndex] != false).toList();
+
+    final pageSorter = _PageSorter.parseSortBy(sortBy);
+    indexedPages.sort(pageSorter.compare);
+
+    return indexedPages.map((page) => _serializePage(page, basePath));
+  }
+
+  /// Return an `Iterable` of page data for all pages with the given [tag], optionally
+  /// ordered by [sortBy].
+  ///
+  /// {@macro sortBy}
+  Iterable<Map<String, dynamic>> _byTag(
+    String tag, {
+    required String basePath,
+    String? sortBy,
+  }) {
+    final taggedPages = pages.where((page) => page.hasTag(tag) && page.data[PageKeys.shouldIndex] != false).toList();
+
+    final pageSorter = _PageSorter.parseSortBy(sortBy);
+    taggedPages.sort(pageSorter.compare);
+
+    return taggedPages.map((page) => _serializePage(page, basePath));
+  }
+
+  Map<String, dynamic> _serializePage(Page page, String basePath) => {
+        "data": {
+          ...page.data,
+          JinjaTemplateKeys.url: page.makeUrl(basePath),
+        },
+      };
+}
+
+/// Sorts [Page]s based on a priority order of [_SortProperty]s.
+///
+/// Each property is applied, in order, until one of them reports that one page
+/// is greater than or less than another page. Each [_SortProperty] also states
+/// its desired sort order.
+class _PageSorter {
+  /// Parses and encoded [sortBy] string to a [_PageSorter].
+  ///
+  /// {@template sortBy}
+  /// [sortBy] is an encoded value, which might contain multiple priority
+  /// ordered sort properties, e.g., "date=desc title=asc".
+  /// {@endtemplate}
+  static _PageSorter parseSortBy(String? sortBy) {
+    if (sortBy == null) {
+      return _PageSorter([]);
+    }
+
+    final propertiesToSortBy = sortBy
+        .split(RegExp(r"\s+")) //
+        .map((encodedSortProperty) => _SortProperty.parse(encodedSortProperty))
+        .toList();
+
+    return _PageSorter(propertiesToSortBy);
+  }
+
+  const _PageSorter(this._sortProperties);
+
+  final List<_SortProperty> _sortProperties;
+
+  int compare(Page a, Page b) {
+    for (final property in _sortProperties) {
+      final aProperty = a.data[property.name];
+      final bProperty = b.data[property.name];
+
+      if (bProperty == null || bProperty is! Comparable) {
+        // Page b doesn't have the property we're sorting by, or that
+        // property can't be compared. Put it at the end.
+        return -1;
+      }
+
+      if (aProperty == null || aProperty is! Comparable) {
+        // Page a doesn't have the property we're sorting by, or that
+        // property can't be compared. Put it at the end.
+        return 1;
+      }
+
+      final comparison = aProperty.compareTo(bProperty);
+      if (comparison == 0) {
+        // The properties are equivalent. Continue to the next lower priority
+        // property and look for a difference there.
+        continue;
+      }
+
+      if (comparison < 0) {
+        // Page a naturally comes before Page b. Return a comparator value
+        // based on the desired sort order.
+        if (property.sortOrder == _SortOrder.ascending) {
+          // Return the natural order.
+          return -1;
+        } else {
+          // Flip the order.
+          return 1;
+        }
+      } else {
+        // Page b naturally comes before Page a. Return a comparator value
+        // based on the desired sort order.
+        if (property.sortOrder == _SortOrder.ascending) {
+          // Return the natural order.
+          return 1;
+        } else {
+          // Flip the order.
+          return -1;
+        }
+      }
+    }
+
+    // We didn't find any difference in sort order across any of the given
+    // sort properties. Therefore, both of these items have an equivalent
+    // sort order.
+    return 0;
+  }
+}
+
+/// A page property, combined with a sorting order for that property.
+///
+/// The user can request a specific page ordering by providing a priority
+/// list of [_SortProperty]s.
+class _SortProperty {
+  /// Parses an encoded sort property to a `SortProperty`, e.g.,
+  /// "date=desc".
+  static _SortProperty parse(String encodedSortProperty) {
+    if (!encodedSortProperty.contains("=")) {
+      // This property is just the name, e.g., "date" - it doesn't have
+      // an explicit sort order. Return the property with the given name
+      // and default sort order.
+      return _SortProperty(encodedSortProperty);
+    }
+
+    final pieces = encodedSortProperty.split("=");
+    if (pieces.length > 2) {
+      throw Exception(
+        "Tried to sort by invalid property value '$encodedSortProperty' - only one '=' can appear in a sort property.",
+      );
+    }
+
+    final sortOrder = _SortOrder.fromName(pieces.last);
+    if (sortOrder == null) {
+      throw Exception(
+        "Tried to sort by invalid property value '$encodedSortProperty' - invalid sort order: '${pieces.last}'",
+      );
+    }
+
+    return _SortProperty(pieces.first, sortOrder);
+  }
+
+  const _SortProperty(this.name, [this.sortOrder = _SortOrder.ascending]);
+
+  final String name;
+  final _SortOrder sortOrder;
+}
+
+enum _SortOrder {
+  ascending,
+  descending;
+
+  /// Parses the given [name] and returns the corresponding [_SortOrder], or returns
+  /// `null` if the [name] doesn't correspond to a sort order.
+  static _SortOrder? fromName(String name) {
+    name = name.toLowerCase();
+    if (name == "asc" || name == "ascending") {
+      return _SortOrder.ascending;
+    }
+    if (name == "desc" || name == "descending") {
+      return _SortOrder.descending;
+    }
+
+    return null;
+  }
 }

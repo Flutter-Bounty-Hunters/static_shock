@@ -62,7 +62,7 @@ bool _isMenuNonEmpty(
 /// Path fragments are used instead of a full path because it's not always possible for Jinja
 /// template code to assemble interpolated strings. Therefore, fragments are used, for example:
 /// Given the fragments ["guides", "getting-started"], this method searches for
-/// a [Page] with the path "guides/getting-started/".
+/// a [Page] with the path "{basePath}guides/getting-started/".
 List _pageExistsForMenuItem(
   StaticShockPipelineContext context,
   List menuItems,
@@ -71,9 +71,9 @@ List _pageExistsForMenuItem(
   final filteredMenuItems = <Object>[];
   for (final menuItem in menuItems) {
     final pathFragments = [...prefixPathFragments, menuItem['id']];
-    final url = "${pathFragments.isNotEmpty ? "/" : ""}${pathFragments.join("/")}/";
+    final pagePath = pathFragments.isNotEmpty ? "${pathFragments.join("/")}/" : "";
     for (final page in context.pagesIndex.pages) {
-      if (page.url == url) {
+      if (page.pagePath == pagePath) {
         filteredMenuItems.add(menuItem);
         break;
       }

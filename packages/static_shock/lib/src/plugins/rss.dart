@@ -74,12 +74,14 @@ class RssSiteConfiguration {
     this.title,
     this.description,
     required this.homePageUrl,
+    this.basePath = "/",
     this.language = "en-us",
   });
 
   final String? title;
   final String? description;
   final String homePageUrl;
+  final String basePath;
   final String? language;
 
   @override
@@ -90,10 +92,12 @@ class RssSiteConfiguration {
           title == other.title &&
           description == other.description &&
           homePageUrl == other.homePageUrl &&
+          basePath == other.basePath &&
           language == other.language;
 
   @override
-  int get hashCode => title.hashCode ^ description.hashCode ^ homePageUrl.hashCode ^ language.hashCode;
+  int get hashCode =>
+      title.hashCode ^ description.hashCode ^ homePageUrl.hashCode ^ basePath.hashCode ^ language.hashCode;
 }
 
 /// The default [PageToRssItemMapper] used by the [RssPlugin].
@@ -101,7 +105,7 @@ RssItem? defaultPageToRssItemMapper(RssSiteConfiguration config, Page page) {
   // Note: The `page.url` has no leading "/". We need to add that leading "/" so
   // that the url can be appended to the website base URL, and also to clarify in
   // the guid that this URL path is based on the site root.
-  String urlPath = "/${page.url}";
+  String urlPath = "${config.basePath}${page.pagePath}";
   if (urlPath.endsWith("index.html")) {
     // The name "index.html" is redundant. E.g., "/index.html" can be represented as
     // "/", which is shorter and probably more canonical among web development.

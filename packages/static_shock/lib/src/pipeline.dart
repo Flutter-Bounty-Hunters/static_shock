@@ -108,7 +108,7 @@ abstract class StaticShockPipeline {
 /// Information and file system access that's provided to various pipeline actors
 /// and also provided to plugins.
 class StaticShockPipelineContext {
-  StaticShockPipelineContext(this.log, this._sourceDirectory);
+  StaticShockPipelineContext(this._sourceDirectory, [Logger? log]) : log = log ?? Logger(level: Level.quiet);
 
   /// The shared [Logger] for all CLI output.
   ///

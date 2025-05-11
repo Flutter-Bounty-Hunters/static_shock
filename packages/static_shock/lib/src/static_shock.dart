@@ -236,7 +236,7 @@ class StaticShock implements StaticShockPipeline {
     _clearDestination();
 
     //---- Run new pipeline ----
-    _context = StaticShockPipelineContext(_log, _sourceDirectory);
+    _context = StaticShockPipelineContext(_sourceDirectory, _log);
     _files.clear();
 
     // Configure the site-wide base path for all URLs.
@@ -836,14 +836,18 @@ class StaticShock implements StaticShockPipeline {
       return;
     }
 
+    final pagesToRemove = <Page>{};
     for (final page in _context.pagesIndex.pages) {
       for (final filter in _pageFilters) {
         if (!filter.shouldInclude(_context, page)) {
           _log.detail("Removing page: ${page.title}");
-          _context.pagesIndex.removePage(page);
+          pagesToRemove.add(page);
           continue;
         }
       }
+    }
+    for (final page in pagesToRemove) {
+      _context.pagesIndex.removePage(page);
     }
 
     _timer.checkpoint("Filter pages", "Removes all pages that are no longer desired in the final build");

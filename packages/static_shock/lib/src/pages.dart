@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
-
 import 'files.dart';
 import 'pipeline.dart';
 
@@ -53,7 +51,7 @@ abstract class PageRenderer {
 class PagesIndex {
   PagesIndex();
 
-  Iterable<Page> get pages => List.from(_pages);
+  Iterable<Page> get pages => _pages;
   final List<Page> _pages = [];
 
   void addPages(Iterable<Page> pages) {
@@ -68,224 +66,6 @@ class PagesIndex {
 
   void removePage(Page page) {
     _pages.remove(page);
-  }
-
-  /// Returns a data structure which represents a "page index" within a Jinja template.
-  ///
-  /// For example, when the returned data structure is added to a Jinja context, a developer
-  /// can list all pages with a "flutter" tag as follows:
-  ///
-  /// ```jinja
-  /// <body>
-  ///   <ul>
-  ///     {% for page in pages.byTag("flutter") %}
-  ///       <li>
-  ///         <a href="{{ page.data['url'] }}">{{ page.data['title'] }}</a>
-  ///       </li>
-  ///     {% endfor %}
-  ///   </ul>
-  /// </body>
-  /// ```
-  ///
-  Map<String, dynamic> buildPageIndexDataForTemplates() {
-    return {
-      "pages": {
-        "hasPageWithUrl": _hasPageWithUrl,
-        "hasPagesAtPath": _hasPagesAtPath,
-        "all": _all,
-        "byTag": _byTag,
-      },
-    };
-  }
-
-  /// Returns `true` if a page exists with a destination path that's the same as the given
-  /// [path].
-  bool _hasPageWithUrl(String path) {
-    return _pages.firstWhereOrNull(
-            (page) => page.destinationPath?.value == path || page.destinationPath?.value == "${path}index.html") !=
-        null;
-  }
-
-  /// Returns `true` if at least one page has a destination path that begins with [path].
-  bool _hasPagesAtPath(String path) {
-    return _pages.firstWhereOrNull((page) => page.destinationPath?.value.startsWith(path) == true) != null;
-  }
-
-  /// Return an `Iterable` of page data for all pages, optionally ordered by [sortBy].
-  ///
-  /// {@macro sortBy}
-  Iterable<Map<String, dynamic>> _all({
-    String? sortBy,
-  }) {
-    final pages = _pages.where((page) => page.data[PageKeys.shouldIndex] != false).toList();
-
-    final pageSorter = _PageSorter.parseSortBy(sortBy);
-    pages.sort(pageSorter.compare);
-
-    return pages.map(_serializePage);
-  }
-
-  /// Return an `Iterable` of page data for all pages with the given [tag], optionally
-  /// ordered by [sortBy].
-  ///
-  /// {@macro sortBy}
-  Iterable<Map<String, dynamic>> _byTag(
-    String tag, {
-    String? sortBy,
-  }) {
-    final pages = _pages.where((page) => page.hasTag(tag) && page.data[PageKeys.shouldIndex] != false).toList();
-
-    final pageSorter = _PageSorter.parseSortBy(sortBy);
-    pages.sort(pageSorter.compare);
-
-    return pages.map(_serializePage);
-  }
-
-  Map<String, dynamic> _serializePage(Page page) => {
-        "data": {
-          ...page.data,
-          PageKeys.url: page.url,
-        },
-      };
-}
-
-/// Sorts [Page]s based on a priority order of [_SortProperty]s.
-///
-/// Each property is applied, in order, until one of them reports that one page
-/// is greater than or less than another page. Each [_SortProperty] also states
-/// its desired sort order.
-class _PageSorter {
-  /// Parses and encoded [sortBy] string to a [_PageSorter].
-  ///
-  /// {@template sortBy}
-  /// [sortBy] is an encoded value, which might contain multiple priority
-  /// ordered sort properties, e.g., "date=desc title=asc".
-  /// {@endtemplate}
-  static _PageSorter parseSortBy(String? sortBy) {
-    if (sortBy == null) {
-      return _PageSorter([]);
-    }
-
-    final propertiesToSortBy = sortBy
-        .split(RegExp(r"\s+")) //
-        .map((encodedSortProperty) => _SortProperty.parse(encodedSortProperty))
-        .toList();
-
-    return _PageSorter(propertiesToSortBy);
-  }
-
-  const _PageSorter(this._sortProperties);
-
-  final List<_SortProperty> _sortProperties;
-
-  int compare(Page a, Page b) {
-    for (final property in _sortProperties) {
-      final aProperty = a.data[property.name];
-      final bProperty = b.data[property.name];
-
-      if (bProperty == null || bProperty is! Comparable) {
-        // Page b doesn't have the property we're sorting by, or that
-        // property can't be compared. Put it at the end.
-        return -1;
-      }
-
-      if (aProperty == null || aProperty is! Comparable) {
-        // Page a doesn't have the property we're sorting by, or that
-        // property can't be compared. Put it at the end.
-        return 1;
-      }
-
-      final comparison = aProperty.compareTo(bProperty);
-      if (comparison == 0) {
-        // The properties are equivalent. Continue to the next lower priority
-        // property and look for a difference there.
-        continue;
-      }
-
-      if (comparison < 0) {
-        // Page a naturally comes before Page b. Return a comparator value
-        // based on the desired sort order.
-        if (property.sortOrder == _SortOrder.ascending) {
-          // Return the natural order.
-          return -1;
-        } else {
-          // Flip the order.
-          return 1;
-        }
-      } else {
-        // Page b naturally comes before Page a. Return a comparator value
-        // based on the desired sort order.
-        if (property.sortOrder == _SortOrder.ascending) {
-          // Return the natural order.
-          return 1;
-        } else {
-          // Flip the order.
-          return -1;
-        }
-      }
-    }
-
-    // We didn't find any difference in sort order across any of the given
-    // sort properties. Therefore, both of these items have an equivalent
-    // sort order.
-    return 0;
-  }
-}
-
-/// A page property, combined with a sorting order for that property.
-///
-/// The user can request a specific page ordering by providing a priority
-/// list of [_SortProperty]s.
-class _SortProperty {
-  /// Parses an encoded sort property to a `SortProperty`, e.g.,
-  /// "date=desc".
-  static _SortProperty parse(String encodedSortProperty) {
-    if (!encodedSortProperty.contains("=")) {
-      // This property is just the name, e.g., "date" - it doesn't have
-      // an explicit sort order. Return the property with the given name
-      // and default sort order.
-      return _SortProperty(encodedSortProperty);
-    }
-
-    final pieces = encodedSortProperty.split("=");
-    if (pieces.length > 2) {
-      throw Exception(
-        "Tried to sort by invalid property value '$encodedSortProperty' - only one '=' can appear in a sort property.",
-      );
-    }
-
-    final sortOrder = _SortOrder.fromName(pieces.last);
-    if (sortOrder == null) {
-      throw Exception(
-        "Tried to sort by invalid property value '$encodedSortProperty' - invalid sort order: '${pieces.last}'",
-      );
-    }
-
-    return _SortProperty(pieces.first, sortOrder);
-  }
-
-  const _SortProperty(this.name, [this.sortOrder = _SortOrder.ascending]);
-
-  final String name;
-  final _SortOrder sortOrder;
-}
-
-enum _SortOrder {
-  ascending,
-  descending;
-
-  /// Parses the given [name] and returns the corresponding [_SortOrder], or returns
-  /// `null` if the [name] doesn't correspond to a sort order.
-  static _SortOrder? fromName(String name) {
-    name = name.toLowerCase();
-    if (name == "asc" || name == "ascending") {
-      return _SortOrder.ascending;
-    }
-    if (name == "desc" || name == "descending") {
-      return _SortOrder.descending;
-    }
-
-    return null;
   }
 }
 
@@ -318,16 +98,17 @@ class Page {
 
   String? get title => data[PageKeys.title];
 
-  String? get url {
-    if (pagePath == null) {
-      return null;
-    }
+  /// Creates an absolute URL path for this page, given a [basePath].
+  ///
+  /// The typical base path is `/`, but can be anything that a server
+  /// wants it to be. Because the base path is out of our control, we
+  /// can't report an absolute URL path per page, we can only construct
+  /// one on demand, given the base path.
+  String? makeUrl(String basePath) => pagePath != null ? "$basePath$pagePath" : null;
 
-    return "$basePath$pagePath";
-  }
-
-  String get basePath => data[PageKeys.basePath] ?? "/";
-
+  /// The relative URL path to this page, from the website's base path.
+  ///
+  /// E.g., `getting-started/install/`. Notice no leading slash `/`.
   String? get pagePath => data[PageKeys.pagePath];
   set pagePath(String? pagePath) => data[PageKeys.pagePath] = pagePath;
 

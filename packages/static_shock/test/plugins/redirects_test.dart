@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:static_shock/static_shock.dart';
-
-import 'package:mason_logger/mason_logger.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -12,7 +10,7 @@ void main() {
       // Sets up a `Page` that requests a redirect from `redirectFrom` to the given page,
       // and then verifies that a dedicated redirect page was created for the old URL.
       void redirectsFrom(String redirectFrom, String redirectTo) {
-        final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
+        final context = StaticShockPipelineContext(Directory("test/fake/"));
         final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
           ..destinationContent = _basicHtml
           ..pagePath = redirectTo
@@ -21,62 +19,84 @@ void main() {
 
         RedirectsFinisher().execute(context);
 
-        final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.url == redirectFrom);
+        final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.pagePath == redirectFrom);
         expect(redirectPage, isNotNull);
       }
 
-      redirectsFrom("/old/dir", "new/dir");
-      redirectsFrom("/old/dir/", "new/dir");
-      redirectsFrom("/old/dir/file.html", "new/dir");
+      redirectsFrom("old/dir", "new/dir");
+      redirectsFrom("old/dir/", "new/dir");
+      redirectsFrom("old/dir/file.html", "new/dir");
     });
 
-    test("does not attempt to redirect a fully specified URL", () {
-      // We can't handle something like "http://mysite.com/old/path/" because we're not building "mysite.com"
-      final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
+    test("does not try to redirect when given an absolute path", () async {
+      // Pages can't control the base path of a website, so absolute paths
+      // make no sense as a redirect path.
+      final context = StaticShockPipelineContext(Directory("test/fake/"));
       final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
         ..destinationContent = _basicHtml
-        ..pagePath = "new/path"
-        ..data[PageKeys.redirectFrom] = "http://mysite.com/old/path";
+        ..pagePath = "new/dir"
+        ..data[PageKeys.redirectFrom] = "/old/dir";
       context.pagesIndex.addPage(page);
 
       RedirectsFinisher().execute(context);
 
-      final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.url == "mysite.com/old/path");
-      expect(redirectPage, isNull);
+      // Expect that no additional page was added for redirect.
+      expect(context.pagesIndex.pages.length, 1);
     });
 
-    test("does not attempt to redirect a partially specified URL", () {
-      // We can't handle something like "mysite.com/old/path/" because we're not building "mysite.com"
-      final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
-      final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
-        ..destinationContent = _basicHtml
-        ..pagePath = "new/path"
-        ..data[PageKeys.redirectFrom] = "mysite.com/old/path";
-      context.pagesIndex.addPage(page);
-
-      RedirectsFinisher().execute(context);
-
-      final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.url == "mysite.com/old/path");
-      expect(redirectPage, isNull);
-    });
-
-    test("inserts redirect tag in variety of HTML", () {
+    test("inserts redirect tag in variety of HTML with standard base path", () {
       void insertsRedirectTag(String html) {
-        final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
+        final context = StaticShockPipelineContext(Directory("test/fake/"));
         final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
           ..destinationContent = html
           ..pagePath = "new/dir"
-          ..data[PageKeys.redirectFrom] = "/old/dir";
+          ..data[PageKeys.redirectFrom] = "old/dir";
         context.pagesIndex.addPage(page);
 
         RedirectsFinisher().execute(context);
 
-        final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.url == "/old/dir");
+        final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.pagePath == "old/dir");
         expect(redirectPage, isNotNull);
         expect(redirectPage!.destinationContent, isNotNull);
         expect(
           redirectPage.destinationContent,
-          stringContainsInOrder(['<meta http-equiv="refresh" content="0; url=/new/dir" />']),
+          stringContainsInOrder([
+            '<meta http-equiv="refresh" content="0; url=/new/dir" />',
+            '<link rel="canonical" href="/new/dir" />',
+          ]),
+        );
+      }
+
+      // Lowercase "<head>"
+      insertsRedirectTag(_basicHtml);
+
+      // Uppercase "<HEAD>"
+      insertsRedirectTag(_basicHtml.toUpperCase());
+
+      // Mixed-case "<HeAd>"
+      insertsRedirectTag(_mixedCaseHtml);
+    });
+
+    test("inserts redirect tag in variety of HTML with custom base path", () {
+      void insertsRedirectTag(String html) {
+        final context = StaticShockPipelineContext(Directory("test/fake/"));
+        final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
+          ..destinationContent = html
+          ..pagePath = "new/dir"
+          ..data[PageKeys.redirectFrom] = "old/dir";
+        context.pagesIndex.addPage(page);
+
+        RedirectsFinisher(basePath: "/static_shock/").execute(context);
+
+        final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.pagePath == "old/dir");
+        expect(redirectPage, isNotNull);
+        expect(redirectPage!.destinationContent, isNotNull);
+        expect(
+          redirectPage.destinationContent,
+          stringContainsInOrder([
+            '<meta http-equiv="refresh" content="0; url=/static_shock/new/dir" />',
+            '<link rel="canonical" href="/static_shock/new/dir" />'
+          ]),
         );
       }
 
@@ -91,16 +111,16 @@ void main() {
     });
 
     test("does not redirect when missing HEAD tag", () {
-      final context = StaticShockPipelineContext(Logger(), Directory("test/fake/"));
+      final context = StaticShockPipelineContext(Directory("test/fake/"));
       final page = Page(FileRelativePath("./fake_source", "fake", "md"), "") //
         ..destinationContent = _missingHeadHtml
         ..pagePath = "new/dir"
-        ..data[PageKeys.redirectFrom] = "/old/dir";
+        ..data[PageKeys.redirectFrom] = "old/dir";
       context.pagesIndex.addPage(page);
 
       RedirectsFinisher().execute(context);
 
-      final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.url == "/old/dir");
+      final redirectPage = context.pagesIndex.pages.firstWhereOrNull((page) => page.pagePath == "old/dir");
       expect(redirectPage, isNull);
     });
   });

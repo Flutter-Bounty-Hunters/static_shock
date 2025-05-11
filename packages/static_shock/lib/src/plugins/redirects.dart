@@ -39,7 +39,9 @@ class RedirectsPlugin implements StaticShockPlugin {
     StaticShockCache pluginCache,
   ) {
     pipeline.finish(
-      RedirectsFinisher(),
+      RedirectsFinisher(
+        basePath: context.dataIndex.getAtPath(["basePath"]) as String,
+      ),
     );
   }
 }
@@ -50,6 +52,15 @@ class RedirectsPlugin implements StaticShockPlugin {
 /// has its URL set to the `redirectFrom` value
 class RedirectsFinisher implements Finisher {
   static final _urlRegExp = RegExp(r'^((?:https?://)?[^./]+(?:\.[^./]+)+(?:/.*)?)$');
+
+  const RedirectsFinisher({
+    this.basePath = '/',
+  });
+
+  /// The base path for all URLs in the final website.
+  ///
+  /// Typically `/`, but can also be any value that a server might want.
+  final String basePath;
 
   @override
   void execute(StaticShockPipelineContext context) {
@@ -65,28 +76,40 @@ class RedirectsFinisher implements Finisher {
       final redirects = <String>{};
       final redirectsValue = page.data[PageKeys.redirectFrom];
       if (redirectsValue is YamlList) {
-        redirects.addAll(redirectsValue.value.cast());
+        final desiredRedirects = redirectsValue.value.cast<String>();
+        final validRedirects = desiredRedirects.where(_isValidRedirectPath);
+        final invalidRedirects = desiredRedirects.where((redirect) => !_isValidRedirectPath(redirect));
+
+        redirects.addAll(validRedirects);
+
+        if (invalidRedirects.isNotEmpty) {
+          // TODO: Add an ability to report errors to the `context` and then report this, so that
+          // during dev the build won't blow up, but when building for production, it will.
+          context.log.warn("Found invalid page redirect path(s). New path: '${page.pagePath}'. From invalid paths:");
+          for (final invalidRedirect in invalidRedirects) {
+            context.log.warn(" - '$invalidRedirect'");
+          }
+        }
       } else if (redirectsValue is String) {
         if (redirectsValue.isEmpty) {
           // The user added a redirect key, but didn't include a value.
           context.log.warn(
-            "Page ${page.url} has a 'redirectsValue' field, but no corresponding value. To setup a redirect, please add a redirect URL.",
+            "Page ${page.pagePath} has a 'redirectsValue' field, but no corresponding value. To setup a redirect, please add a redirect URL.",
           );
           continue;
         }
 
-        if (_urlRegExp.hasMatch(redirectsValue)) {
-          // The user specified a full URL, which isn't appropriate for a redirect value.
-          // For example, if the user entered "mysite.com/old/dir" the redirect URL can't be
-          // honored because Static Shock only has control over the path within a site, not
-          // the domain where the site lives.
+        if (!_isValidRedirectPath(redirectsValue)) {
+          context.log.warn(
+            "Found invalid page redirect path. New path: '${page.pagePath}'. From invalid path: '$redirectsValue'",
+          );
           continue;
         }
 
         redirects.add(redirectsValue);
       }
 
-      context.log.detail("Setting up redirects for page: ${page.url}");
+      context.log.detail("Setting up redirects for page: ${page.pagePath}");
       context.log.detail("Redirecting from:");
       for (final redirect in redirects) {
         context.log.detail(" - $redirect");
@@ -97,14 +120,14 @@ class RedirectsFinisher implements Finisher {
         }
         if (page.destinationContent == null) {
           context.log.warn(
-              "Tried to setup a redirect for page at URL '${page.url}' - but the page has no content. Therefore, no redirect will be created.");
+              "Tried to setup a redirect for page at URL '${page.pagePath}' - but the page has no content. Therefore, no redirect will be created.");
           continue;
         }
 
         // Add a redirect tag to the original HTML.
         final originalHtml = page.destinationContent!;
         final redirectTags =
-            '    <!-- Page redirect tags -->\n    <meta http-equiv="refresh" content="0; url=${page.url}" />\n    <link rel="canonical" href="${page.url}" />';
+            '    <!-- Page redirect tags -->\n    <meta http-equiv="refresh" content="0; url=$basePath${page.pagePath}" />\n    <link rel="canonical" href="$basePath${page.pagePath}" />';
         final headRegExp = RegExp(r'<head>', caseSensitive: false);
         final headMatch = headRegExp.firstMatch(originalHtml);
         if (headMatch == null) {
@@ -124,6 +147,20 @@ class RedirectsFinisher implements Finisher {
       }
     }
   }
+
+  /// Returns `true` if the given path is a valid redirect path, or `false`
+  /// otherwise.
+  ///
+  /// Empty paths are invalid because they don't point anywhere.
+  ///
+  /// Absolute paths are invalid because this plugin doesn't have any
+  /// control over the final base path of the website. E.g., accept
+  /// `old/dir` but reject `/old/dir`.
+  ///
+  /// Full URLs (with a domain) are invalid because this plugin doesn't
+  /// have any control over choosing a domain.
+  bool _isValidRedirectPath(String redirect) =>
+      redirect.isNotEmpty && !redirect.startsWith("/") && !_urlRegExp.hasMatch(redirect);
 
   FileRelativePath? _mapRedirectUrlToBuildFilePath(StaticShockPipelineContext context, String redirect) {
     if (path.extension(redirect).isEmpty) {
