@@ -64,9 +64,11 @@ class RedirectsFinisher implements Finisher {
 
   @override
   void execute(StaticShockPipelineContext context) {
-    final pagesWithRedirects = context.pagesIndex.pages.where(
-      (page) => page.data[PageKeys.redirectFrom] != null,
-    );
+    final pagesWithRedirects = context.pagesIndex.pages
+        .where(
+          (page) => page.data[PageKeys.redirectFrom] != null,
+        )
+        .toList();
     if (pagesWithRedirects.isEmpty) {
       return;
     }
