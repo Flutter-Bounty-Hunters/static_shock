@@ -4,7 +4,12 @@ import 'package:static_shock/static_shock.dart';
 
 Future<void> main(List<String> arguments) async {
   // Configure the static website generator.
-  final staticShock = StaticShock()
+  final staticShock = StaticShock(
+    site: SiteMetadata(
+      rootUrl: 'https://staticshock.io',
+      basePath: '/',
+    ),
+  )
     ..pick(DirectoryPicker.parse("images"))
     ..plugin(const MarkdownPlugin())
     ..plugin(JinjaPlugin(

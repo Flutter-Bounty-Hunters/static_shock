@@ -13,6 +13,16 @@ docs_menu:
           id: compile-sass
         - title: Compile TailwindCSS
           id: compile-tailwind
+    - title: Deploy
+      id: deploy
+      items:
+        - title: Deploy to GitHub Pages
+          id: deploy-to-github-pages
+    - title: Website
+      id: website
+      items:
+        - title: Base URL
+          id: base-url
     - title: Navigation
       id: navigation
       items:
@@ -20,9 +30,11 @@ docs_menu:
           id: directory-of-pages
         - title: Display a Menu in a Page
           id: display-a-menu-in-a-page
-    - title: Page Layouts
-      id: page-layouts
+    - title: Pages
+      id: pages
       items:
+        - title: Links
+          id: page-links
         - title: Create a Page Layout
           id: create-a-page-layout
         - title: Create a Component
@@ -49,11 +61,6 @@ docs_menu:
       items:
         - title: Create a Plugin
           id: create-a-plugin
-    - title: Deploy
-      id: deploy
-      items:
-        - title: Deploy to GitHub Pages
-          id: deploy-to-github-pages
     - title: Cool Abilities
       id: cool-abilities
       items:

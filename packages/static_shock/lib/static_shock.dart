@@ -1,5 +1,3 @@
-library static_shock;
-
 // ----- Core constructs -----
 export 'src/assets.dart';
 export 'src/cache.dart';

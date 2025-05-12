@@ -25,6 +25,11 @@ class ServeCommand extends Command with PubVersionCheck {
         "find-open-port",
         defaultsTo: true,
         help: "When flag is set, Static Stock looks for open ports if the desired port isn't available.",
+      )
+      ..addOption(
+        "base-path",
+        defaultsTo: null,
+        help: "Base path that's expected to begin every URL path.",
       );
   }
 
@@ -75,9 +80,12 @@ class ServeCommand extends Command with PubVersionCheck {
     }
     final isPortSearchingAllowed = argResults!["find-open-port"] == true;
 
+    final basePath = argResults!["base-path"];
+
     StaticShockDevServer(log, buildWebsite).run(
       port: port,
       findAnOpenPort: isPortSearchingAllowed,
+      basePath: basePath,
     );
   }
 }

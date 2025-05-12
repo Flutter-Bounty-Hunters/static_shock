@@ -55,6 +55,7 @@ class StaticShockDevServer {
   Future<void> run({
     required int port,
     bool findAnOpenPort = false,
+    String? basePath,
   }) async {
     if (_isServing) {
       _log.err("Tried to start a dev server, but it's already running!");
@@ -65,7 +66,7 @@ class StaticShockDevServer {
     _log.info("Serving a static site!");
     int chosenPort = port;
     const maxPortTryCount = 50;
-    final serverHandler = _createServerHandler();
+    final serverHandler = _createServerHandler(basePath: basePath);
     do {
       try {
         _server = await serve(serverHandler, 'localhost', chosenPort);
@@ -89,6 +90,8 @@ class StaticShockDevServer {
     _server!.autoCompress = true;
 
     _log.success('Serving at http://${_server!.address.host}:${_server!.port}');
+    _log.detail(" - port: ${_server!.port}");
+    _log.detail(" - base path: $basePath");
 
     // Rebuild the website whenever a source file changes.
     DirectoryWatcher("${Directory.current.absolute.path}${Platform.pathSeparator}bin") //
@@ -114,12 +117,17 @@ class StaticShockDevServer {
     }
   }
 
-  FutureOr<Response> Function(Request) _createServerHandler() {
+  FutureOr<Response> Function(Request) _createServerHandler({
+    String? basePath,
+  }) {
     return (Request request) {
+      _log.detail("Received request: ${request.url}");
       if (request.url.path == 'ws') {
+        _log.detail("Sending request to websocket handler");
         return _createDevServerSocketHandler()(request);
       } else {
-        return _createStaticSiteServerHandler()(request);
+        _log.detail("Sending request to standard handler");
+        return _createStaticSiteServerHandler(basePath: basePath)(request);
       }
     };
   }
@@ -128,10 +136,13 @@ class StaticShockDevServer {
   ///
   /// This handler serves HTML pages, CSS stylesheets, JS scripts, images, and other
   /// static assets.
-  FutureOr<Response> Function(Request) _createStaticSiteServerHandler() {
+  FutureOr<Response> Function(Request) _createStaticSiteServerHandler({
+    String? basePath,
+  }) {
     return const Pipeline() //
         .addMiddleware(logRequests()) //
         .addMiddleware(_injectDevServerWebSocket(() => _port))
+        .addMiddleware(_removeBasePath(_log, basePath))
         .addHandler(
           createStaticHandler(
             'build',
@@ -247,7 +258,7 @@ class StaticShockDevServer {
 /// a full page refresh so that the page is running the latest version from the server. This
 /// is kind of a like an automatic "hot restart" for every HTML page that this dev server
 /// serves.
-// ignore: unused_element
+// ignore: unused_element, unused_element_parameter
 Middleware _injectDevServerWebSocket(int Function() getPort, {void Function(String message, bool isError)? logger}) =>
     (innerHandler) {
       return (request) async {
@@ -290,5 +301,41 @@ Middleware _injectDevServerWebSocket(int Function() getPort, {void Function(Stri
         return response.change(
           body: dom.outerHtml,
         );
+      };
+    };
+
+/// Middleware that removes a given [basePath] from all incoming requests.
+///
+/// This middleware simulates a deployment server that adds a base path. For
+/// example, GitHub pages adds a base path to all URLs, whose value is the same
+/// as the repository name.
+Middleware _removeBasePath(Logger log, String? basePath) => (innerHandler) {
+      return (request) async {
+        if (basePath == null) {
+          // No base path desired for the dev server. Process request without alteration.
+          return await innerHandler(request);
+        }
+
+        final requestedPath = "/${request.url}";
+        if (request.url.pathSegments.isEmpty || !requestedPath.startsWith(requestedPath)) {
+          // There's no base path configured, or the requested URL doesn't start
+          // with the given base path. Execute without intervention.
+          log.warn(
+              "The dev server is configured with a base path ($basePath), but server received a request for a URL without the base path: '$requestedPath'");
+          return await innerHandler(request);
+        }
+
+        // There's a base path. Strip it from the request path.
+        var newPath = requestedPath.substring(basePath.length);
+        if (newPath.isEmpty) {
+          newPath = "/";
+        }
+        final newRequest = Request(
+          request.method,
+          request.requestedUri.replace(path: newPath),
+          headers: request.headers,
+        );
+        log.detail("Rewrote incoming path to: '$newPath'");
+        return await innerHandler(newRequest);
       };
     };

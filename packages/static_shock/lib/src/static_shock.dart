@@ -35,6 +35,7 @@ final _log = Logger(level: Level.verbose);
 /// [generateSite] generates the static site in the destination directory.
 class StaticShock implements StaticShockPipeline {
   StaticShock({
+    this.site = const SiteMetadata(basePath: "/"),
     this.sourceDirectoryRelativePath = "source",
     this.destinationDirectoryRelativePath = "build",
     Set<Picker>? pickers,
@@ -72,6 +73,8 @@ class StaticShock implements StaticShockPipeline {
         _pageRenderers = pageRenderers ?? {},
         _finishers = finishers ?? {},
         _plugins = plugins ?? {};
+
+  final SiteMetadata site;
 
   /// Path of the source directory, relative to the Static Shock project directory.
   final String sourceDirectoryRelativePath;
@@ -233,8 +236,17 @@ class StaticShock implements StaticShockPipeline {
     _clearDestination();
 
     //---- Run new pipeline ----
-    _context = StaticShockPipelineContext(_log, _sourceDirectory);
+    _context = StaticShockPipelineContext(_sourceDirectory, _log);
     _files.clear();
+
+    // Configure the site-wide base path for all URLs.
+    _context.dataIndex.mergeAtPath(DirectoryRelativePath("/"), {
+      if (site.baseUrl != null) //
+        "baseUrl": site.baseUrl!,
+      if (site.rootUrl != null) //
+        "rootUrl": site.rootUrl!,
+      "basePath": site.basePath,
+    });
 
     // Run plugin configuration - we do this first so that plugins can contribute pickers.
     _applyPlugins();
@@ -431,7 +443,7 @@ class StaticShock implements StaticShockPipeline {
     final dataIndex = context.dataIndex;
 
     // Load remote data. We do this before local data so that remote data can be
-    // overwritten by remote data.
+    // overwritten by local data.
     final client = Client();
     final remoteLoadFutures = <Future>[];
     for (final remoteData in _remoteData) {
@@ -657,23 +669,23 @@ class StaticShock implements StaticShockPipeline {
           ...page.data.entries,
         });
 
-        // Check for a desired base path override, and apply it.
-        String? basePath = page.data['basePath'];
-        if (basePath != null && basePath.isNotEmpty) {
-          if (basePath.startsWith("/")) {
+        // Check for a desired page path override, and apply it.
+        String? replacementPath = page.data['replacementPath'];
+        if (replacementPath != null && replacementPath.isNotEmpty) {
+          if (replacementPath.startsWith("/")) {
             // Chop off leading "/".
             //
             // A "/" is acceptable from a URL perspective, where it refers to the root
             // of the website. However, from a file system perspective, a "/" refers to
             // the root of the file system. We don't want to write files to the root of
             // the file system.
-            basePath = basePath.substring(1);
+            replacementPath = replacementPath.substring(1);
           }
 
-          _log.detail("Overriding default page URL:");
+          _log.detail("Overriding default page path:");
           _log.detail("From: ${page.destinationPath?.value}");
 
-          page.destinationPath = page.destinationPath!.copyWith(directoryPath: basePath);
+          page.destinationPath = page.destinationPath!.copyWith(directoryPath: replacementPath);
           _log.detail("To: ${page.destinationPath?.value}");
         }
 
@@ -715,21 +727,21 @@ class StaticShock implements StaticShockPipeline {
     final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath);
     page.data.addEntries(inheritedData.entries);
 
-    // Check for a desired base path override, and apply it.
-    String? basePath = page.data['basePath'];
-    if (basePath != null && basePath.isNotEmpty) {
-      if (basePath.startsWith("/")) {
+    // Check for a desired page path override, and apply it.
+    String? replacementPath = page.data['replacementPath'];
+    if (replacementPath != null && replacementPath.isNotEmpty) {
+      if (replacementPath.startsWith("/")) {
         // Chop off leading "/".
         //
         // A "/" is acceptable from a URL perspective, where it refers to the root
         // of the website. However, from a file system perspective, a "/" refers to
         // the root of the file system. We don't want to write files to the root of
         // the file system.
-        basePath = basePath.substring(1);
+        replacementPath = replacementPath.substring(1);
       }
 
-      _log.detail("Overriding default page URL:\nFrom: ${page.destinationPath?.value}\nTo: $basePath");
-      page.destinationPath = page.destinationPath!.copyWith(directoryPath: basePath);
+      _log.detail("Overriding default page path:\nFrom: ${page.destinationPath?.value}\nTo: $replacementPath");
+      page.destinationPath = page.destinationPath!.copyWith(directoryPath: replacementPath);
     }
 
     _context.pagesIndex.addPage(page);
@@ -824,14 +836,18 @@ class StaticShock implements StaticShockPipeline {
       return;
     }
 
+    final pagesToRemove = <Page>{};
     for (final page in _context.pagesIndex.pages) {
       for (final filter in _pageFilters) {
         if (!filter.shouldInclude(_context, page)) {
           _log.detail("Removing page: ${page.title}");
-          _context.pagesIndex.removePage(page);
+          pagesToRemove.add(page);
           continue;
         }
       }
+    }
+    for (final page in pagesToRemove) {
+      _context.pagesIndex.removePage(page);
     }
 
     _timer.checkpoint("Filter pages", "Removes all pages that are no longer desired in the final build");
@@ -962,6 +978,52 @@ class StaticShock implements StaticShockPipeline {
     // stopwatch.stop();
     // _log.detail("Wrote asset in ${stopwatch.elapsedMilliseconds / 1000}s");
   }
+}
+
+/// Metadata that applies to an entire website.
+class SiteMetadata {
+  const SiteMetadata({
+    this.rootUrl,
+    required this.basePath,
+  });
+
+  /// The base URL for all pages and assets in this website, which is built from the
+  /// [rootUrl] and [basePath].
+  ///
+  /// If the [rootUrl] is `null`, then the [baseUrl] is `null`, too, because the [rootUrl]
+  /// is required to build the [baseUrl].
+  String? get baseUrl => rootUrl != null //
+      ? "$rootUrl$basePath"
+      : null;
+
+  /// The root URL for this website, e.g., `https://flutterbountyhunters.github.io`.
+  ///
+  /// In cases where a site doesn't know its [rootUrl], or doesn't care, this value
+  /// can be `null`.
+  ///
+  /// The [rootUrl] should NOT include a trailing "/" - instead, that slash is
+  /// provided by the [basePath].
+  final String? rootUrl;
+
+  /// The base path for all pages and assets in this website, which is typically "/".
+  ///
+  /// In some cases, such as GitHub Pages, a non-standard base path is added to all
+  /// website URLs. For example, the base URL for Static Shock GitHub Pages is
+  /// `https://flutterbountyhunters.github.io/static_shock/`. As a result, a Static Shock
+  /// page whose source path is `source/getting-started/install` will have a final URL
+  /// that includes the base path: `https://flutterbountyhunters.github.io/static_shock/getting-started/install`.
+  final String basePath;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SiteMetadata &&
+          runtimeType == other.runtimeType &&
+          rootUrl == other.rootUrl &&
+          basePath == other.basePath;
+
+  @override
+  int get hashCode => rootUrl.hashCode ^ basePath.hashCode;
 }
 
 /// A Static Shock plugin.
