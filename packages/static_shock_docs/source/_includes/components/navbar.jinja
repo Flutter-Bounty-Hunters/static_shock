@@ -8,31 +8,45 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mb-2 mb-lg-0 ms-auto">
-        <li class="nav-item">
-          <a class="nav-link {% if url|startsWith("quickstart/") %}active{% endif %}" aria-current="page" href="/quickstart">Quickstart</a>
-        </li>
-
-        {% if pages.hasPageWithUrl("jumpstart/") %}
-        <li class="nav-item">
-          <a class="nav-link {% if url|startsWith("jumpstart/") %}active{% endif %}" href="/jumpstart">Jumpstart</a>
-        </li>
-        {% endif %}
-
         {% if pages.hasPagesAtPath("guides/") %}
         <!-- Desktop Link -->
         <li class="nav-item d-none d-lg-block d-xl-block">
-          <a class="nav-link {% if url|startsWith("guides/") %}active{% endif %}" href="/guides/add-a-page">Guides</a>
+          <a class="nav-link {% if pagePath|startsWith("guides/") %}active{% endif %}" href="/guides/quickstart">Guides</a>
         </li>
 
         <!-- Mobile Link -->
         <li class="nav-item d-lg-none d-xl-none">
-          <a class="nav-link {% if url|startsWith("guides/directory") %}active{% endif %}" href="/guides/directory">Guides</a>
+          <a class="nav-link {% if pagePath|startsWith("guides/directory") %}active{% endif %}" href="/guides/directory">Guides</a>
+        </li>
+        {% endif %}
+
+        {% if pages.hasPagesAtPath("concepts/") %}
+        <!-- Desktop Link -->
+        <li class="nav-item d-none d-lg-block d-xl-block">
+          <a class="nav-link {% if pagePath|startsWith("concepts/") %}active{% endif %}" href="/concepts/how-it-works/the-pipeline">Concepts</a>
+        </li>
+
+        <!-- Mobile Link -->
+        <li class="nav-item d-lg-none d-xl-none">
+          <a class="nav-link {% if pagePath|startsWith("concepts/directory") %}active{% endif %}" href="/concepts/directory">Concepts</a>
+        </li>
+        {% endif %}
+
+        {% if pages.hasPagesAtPath("contributing/") %}
+        <!-- Desktop Link -->
+        <li class="nav-item d-none d-lg-block d-xl-block">
+          <a class="nav-link {% if pagePath|startsWith("contributing/") %}active{% endif %}" href="/contributing/welcome">Contributing</a>
+        </li>
+
+        <!-- Mobile Link -->
+        <li class="nav-item d-lg-none d-xl-none">
+          <a class="nav-link {% if pagePath|startsWith("contributing/directory") %}active{% endif %}" href="/contributing/directory">Contributing</a>
         </li>
         {% endif %}
 
         {% if pages.hasPageWithUrl("directory/") %}
         <li class="nav-item">
-          <a class="nav-link {% if url|startsWith("directory/") %}active{% endif %}" href="/directory">Directory</a>
+          <a class="nav-link {% if pagePath|startsWith("directory/") %}active{% endif %}" href="/directory">Directory</a>
         </li>
         {% endif %}
 

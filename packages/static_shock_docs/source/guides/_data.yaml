@@ -1,7 +1,9 @@
 layout: layouts/guides.jinja
 docs_menu:
-  base_path: /guides
+  base_path: guides
   items:
+    - title: Quickstart
+      id: quickstart
     - title: Get Started
       id: get-started
       items:

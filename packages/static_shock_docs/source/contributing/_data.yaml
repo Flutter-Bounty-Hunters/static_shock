@@ -1,0 +1,20 @@
+layout: layouts/guides.jinja
+docs_menu:
+  base_path: contributing
+  items:
+    - title: Welcome
+      id: welcome
+    - title: Getting Started
+      id: getting-started
+      subPath: getting-started/
+      items:
+        - title: What is a static site?
+          id: what-is-a-static-site
+        - title: The Repository
+          id: the-repository
+        - title: File an Issue
+          id: file-an-issue
+        - title: Work on an Issue
+          id: work-on-an-issue
+        - title: Submit a Pull Request
+          id: submit-pull-request

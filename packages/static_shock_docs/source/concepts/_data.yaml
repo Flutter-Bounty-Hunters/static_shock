@@ -1,0 +1,18 @@
+layout: layouts/guides.jinja
+docs_menu:
+  base_path: concepts
+  items:
+    - title: How it Works
+      id: how-it-works
+      subPath: how-it-works/
+      items:
+        - title: The Pipeline
+          id: the-pipeline
+        - title: Pages
+          id: pages
+        - title: Assets
+          id: assets
+        - title: Data Index
+          id: data-index
+        - title: Pages Index
+          id: pages-index

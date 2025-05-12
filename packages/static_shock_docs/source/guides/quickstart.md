@@ -1,7 +1,6 @@
 ---
 title: Quickstart
 description: Start assembling a Static Shock website
-layout: layouts/top-level-page.jinja
 ---
 ## Activate the Static Shock CLI
 The Static Shock CLI tool helps you quickly generate new projects, and locally serve your static site. You don't need to use this tool, but it's the fastest and easiest way to get started.
