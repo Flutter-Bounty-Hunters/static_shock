@@ -42,9 +42,9 @@ class PrettyPathPageTransformer implements PageTransformer {
     final pathBeforePageFile = originalPath.directories.isNotEmpty ? "${originalPath.directories.join("/")}/" : "";
 
     page.pagePath = originalPath.filename != "index"
-        // First case is like "posts/news/hello-world.html" -> "posts/news/hello-world/"
+        // First case is like "posts/news/hello-world.md" -> "posts/news/hello-world/"
         ? "$pathBeforePageFile${originalPath.filename}/"
-        // Second case is like "posts/news/hello-world/index.html" -> "posts/news/hello-world/"
+        // Second case is like "posts/news/hello-world/index.md" -> "posts/news/hello-world/"
         : pathBeforePageFile;
 
     if (page.destinationPath?.filename != "index") {

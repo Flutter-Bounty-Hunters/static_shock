@@ -179,8 +179,6 @@ $destinationContent
 abstract class PageKeys {
   static const title = "title";
   static const layout = "layout";
-  static const url = "url";
-  static const basePath = "basePath";
   static const pagePath = "pagePath";
   static const content = "content";
   static const contentRenderers = "contentRenderers";
