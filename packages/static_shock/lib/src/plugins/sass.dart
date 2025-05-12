@@ -32,7 +32,7 @@ class SassPlugin implements StaticShockPlugin {
     final sassEnvironment = SassEnvironment(context.log);
 
     pipeline
-      // Load all local Sass files into artifacts.
+      // Load all local Sass files as assets.
       ..pick(ExtensionPicker("sass"))
       ..pick(ExtensionPicker("scss"))
       // Index all the loaded Sass files so they can import each other.
