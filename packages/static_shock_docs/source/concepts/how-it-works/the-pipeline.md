@@ -41,9 +41,6 @@ The Static Shock pipeline executes the following steps on each build:
 13. Run finishers
 14. Write all files to the destination directory
 
-When working on Static Shock, it's common to focus on just one of these
-steps. Tasks don't usually require modifying multiple pipeline steps.
-
 The Static Shock pipeline might appear to include a lot of steps, but the
 reason for so many steps is to make Static Shock as pluggable as possible.
 As such, most Static Shock development can happen inside of plugins, instead
