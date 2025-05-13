@@ -16,3 +16,27 @@ docs_menu:
           id: data-index
         - title: Pages Index
           id: pages-index
+        - title: Plugins
+          id: plugins
+    - title: Markdown
+      id: markdown
+      subPath: markdown/
+      items:
+        - title: Overview
+          id: overview
+    - title: Jinja Templates
+      id: jinja-templates
+      subPath: jinja-templates/
+      items:
+        - title: What is Jinja?
+          id: what-is-jinja
+        - title: Jinja Plugin
+          id: jinja-plugin
+        - title: Basic Syntax
+          id: basic-syntax
+        - title: Filters
+          id: filters
+        - title: Tests
+          id: tests
+        - title: Functions
+          id: functions
