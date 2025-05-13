@@ -6,6 +6,7 @@ import 'package:static_shock_cli/src/project_maintenance/build_project.dart';
 import 'package:static_shock_cli/src/templates/blog_template.dart';
 import 'package:static_shock_cli/src/templates/docs_multi_page_template.dart';
 import 'package:static_shock_cli/src/templates/empty_template.dart';
+import 'package:static_shock_cli/src/templates/tailwind_template.dart';
 import 'package:static_shock_cli/src/version_check.dart';
 
 /// CLI [Command] that generates a new Static Shock project based on user preferences.
@@ -16,6 +17,7 @@ class CreateCommand extends Command with PubVersionCheck {
     // TODO: create single-page docs template
     // _TemplateType.docsSinglePage: "Documentation (single page)",
     _TemplateType.empty: "Empty",
+    _TemplateType.tailwind: "Tailwind CSS",
   };
 
   CreateCommand(this.log);
@@ -27,7 +29,8 @@ class CreateCommand extends Command with PubVersionCheck {
   final name = "create";
 
   @override
-  final description = "Creates a new static site project at the desired location.";
+  final description =
+      "Creates a new static site project at the desired location.";
 
   @override
   bool get takesArguments => true;
@@ -36,9 +39,11 @@ class CreateCommand extends Command with PubVersionCheck {
   Future<void> run() async {
     await super.run();
 
-    log.info("Welcome to Static Shock! Let's get you started with a new project!");
+    log.info(
+        "Welcome to Static Shock! Let's get you started with a new project!");
     log.info("");
-    log.info("We'll ask you a series of questions, and then we'll generate a custom website project just for you.");
+    log.info(
+        "We'll ask you a series of questions, and then we'll generate a custom website project just for you.");
     log.info("");
 
     final templateType = log.chooseOne(
@@ -50,7 +55,8 @@ class CreateCommand extends Command with PubVersionCheck {
 
     log.info("You chose: ${_templateNamesById[templateType]}.");
     log.info("");
-    log.info("We'll ask you a series of questions to configure the template for your specific needs...");
+    log.info(
+        "We'll ask you a series of questions to configure the template for your specific needs...");
     log.info("");
 
     late final Directory targetDirectory;
@@ -63,10 +69,13 @@ class CreateCommand extends Command with PubVersionCheck {
         targetDirectory = await runMultiPageDocsTemplateWizard(log);
       case _TemplateType.empty:
         targetDirectory = await runEmptyTemplateWizard(log);
+      case _TemplateType.tailwind:
+        targetDirectory = await runTailwindTemplateWizard(log);
     }
 
     log.success("Your new Static Shock website has been generated!\n");
-    final shouldInitialize = log.confirm("Would you like to immediately run a build of your new website?");
+    final shouldInitialize = log.confirm(
+        "Would you like to immediately run a build of your new website?");
     log.info("");
 
     log.info("--------------------------------------");
@@ -78,7 +87,8 @@ class CreateCommand extends Command with PubVersionCheck {
     log.info("");
 
     log.success("Congratulations, your new Static Shock website is ready!");
-    log.detail("To learn how to further configure your website, please check our guides at https://staticshock.io");
+    log.detail(
+        "To learn how to further configure your website, please check our guides at https://staticshock.io");
   }
 }
 
@@ -88,4 +98,5 @@ enum _TemplateType {
   // docsSinglePage,
   docsMultiPage,
   empty,
+  tailwind,
 }
