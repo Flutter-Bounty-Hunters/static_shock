@@ -16,8 +16,34 @@ docs_menu:
           id: data-index
         - title: Pages Index
           id: pages-index
-        - title: Plugins
-          id: plugins
+    - title: Plugins
+      id: plugins
+      subPath: plugins/
+      items:
+        - title: Overview
+          id: overview
+        - title: Pickers
+          id: pickers
+        - title: Excluders
+          id: excluders
+        - title: Remote Picking
+          id: pick-remote
+        - title: Data Loaders
+          id: data-loaders
+        - title: Asset Loaders
+          id: asset-loaders
+        - title: Asset Transformers
+          id: asset-transformers
+        - title: Page Loaders
+          id: page-loaders
+        - title: Page Transformers
+          id: page-transformers
+        - title: Page Filters
+          id: page-filters
+        - title: Page Renderers
+          id: page-renderers
+        - title: Finishers
+          id: finishers
     - title: Markdown
       id: markdown
       subPath: markdown/
