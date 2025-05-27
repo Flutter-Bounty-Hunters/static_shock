@@ -1,21 +1,24 @@
 ---
-title: Plugins
+title: Overview
+contentRenderers:
+  - jinja
+  - markdown
 ---
 Plugins are a major part of Static Shock. Static Shock is designed to be as
 pluggable as possible, with the express purpose of empowering plugins.
 
 Static Shock ships with support for the following:
- * Markdown parsing
- * Jinja templating
- * Sass compilation
- * Tailwind compilation
- * Pretty URLs
- * Redirect generation
- * RSS feeds
- * Website screenshotting
- * Pub package metadata scraping
- * GitHub repository metadata scraping
- * and more...
+* Markdown parsing
+* Jinja templating
+* Sass compilation
+* Tailwind compilation
+* Pretty URLs
+* Redirect generation
+* RSS feeds
+* Website screenshotting
+* Pub package metadata scraping
+* GitHub repository metadata scraping
+* and more...
 
 Despite the fact that Static Shock ships these tools, each of these tools is
 implemented as it's own plugin. Each behavior is accomplished by registering
@@ -23,6 +26,7 @@ these plugins with Static Shock.
 
 For example, the Dart file for this very website looks like the following.
 
+{% raw %}
 ```dart
 final staticShock = StaticShock(
     site: SiteMetadata(
@@ -64,6 +68,7 @@ final staticShock = StaticShock(
     )
     ..loadData(/*...*/);
 ```
+{% endraw %}
 
 Notice that nearly all of the Static Shock website's configuration is the
 selection and configuration of plugins.
@@ -81,6 +86,7 @@ whatever pieces it wants.
 
 The interface for a plugin is as follows.
 
+{% raw %}
 ```dart
 abstract class StaticShockPlugin {
   const StaticShockPlugin();
@@ -102,12 +108,14 @@ abstract class StaticShockPlugin {
   ) {}
 }
 ```
+{% endraw %}
 
 A plugin is defined entirely by what it chooses to register within its `configure()` method.
 
 The following is the implementation for the drafting plugin, which removes any pages
 that are in draft mode.
 
+{% raw %}
 ```dart
 @override
 FutureOr<void> configure(
@@ -120,10 +128,12 @@ FutureOr<void> configure(
   );
 }
 ```
+{% endraw %}
 
 The following is the implementation of the Sass plugin, which compiles Sass files
 to CSS.
 
+{% raw %}
 ```dart
 @override
   FutureOr<void> configure(
@@ -147,7 +157,20 @@ to CSS.
     );
 }
 ```
+{% endraw %}
 
-The objects that plugins register with Static Shock are the various hooks
-supported by the `StaticShockPipeline`. See [the pipeline](concepts/how-it-works/the-pipeline)
-documentation to learn more about pipeline steps and hooks.
+## Plugin Hooks
+Static Shock provides a variety of hooks with which a plugin can register.
+
+ * [`Picker`s]({{ "concepts/plugins/pickers" | local_link }}): Pick files from the source directory for processing in the pipeline.
+ * [`Excluder`s]({{ "concepts/plugins/excluders" | local_link }}): Exclude files that would otherwise be picked.
+ * [Remote Picking]({{ "concepts/plugins/pick-remote" | local_link }}): Pick files from a server.
+ * [`DataLoader`s]({{ "concepts/plugins/data-loaders" | local_link }}): Load data into the `DataIndex`.
+ * [`AssetLoader`s]({{ "concepts/plugins/asset-loaders" | local_link }}): Load assets into the pipeline.
+ * [`AssetTransformer`s]({{ "concepts/plugins/asset-transformers" | local_link }}): Transform assets in the pipeline.
+ * [`PageLoader`s]({{ "concepts/plugins/page-loaders" | local_link }}): Load pages into the pipeline.
+ * [`PageTransformer`s]({{ "concepts/plugins/page-transformers" | local_link }}): Transform pages in the pipeline.
+ * [`PageFilter`s]({{ "concepts/plugins/page-filters" | local_link }}): Remote pages before final rendering.
+ * [`PageRenderer`s]({{ "concepts/plugins/page-renderers" | local_link }}): Render pages to HTML files.
+ * [`Finisher`s]({{ "concepts/plugins/finishers" | local_link }}): Take final actions after all pages and assets are rendered.
+
