@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -20,8 +22,13 @@ mixin PubVersionCheck on Command {
 
   @override
   Future<void> run() async {
-    final isUpToDate = await StaticShockCliVersion.isAtLeastUpToDateWithPub();
-    if (isUpToDate) {
+    try {
+      final isUpToDate = await StaticShockCliVersion.isAtLeastUpToDateWithPub();
+      if (isUpToDate) {
+        return;
+      }
+    } on SocketException {
+      log.warn('Unable to reach pub.dev. Skipping version check.');
       return;
     }
 
