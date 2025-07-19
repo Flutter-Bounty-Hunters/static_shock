@@ -71,13 +71,9 @@ List _pageExistsForMenuItem(
   final filteredMenuItems = <Object>[];
   for (final menuItem in menuItems) {
     final pathFragments = [...prefixPathFragments, menuItem['id']];
-    print("Menu item: $menuItem, prefix path fragments: $prefixPathFragments");
-    print(" - last path fragment: '${prefixPathFragments.last}'");
-    print(" - does last path fragment end with '/'? ${(prefixPathFragments.last as String).endsWith("/")}");
     final pagePath = pathFragments.isNotEmpty && !(prefixPathFragments.last as String).endsWith("/")
         ? "${pathFragments.join("/")}/"
         : "";
-    print(" - page path: $pagePath");
     for (final page in context.pagesIndex.pages) {
       if (page.pagePath == pagePath) {
         filteredMenuItems.add(menuItem);
