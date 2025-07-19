@@ -6,7 +6,10 @@ import 'package:test/test.dart';
 void main() {
   group("Plugins > pretty URLs >", () {
     test("pretties URL for page with single source file", () async {
-      final context = StaticShockPipelineContext(Directory("/User/Fake/website"));
+      final context = StaticShockPipelineContext(
+        sourceDirectory: Directory("/User/Fake/website"),
+        errorLog: ErrorLog(),
+      );
       final page = Page(FileRelativePath("./posts/news", "fake", "md"), "");
       context.pagesIndex.addPage(page);
 
@@ -16,7 +19,10 @@ void main() {
     });
 
     test("pretties URL for page with explicit index file", () async {
-      final context = StaticShockPipelineContext(Directory("/User/Fake/website"));
+      final context = StaticShockPipelineContext(
+        sourceDirectory: Directory("/User/Fake/website"),
+        errorLog: ErrorLog(),
+      );
       final page = Page(FileRelativePath("./posts/news/fake", "index", "md"), "");
       context.pagesIndex.addPage(page);
 
@@ -26,7 +32,10 @@ void main() {
     });
 
     test("pretties URL for root-level page", () async {
-      final context = StaticShockPipelineContext(Directory("/User/Fake/website"));
+      final context = StaticShockPipelineContext(
+        sourceDirectory: Directory("/User/Fake/website"),
+        errorLog: ErrorLog(),
+      );
       final page = Page(FileRelativePath("./", "fake", "md"), "");
       context.pagesIndex.addPage(page);
 
@@ -36,7 +45,10 @@ void main() {
     });
 
     test("keeps root level index HTML file as-is", () async {
-      final context = StaticShockPipelineContext(Directory("/User/Fake/website"));
+      final context = StaticShockPipelineContext(
+        sourceDirectory: Directory("/User/Fake/website"),
+        errorLog: ErrorLog(),
+      );
       final page = Page(FileRelativePath("./", "index", "html"), "");
       context.pagesIndex.addPage(page);
 
@@ -46,7 +58,10 @@ void main() {
     });
 
     test("keeps root level index Markdown file as-is", () async {
-      final context = StaticShockPipelineContext(Directory("/User/Fake/website"));
+      final context = StaticShockPipelineContext(
+        sourceDirectory: Directory("/User/Fake/website"),
+        errorLog: ErrorLog(),
+      );
       final page = Page(FileRelativePath("./", "index", "md"), "");
       context.pagesIndex.addPage(page);
 

@@ -149,5 +149,5 @@ to CSS.
 ```
 
 The objects that plugins register with Static Shock are the various hooks
-supported by the `StaticShockPipeline`. See [the pipeline](concepts/how-it-works/the-pipeline)
+supported by the `StaticShockPipeline`. See [the pipeline](/concepts/how-it-works/the-pipeline)
 documentation to learn more about pipeline steps and hooks.

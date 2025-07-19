@@ -15,6 +15,7 @@ export 'src/templates/layouts.dart';
 export 'src/plugins/drafting.dart';
 export 'src/plugins/github.dart';
 export 'src/plugins/jinja.dart';
+export 'src/plugins/links.dart';
 export 'src/plugins/markdown.dart';
 export 'src/plugins/menus.dart';
 export 'src/plugins/pretty_urls.dart';

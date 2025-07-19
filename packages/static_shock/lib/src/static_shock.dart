@@ -35,7 +35,9 @@ final _log = Logger(level: Level.verbose);
 /// [generateSite] generates the static site in the destination directory.
 class StaticShock implements StaticShockPipeline {
   StaticShock({
-    this.site = const SiteMetadata(basePath: "/"),
+    SiteMetadata site = const SiteMetadata(basePath: "/"),
+    StaticShockBuildMode buildMode = StaticShockBuildMode.production,
+    List<String> cliArguments = const [],
     this.sourceDirectoryRelativePath = "source",
     this.destinationDirectoryRelativePath = "build",
     Set<Picker>? pickers,
@@ -54,7 +56,9 @@ class StaticShock implements StaticShockPipeline {
     Set<PageRenderer>? pageRenderers,
     Set<Finisher>? finishers,
     Set<StaticShockPlugin>? plugins,
-  })  : _pickers = pickers ?? {},
+  })  : _site = site,
+        _cliArguments = cliArguments,
+        _pickers = pickers ?? {},
         _remoteLayouts = remoteLayoutPickers ?? {},
         _remoteComponents = remoteComponentPickers ?? {},
         _remoteData = remoteDataPickers ?? {},
@@ -72,9 +76,88 @@ class StaticShock implements StaticShockPipeline {
         _pageFilters = pageFilters ?? {},
         _pageRenderers = pageRenderers ?? {},
         _finishers = finishers ?? {},
-        _plugins = plugins ?? {};
+        _plugins = plugins ?? {} {
+    _initFromCliArguments();
+  }
 
-  final SiteMetadata site;
+  void _initFromCliArguments() {
+    _configureBuildMode(_cliArguments);
+  }
+
+  void _configureBuildMode(List<String> arguments) {
+    if (_buildMode != null) {
+      // The build mode was set explicitly via property. Ignore CLI arguments.
+      return;
+    }
+
+    final buildModeArgs = arguments.where((arg) => arg.startsWith("--build-mode"));
+    if (buildModeArgs.isEmpty) {
+      // No explicit build mode.
+      return;
+    }
+
+    // Look for a build mode argument, which contains its value.
+    for (final buildModeArg in buildModeArgs) {
+      final pieces = buildModeArg.split("=");
+      if (pieces.length != 2) {
+        // This is either malformed, or for something else. Skip it.
+        continue;
+      }
+
+      final value = pieces.last.trim();
+      if (value.toLowerCase() == "production") {
+        _buildMode = StaticShockBuildMode.production;
+        return;
+      } else if (value.toLowerCase() == "dev") {
+        _buildMode = StaticShockBuildMode.dev;
+        return;
+      } else {
+        continue;
+      }
+    }
+
+    // We didn't find a build mode that contains its own value. Check
+    // for a build mode that's followed by its value.
+    final buildModeKeyIndex = arguments.indexOf("--build-mode");
+    if (buildModeKeyIndex < 0 || buildModeKeyIndex >= arguments.length) {
+      // Couldn't find a two-part build mode argument.
+      return;
+    }
+    final buildModeValue = arguments[buildModeKeyIndex + 1];
+    if (buildModeValue.toLowerCase() == "production") {
+      _buildMode = StaticShockBuildMode.production;
+      return;
+    } else if (buildModeValue.toLowerCase() == "dev") {
+      _buildMode = StaticShockBuildMode.dev;
+      return;
+    } else {
+      // Invalid value. Fizzle.
+      return;
+    }
+  }
+
+  /// Configuration for the website deployment, e.g., URL, base path.
+  final SiteMetadata _site;
+
+  /// {@template build_mode}
+  /// The build mode to use when build this website, e.g., production vs dev.
+  ///
+  /// This build mode might be used by various plugins to make decisions about
+  /// the version of their behavior to run, e.g., the links plugin might only
+  /// verify links for production builds, to avoid excessive time during development.
+  /// {@endtemplate}
+  StaticShockBuildMode? _buildMode;
+
+  /// {@template cli_arguments}
+  /// Arguments passed from the CLI entrypoint, which might contain desired
+  /// configuration for Static Shock and/or plugins.
+  ///
+  /// The CLI arguments are an optional tool for easier configuration by
+  /// end-users. Static Shock is fully configurable without CLI arguments.
+  /// All plugins should make sure that anything configurable via CLI arguments
+  /// also have corresponding public properties.
+  /// {@endtemplate}
+  final List<String> _cliArguments;
 
   /// Path of the source directory, relative to the Static Shock project directory.
   final String sourceDirectoryRelativePath;
@@ -208,6 +291,7 @@ class StaticShock implements StaticShockPipeline {
 
   File _resolveDestinationFile(FileRelativePath relativePath) => _destinationDir.descFile([relativePath.value]);
 
+  late ErrorLog _errorLog;
   late CheckpointTimer _timer;
   late StaticShockPipelineContext _context;
   final _files = <FileRelativePath>[];
@@ -236,16 +320,23 @@ class StaticShock implements StaticShockPipeline {
     _clearDestination();
 
     //---- Run new pipeline ----
-    _context = StaticShockPipelineContext(_sourceDirectory, _log);
+    _errorLog = ErrorLog();
+    _context = StaticShockPipelineContext(
+      sourceDirectory: _sourceDirectory,
+      buildMode: _buildMode ?? StaticShockBuildMode.production,
+      cliArguments: _cliArguments,
+      errorLog: _errorLog,
+      log: _log,
+    );
     _files.clear();
 
     // Configure the site-wide base path for all URLs.
     _context.dataIndex.mergeAtPath(DirectoryRelativePath("/"), {
-      if (site.baseUrl != null) //
-        "baseUrl": site.baseUrl!,
-      if (site.rootUrl != null) //
-        "rootUrl": site.rootUrl!,
-      "basePath": site.basePath,
+      if (_site.baseUrl != null) //
+        "baseUrl": _site.baseUrl!,
+      if (_site.rootUrl != null) //
+        "rootUrl": _site.rootUrl!,
+      "basePath": _site.basePath,
     });
 
     // Run plugin configuration - we do this first so that plugins can contribute pickers.
@@ -292,6 +383,27 @@ class StaticShock implements StaticShockPipeline {
     _timer
       ..totalTime("Total build")
       ..stop();
+
+    // Report warnings and errors.
+    if (_errorLog.hasProblems) {
+      _log.alert("Problems reported during build!");
+
+      if (_errorLog.hasWarnings) {
+        _log.warn("Warnings:");
+        for (final warning in _errorLog.warnings) {
+          _log.warn(" • ${warning.description}");
+        }
+      }
+
+      if (_errorLog.hasErrors) {
+        _log.err("Errors:");
+        for (final error in _errorLog.errors) {
+          _log.err(" • ${error.description}");
+        }
+
+        throw Exception("Build completed with errors. Review them above.");
+      }
+    }
   }
 
   void _clearDestination() {

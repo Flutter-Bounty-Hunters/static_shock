@@ -1,0 +1,60 @@
+<!--
+title: Concepts
+layout: ""
+-->
+<!doctype html>
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title }} | Static Shock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {{ components.headerResources() }}
+
+    <link rel="stylesheet" href="/styles/theme.css">
+    <link rel="stylesheet" href="/styles/base_layout.css">
+    <link rel="stylesheet" href="/styles/inner_page.css">
+    <link rel="stylesheet" href="/styles/guides.css">
+    <link rel="stylesheet" href="/styles/directory.css">
+  </head>
+
+  <body class="inner-page">
+    <main>
+      {{ components.githubCornerLink() }}
+
+      {{ components.navbar({"title": title}) }}
+
+      <!-- Primary page content -->
+      <div id="content" class="container">
+        <h1>Concepts</h1>
+
+        <nav id="menu">
+          {% for menuItem in docs_menu.items %}
+
+            {% if menuItem.items %}
+              {# Show a menu sub-group with a header and child items #}
+              <p class="title">{{ menuItem.title }}</p>
+
+              {% set menuItemSubpath = docs_menu.base_path + "/" + menuItem.subPath if menuItem.subPath else docs_menu.base_path + "/" %}
+              {% for item in menuItem.items|itemsForExistingPages([menuItemSubpath]) %}
+                {% set menuItemUrlPath = menuItemSubpath + item.id %}
+                <a class="btn btn-primary btn-sm {{ 'active' if isCurrentPage(menuItemUrlPath) else '' }}" href="{{ menuItemUrlPath }}" role="button">{{ item.title }}</a>
+              {% endfor %}
+            {% else %}
+              {% set menuItemUrlPath = docs_menu.base_path + "/" + menuItem.id %}
+              <a class="btn btn-primary btn-sm {{ 'active' if isCurrentPage(menuItemUrlPath) else '' }}" href="{{ menuItemUrlPath }}" role="button">{{ menuItem.title }}</a>
+            {% endif %}
+
+          {% endfor %}
+        </nav>
+      </div>
+    </main>
+
+    <footer>
+      {{ components.footer() }}
+    </footer>
+
+    {{ components.endBodyScripts() }}
+  </body>
+</html>

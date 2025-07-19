@@ -108,13 +108,30 @@ abstract class StaticShockPipeline {
 /// Information and file system access that's provided to various pipeline actors
 /// and also provided to plugins.
 class StaticShockPipelineContext {
-  StaticShockPipelineContext(this._sourceDirectory, [Logger? log]) : log = log ?? Logger(level: Level.quiet);
+  StaticShockPipelineContext({
+    required Directory sourceDirectory,
+    this.buildMode = StaticShockBuildMode.production,
+    this.cliArguments = const [],
+    required this.errorLog,
+    Logger? log,
+  })  : _sourceDirectory = sourceDirectory,
+        log = log ?? Logger(level: Level.quiet);
+
+  /// {@macro build_mode}
+  final StaticShockBuildMode buildMode;
+
+  /// {@macro cli_arguments}
+  final List<String> cliArguments;
 
   /// The shared [Logger] for all CLI output.
   ///
   /// Plugins should log messages with this [Logger] so that verbosity output level
   /// can be centrally controlled.
   final Logger log;
+
+  /// An error logger for internal behavior and plugins to report warnings, errors,
+  /// and crashes.
+  final ErrorLog errorLog;
 
   final Directory _sourceDirectory;
 
@@ -218,4 +235,120 @@ class StaticShockPipelineContext {
   void putComponent(String name, Component component) {
     _components[name] = component;
   }
+}
+
+enum StaticShockBuildMode {
+  production,
+  dev;
+}
+
+/// An error log where plugins can report warnings and errors, which may then be
+/// shown to the user during or after a build.
+///
+/// A warning is a potential issue that a user might want to review and correct.
+///
+/// An error is a problem that should cause the build to fail, but shouldn't short circuit
+/// the build process.
+///
+/// A crash is a problem that's so catastrophic that no further build execution
+/// should continue.
+class ErrorLog {
+  bool get hasProblems => _warningsAndErrors.isNotEmpty;
+
+  bool get hasWarnings => warnings.isNotEmpty;
+
+  List<StaticShockError> get warnings =>
+      _warningsAndErrors.where((e) => e.level == StaticShockErrorLevel.warning).toList();
+
+  bool get hasErrors => errors.isNotEmpty;
+
+  List<StaticShockError> get errors => _warningsAndErrors.where((e) => e.level == StaticShockErrorLevel.error).toList();
+
+  final _warningsAndErrors = <StaticShockError>[];
+
+  void warn(String description, [StackTrace? stacktrace]) {
+    _warningsAndErrors.add(
+      StaticShockError.warning(description, stacktrace),
+    );
+  }
+
+  void error(String description, [StackTrace? stacktrace]) {
+    _warningsAndErrors.add(
+      StaticShockError.error(description, stacktrace),
+    );
+  }
+
+  void crash(String description) {
+    _warningsAndErrors.add(
+      StaticShockError.crash(description, StackTrace.current),
+    );
+
+    throw StaticShockCrash(description);
+  }
+
+  void log(StaticShockErrorLevel level, String description, [StackTrace? stacktrace]) {
+    switch (level) {
+      case StaticShockErrorLevel.warning:
+        warn(description, stacktrace);
+      case StaticShockErrorLevel.error:
+        error(description, stacktrace);
+      case StaticShockErrorLevel.crash:
+        crash(description);
+    }
+  }
+
+  void clear() => _warningsAndErrors.clear();
+}
+
+class StaticShockCrash implements Exception {
+  StaticShockCrash(this.message);
+
+  final String message;
+
+  @override
+  String toString() {
+    return "StaticShockCrash: $message";
+  }
+}
+
+class StaticShockError {
+  const StaticShockError.warning(this.description, [this.stackTrace]) : level = StaticShockErrorLevel.warning;
+
+  const StaticShockError.error(this.description, [this.stackTrace]) : level = StaticShockErrorLevel.error;
+
+  const StaticShockError.crash(this.description, [this.stackTrace]) : level = StaticShockErrorLevel.crash;
+
+  const StaticShockError(this.level, this.description, [this.stackTrace]);
+
+  final StaticShockErrorLevel level;
+  final String description;
+  final StackTrace? stackTrace;
+
+  @override
+  String toString() => "StaticShockError ($level): $description";
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StaticShockError &&
+          runtimeType == other.runtimeType &&
+          level == other.level &&
+          description == other.description &&
+          stackTrace == other.stackTrace;
+
+  @override
+  int get hashCode => level.hashCode ^ description.hashCode ^ stackTrace.hashCode;
+}
+
+enum StaticShockErrorLevel {
+  warning,
+  error,
+  crash;
+
+  @override
+  String toString() => switch (this) {
+        StaticShockErrorLevel.warning => "warning",
+        StaticShockErrorLevel.error => "error",
+        StaticShockErrorLevel.crash => "crash",
+      };
 }

@@ -71,7 +71,9 @@ List _pageExistsForMenuItem(
   final filteredMenuItems = <Object>[];
   for (final menuItem in menuItems) {
     final pathFragments = [...prefixPathFragments, menuItem['id']];
-    final pagePath = pathFragments.isNotEmpty ? "${pathFragments.join("/")}/" : "";
+    final pagePath = pathFragments.isNotEmpty && !(prefixPathFragments.last as String).endsWith("/")
+        ? "${pathFragments.join("/")}/"
+        : "";
     for (final page in context.pagesIndex.pages) {
       if (page.pagePath == pagePath) {
         filteredMenuItems.add(menuItem);

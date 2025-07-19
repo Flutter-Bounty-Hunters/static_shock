@@ -1,6 +1,6 @@
 layout: layouts/guides.jinja
 docs_menu:
-  base_path: guides
+  base_path: /guides
   items:
     - title: Quickstart
       id: quickstart
@@ -20,6 +20,8 @@ docs_menu:
       items:
         - title: Deploy to GitHub Pages
           id: deploy-to-github-pages
+        - title: Validate Links
+          id: validate-links
     - title: Website
       id: website
       items:
@@ -37,10 +39,10 @@ docs_menu:
       items:
         - title: Links
           id: page-links
-        - title: Create a Page Layout
-          id: create-a-page-layout
-        - title: Create a Component
-          id: create-a-component
+#        - title: Create a Page Layout
+#          id: create-a-page-layout
+#        - title: Create a Component
+#          id: create-a-component
     - title: Drafting
       id: drafting
       items:
@@ -51,8 +53,8 @@ docs_menu:
       items:
         - title: Include Remote Files
           id: remote-files
-        - title: Use Remote CSS and JS
-          id: use-remote-css-and-js
+#        - title: Use Remote CSS and JS
+#          id: use-remote-css-and-js
     - title: Blogs
       id: blogs
       items:

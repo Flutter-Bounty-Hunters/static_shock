@@ -1,6 +1,6 @@
 layout: layouts/guides.jinja
 docs_menu:
-  base_path: contributing
+  base_path: /contributing
   items:
     - title: Welcome
       id: welcome

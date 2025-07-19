@@ -23,13 +23,16 @@ import 'package:static_shock/src/static_shock.dart';
 /// To preview draft content, build the website with [showDrafts] set to `true`.
 class DraftingPlugin implements StaticShockPlugin {
   const DraftingPlugin({
-    this.showDrafts = false,
+    this.showDrafts,
   });
 
   @override
   final id = "io.staticshock.drafting";
 
-  final bool showDrafts;
+  /// `true` to show draft articles, `false` to exclude drafts, or `null`
+  /// to let the CLI arguments configure it - defaults to `false` if no
+  /// CLI arguments are included.
+  final bool? showDrafts;
 
   @override
   FutureOr<void> configure(
@@ -38,7 +41,9 @@ class DraftingPlugin implements StaticShockPlugin {
     StaticShockCache pluginCache,
   ) {
     pipeline.filterPages(
-      _DraftPageFilter(showDrafts: showDrafts),
+      _DraftPageFilter(
+        showDrafts: context.cliArguments.contains("--preview"),
+      ),
     );
   }
 }
