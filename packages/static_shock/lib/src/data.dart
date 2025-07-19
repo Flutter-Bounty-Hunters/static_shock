@@ -64,6 +64,10 @@ class DataIndex {
 
   final _DataNode _data;
 
+  /// Returns this website's base path, which is typically "/", but might be different
+  /// in some web server environments, such as GitHub Pages.
+  String get basePath => getAtPath(["basePath"]) as String;
+
   /// Returns all data from the global index that should be available to a page at the given [path].
   ///
   /// The global data index is a tree. The data that's made available to a given [path] includes all

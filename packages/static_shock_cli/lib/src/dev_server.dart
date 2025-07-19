@@ -56,6 +56,7 @@ class StaticShockDevServer {
     required int port,
     bool findAnOpenPort = false,
     String? basePath,
+    String? buildMode,
   }) async {
     if (_isServing) {
       _log.err("Tried to start a dev server, but it's already running!");

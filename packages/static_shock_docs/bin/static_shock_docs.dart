@@ -9,6 +9,7 @@ Future<void> main(List<String> arguments) async {
       rootUrl: 'https://staticshock.io',
       basePath: '/',
     ),
+    cliArguments: arguments,
   )
     ..pick(DirectoryPicker.parse("images"))
     ..plugin(const MarkdownPlugin())
@@ -19,10 +20,9 @@ Future<void> main(List<String> arguments) async {
     ))
     ..plugin(const PrettyUrlsPlugin())
     ..plugin(const RedirectsPlugin())
+    ..plugin(const LinksPlugin())
     ..plugin(const SassPlugin())
-    ..plugin(DraftingPlugin(
-      showDrafts: arguments.contains("preview"),
-    ))
+    ..plugin(const DraftingPlugin())
     ..plugin(const PubPackagePlugin())
     ..plugin(WebsiteScreenshotsPlugin(
       selector: (context) {

@@ -30,6 +30,11 @@ class ServeCommand extends Command with PubVersionCheck {
         "base-path",
         defaultsTo: null,
         help: "Base path that's expected to begin every URL path.",
+      )
+      ..addOption(
+        "build-mode",
+        defaultsTo: "dev",
+        help: "The build mode to use for the website build, e.g., 'production', 'dev'.",
       );
   }
 
@@ -49,6 +54,8 @@ class ServeCommand extends Command with PubVersionCheck {
   Future<void> run() async {
     await super.run();
 
+    final buildMode = argResults!.option("build-mode") ?? "production";
+
     // Run a website build just in case the user has never built, or hasn't built recently.
     log.info("Building website.");
     try {
@@ -57,7 +64,12 @@ class ServeCommand extends Command with PubVersionCheck {
       }
 
       final result = await buildWebsite(
-        appArguments: argResults?.rest ?? [],
+        appArguments: [
+          if (argResults != null) ...[
+            ...argResults!.rest,
+            "--build-mode", buildMode, //
+          ],
+        ],
       );
       if (result == null) {
         log.err("Failed to build website, therefore not starting the dev server.");
@@ -86,6 +98,7 @@ class ServeCommand extends Command with PubVersionCheck {
       port: port,
       findAnOpenPort: isPortSearchingAllowed,
       basePath: basePath,
+      buildMode: buildMode,
     );
   }
 }

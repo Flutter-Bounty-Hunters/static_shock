@@ -2,7 +2,7 @@
 title: Assets
 ---
 Assets are data structures that essentially represent any output file that isn't
-a [page](contributing/how-it-works/pages/). An asset might be a CSS file, JavaScript
+a [page](/concepts/how-it-works/pages/). An asset might be a CSS file, JavaScript
 file, image, video, etc.
 
 An `Asset` data structure only has two pieces of information: a source, and a destination.

@@ -1,6 +1,6 @@
 layout: layouts/guides.jinja
 docs_menu:
-  base_path: concepts
+  base_path: /concepts
   items:
     - title: How it Works
       id: how-it-works

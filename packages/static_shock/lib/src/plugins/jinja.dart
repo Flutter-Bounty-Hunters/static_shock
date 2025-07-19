@@ -167,8 +167,7 @@ class JinjaPageRenderer implements PageRenderer {
     required String templateSource,
     String? content,
   }) {
-    // TODO: create an accessor on the context for the base path
-    final basePath = context.dataIndex.getAtPath(["basePath"]) as String;
+    final basePath = context.dataIndex.basePath;
 
     final jinjaFilters = Map.fromEntries([
       MapEntry(

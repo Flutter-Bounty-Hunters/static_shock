@@ -24,7 +24,7 @@ easy to change a behavior in place only to have it break a behavior somewhere el
 
 You should expect to write tests for every bug fix and every feature.
 
-To help you, we've published an entire section on [testing](contributing/testing/overview/).
+To help you, we've published an entire section on [testing](/contributing/testing/overview/).
 
 ## Documentation
 What you're reading right now is documentation. The only reason these words exist is
