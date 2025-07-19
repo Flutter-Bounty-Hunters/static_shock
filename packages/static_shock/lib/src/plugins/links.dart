@@ -75,9 +75,7 @@ class BrokenLinkFinderFinisher implements Finisher {
     int badInternalUriCount = 0;
     final errorLevel = reportBrokenLinksAsErrors ? StaticShockErrorLevel.error : StaticShockErrorLevel.warning;
     for (final page in context.pagesIndex.pages) {
-      print("Scraping links page from: ${page.pagePath}");
       if (page.tags.contains("drafting")) {
-        print(" - skipping this page because it's in draft mode");
         continue;
       }
 
@@ -103,7 +101,6 @@ class BrokenLinkFinderFinisher implements Finisher {
           .toList(growable: true);
       checkedInternalUris.addAll(internalUris);
       for (final otherPage in context.pagesIndex.pages) {
-        print("Another page with URL: ${otherPage.makeUrl(context.dataIndex.basePath)}");
         internalUris.removeWhere((internalUri) =>
             // Check for trailing and non-trailing "/", e.g., "/guides/getting-started"
             // and "/guides/getting-started/".
@@ -152,7 +149,7 @@ extension NormalizeUris on Iterable<Uri> {
 
     // We have a URL. Restructure it so that all of our URLs are represented
     // in a comparable way.
-    return uri.replace(
+    return url.replace(
       scheme: "https",
       host: uri.host.replaceFirst(RegExp(r'^www\.'), ""),
     );
@@ -249,9 +246,11 @@ extension UriSelector on Iterable<Uri> {
         return uri;
       }
 
-      print(
-          "Relative URI - source page: $currentPagePath, from: ${uri.path}, to: ${Uri.parse("$currentPagePath${uri.path}")}");
-      return Uri.parse("$currentPagePath${uri.path}");
+      if (currentPagePath.endsWith("/")) {
+        return Uri.parse("$currentPagePath${uri.path}");
+      } else {
+        return Uri.parse("$currentPagePath/${uri.path}");
+      }
     });
   }
 

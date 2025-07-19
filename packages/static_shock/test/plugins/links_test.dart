@@ -14,13 +14,13 @@ void main() {
       expect(errorLog.hasWarnings, isTrue);
       expect(errorLog.warnings, [
         StaticShockError.warning(
-          "Bad external URL found on page '/guides/getting-started': 'https://staticshock.io/does/not/exist'",
+          "Bad external URL found on page '/guides/getting-started' (Getting Started): 'https://staticshock.io/does/not/exist'",
         ),
         StaticShockError.warning(
-          "Bad internal URL/path found on page '/guides/getting-started': '/root/relative/url/'",
+          "Bad internal URL/path found on page '/guides/getting-started' (Getting Started): '/root/relative/url/'",
         ),
         StaticShockError.warning(
-          "Bad internal URL/path found on page '/guides/getting-started': 'relative/url/index.html'",
+          "Bad internal URL/path found on page '/guides/getting-started' (Getting Started): '/guides/getting-started/relative/url/index.html'",
         ),
       ]);
     });
@@ -37,13 +37,13 @@ void main() {
       expect(errorLog.hasWarnings, isTrue);
       expect(errorLog.warnings, [
         StaticShockError.warning(
-          "Bad internal URL/path found on page '/guides/getting-started': 'https://staticshock.io/does/not/exist'",
+          "Bad internal URL/path found on page '/guides/getting-started' (Getting Started): 'https://staticshock.io/does/not/exist'",
         ),
         StaticShockError.warning(
-          "Bad internal URL/path found on page '/guides/getting-started': '/root/relative/url/'",
+          "Bad internal URL/path found on page '/guides/getting-started' (Getting Started): '/root/relative/url/'",
         ),
         StaticShockError.warning(
-          "Bad internal URL/path found on page '/guides/getting-started': 'relative/url/index.html'",
+          "Bad internal URL/path found on page '/guides/getting-started' (Getting Started): '/guides/getting-started/relative/url/index.html'",
         ),
       ]);
     });
@@ -208,8 +208,18 @@ StaticShockPipelineContext _createFakeSite(Directory sourceDirectory, [ErrorLog?
     errorLog: errorLog ?? ErrorLog(),
   );
 
+  context.dataIndex.mergeAtPath(DirectoryRelativePath("/"), {
+    "basePath": "/",
+  });
+
   context.pagesIndex.addPage(
-    Page(FileRelativePath("guides/getting-started.md", "fake", "md"), "") //
+    Page(
+      FileRelativePath("guides/getting-started.md", "fake", "md"),
+      "",
+      data: {
+        PageKeys.title: "Getting Started",
+      },
+    ) //
       ..destinationContent = _gettingStartedHtml
       ..pagePath = "/guides/getting-started",
   );
