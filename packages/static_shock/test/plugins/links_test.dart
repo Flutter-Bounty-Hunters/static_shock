@@ -9,7 +9,7 @@ void main() {
       final errorLog = ErrorLog();
       final context = _createFakeSite(Directory("test/fake/"), errorLog);
 
-      await BrokenLinkFinderFinisher().execute(context);
+      await BrokenLinkFinderFinisher(shouldRunLinkVerification: true).execute(context);
 
       expect(errorLog.hasWarnings, isTrue);
       expect(errorLog.warnings, [
@@ -32,7 +32,7 @@ void main() {
         "baseUrl": "https://staticshock.io",
       });
 
-      await BrokenLinkFinderFinisher().execute(context);
+      await BrokenLinkFinderFinisher(shouldRunLinkVerification: true).execute(context);
 
       expect(errorLog.hasWarnings, isTrue);
       expect(errorLog.warnings, [

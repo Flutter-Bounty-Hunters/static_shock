@@ -22,6 +22,8 @@ docs_menu:
           id: deploy-to-github-pages
         - title: Validate Links
           id: validate-links
+        - title: Find Missing Pages
+          id: find-missing-pages
     - title: Website
       id: website
       items:

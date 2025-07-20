@@ -4,7 +4,11 @@ import 'package:static_shock_cli/src/website_builder.dart';
 
 /// CLI [Command] that builds a Static Shock website from source files.
 class BuildCommand extends Command {
-  BuildCommand(this.log);
+  BuildCommand(this.log) {
+    argParser //
+      ..addFlag("production", help: "Build in production mode.")
+      ..addFlag("dev", help: "Build in dev mode");
+  }
 
   final Logger log;
 
@@ -24,8 +28,17 @@ class BuildCommand extends Command {
       log.detail("Passing extra arguments to the website builder: ${argResults!.rest.join(", ")}");
     }
 
+    log.detail("Production flag: ${argResults!.flag("production")}");
+    log.detail("Dev flag: ${argResults!.flag("dev")}");
+
     await buildWebsite(
-      appArguments: argResults?.rest ?? [],
+      appArguments: [
+        if (argResults!.flag("production")) //
+          "--production",
+        if (argResults!.flag("dev")) //
+          "--dev",
+        ...argResults!.rest,
+      ],
       log: log,
     );
   }
