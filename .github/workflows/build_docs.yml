@@ -60,6 +60,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
           branch: cache-updates-${{ github.run_id }}
           title: "[GitHub] - Update source cache for latest deployment"
           body: "Auto-generated update to the source cache after the latest public deployment."
