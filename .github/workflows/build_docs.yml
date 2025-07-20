@@ -34,6 +34,28 @@ jobs:
         with:
           path: ./packages/static_shock_docs/build
 
+      - name: Check for cache changes
+        id: detect_changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Check for changes in source/.shock
+          if [[ -n "$(git status --porcelain packages/static_shock_docs/source/.shock/cache)" ]]; then
+            echo "Changes detected in the source cache"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No changes in the source cache"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push cache changes
+        if: steps.detect_changes.outputs.changed == 'true'
+        run: |
+          git add packages/static_shock_docs/source/.shock/cache
+          git commit -m "[GitHub Deployment] - Push changes to the source cache"
+          git push
+
   deploy:
     name: Deploy
     needs: build
@@ -52,3 +74,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
