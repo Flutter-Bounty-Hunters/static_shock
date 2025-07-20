@@ -2,7 +2,7 @@ name: Build and deploy documentation website
 on:
   push:
     branches:
-      main
+      - main
   workflow_dispatch:
 
 jobs:
@@ -34,20 +34,49 @@ jobs:
         with:
           path: ./packages/static_shock_docs/build
 
+      - name: Check for cache changes
+        id: detect_changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Check for changes in source/.shock
+          if [[ -n "$(git status --porcelain source/.shock/cache)" ]]; then
+            echo "Changes detected in the source cache"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No changes in the source cache"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create cache update pull request
+        if: steps.detect_changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          branch: cache-updates-${{ github.run_id }}
+          title: "[GitHub] - Update source cache for latest deployment"
+          body: "Auto-generated update to the source cache after the latest public deployment."
+          commit-message: "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})"
+          committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          labels: generated
+          reviewers: matthew-carroll
+
   deploy:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
-    
+
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
-    
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
