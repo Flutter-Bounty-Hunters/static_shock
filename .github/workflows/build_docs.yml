@@ -49,47 +49,48 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit and push cache changes to new PR branch
-        run: |
-          cd "$GITHUB_WORKSPACE"
-          BRANCH_NAME="cache-updates-${{ github.run_id }}"
-          
-          git switch -c $BRANCH_NAME
-          echo "Running git status"
-          git status
-          echo ""
-          
-          echo "Running git diff --stat"
-          git diff --stat
-          echo ""
-          
-          echo "Adding cache files for commit"
-          git add packages/static_shock_docs/source/.shock/cache
-          echo ""
-          
-          echo "Running git status after staging files"
-          git status
-          echo ""
-          
-          # The changes are committed and pushed in the next step.
-          
-#          echo "Committing changes to branch"
-#          git commit -m "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})"
-#          echo ""
+#      - name: Commit and push cache changes to new PR branch
+#        run: |
+#          cd "$GITHUB_WORKSPACE"
+#          BRANCH_NAME="cache-updates-${{ github.run_id }}"
 #
-#          echo "Running git status after committing files"
+#          git switch -c $BRANCH_NAME
+#          echo "Running git status"
 #          git status
 #          echo ""
 #
-#          echo "Verifying latest commit on new branch"
-#          git log -1
+#          echo "Running git diff --stat"
+#          git diff --stat
 #          echo ""
 #
-#          echo "Pushing branch to origin"
-#          git push origin $BRANCH_NAME
-#          echo ""
+#          # The changes are committed and pushed in the next step.
+#
+##          echo "Adding cache files for commit"
+##          git add packages/static_shock_docs/source/.shock/cache
+##          echo ""
+##
+##          echo "Running git status after staging files"
+##          git status
+##          echo ""
+#
+##          echo "Committing changes to branch"
+##          git commit -m "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})"
+##          echo ""
+##
+##          echo "Running git status after committing files"
+##          git status
+##          echo ""
+##
+##          echo "Verifying latest commit on new branch"
+##          git log -1
+##          echo ""
+##
+##          echo "Pushing branch to origin"
+##          git push origin $BRANCH_NAME
+##          echo ""
 
       - name: Create cache update pull request
+        if: steps.detect_changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
