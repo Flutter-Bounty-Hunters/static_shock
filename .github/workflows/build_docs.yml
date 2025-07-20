@@ -63,7 +63,7 @@ jobs:
           echo ""
           
           echo "Adding cache files for commit"
-          git add source
+          git add packages/static_shock_docs/source/.shock/cache
           echo ""
           
           echo "Running git status after staging files"
@@ -72,6 +72,10 @@ jobs:
           
           echo "Committing changes to branch"
           git commit -m "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})"
+          echo ""
+          
+          echo "Running git status after committing files"
+          git status
           echo ""
           
           echo "Verifying latest commit on new branch"
