@@ -41,7 +41,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           # Check for changes in source/.shock
-          if [[ -n "$(git status --porcelain packages/static_shock_docs/source/.shock/cache)" ]]; then
+          if [[ -n "$(git status --porcelain source/.shock/cache)" ]]; then
             echo "Changes detected in the source cache"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
@@ -52,7 +52,7 @@ jobs:
       - name: Commit and push cache changes
         if: steps.detect_changes.outputs.changed == 'true'
         run: |
-          git add packages/static_shock_docs/source/.shock/cache
+          git add source/.shock/cache
           git commit -m "[GitHub Deployment] - Push changes to the source cache"
           git push
 
