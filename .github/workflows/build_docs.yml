@@ -51,7 +51,9 @@ jobs:
 
       - name: Commit and push cache changes to new PR branch
         run: |
-          git switch -c cache-updates-${{ github.run_id }}
+          BRANCH_NAME="cache-updates-${{ github.run_id }}"
+          
+          git switch -c $BRANCH_NAME
           echo "Running git status"
           git status
           echo ""
@@ -70,12 +72,15 @@ jobs:
           
           echo "Committing changes to branch"
           git commit -m "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})"
+          echo ""
           
           echo "Verifying latest commit on new branch"
           git log -1
+          echo ""
           
           echo "Pushing branch to origin"
-          git push origin HEAD
+          git push origin $BRANCH_NAME
+          echo ""
 
       - name: Create cache update pull request
         uses: peter-evans/create-pull-request@v6
