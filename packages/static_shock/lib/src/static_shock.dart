@@ -90,6 +90,16 @@ class StaticShock implements StaticShockPipeline {
       return;
     }
 
+    if (arguments.contains("--production")) {
+      _buildMode = StaticShockBuildMode.production;
+      return;
+    }
+
+    if (arguments.contains("--dev")) {
+      _buildMode = StaticShockBuildMode.dev;
+      return;
+    }
+
     final buildModeArgs = arguments.where((arg) => arg.startsWith("--build-mode"));
     if (buildModeArgs.isEmpty) {
       // No explicit build mode.
