@@ -54,7 +54,7 @@ class ServeCommand extends Command with PubVersionCheck {
   Future<void> run() async {
     await super.run();
 
-    final buildMode = argResults!.option("build-mode") ?? "production";
+    final buildMode = argResults!.option("build-mode") ?? "dev";
 
     // Run a website build just in case the user has never built, or hasn't built recently.
     log.info("Building website.");

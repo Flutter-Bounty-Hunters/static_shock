@@ -151,3 +151,58 @@ file:
 Your Static Shock website will now build and deploy every time you push a commit to `main`.
 
 To configure a custom domain for your static website, check the [GitHub Pages Guides](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)
+
+## Commit your website cache
+Some Static Shock plugins write to a local cache located at `[source]/.shock/cache/`. For example,
+the `LinksPlugin` writes all known page paths to that cache, so that you don't accidentally remove
+pages between deployments. This cache should be checked into version control, but it should also
+be updated whenever you deploy.
+
+When using GitHub Pages with auto-deployment, your deployment happens within a GitHub workflow.
+Therefore, you should capture any cache changes that happen during your workflow, and commit them
+to your repository.
+
+Here is an example of a couple steps that you can add after your "Upload artifact" step, which
+will automatically generate a PR into your repository whenever your GitHub deployment causes changes
+to your cache.
+
+{% raw %}
+```yaml
+- name: Check for cache changes
+  id: detect_changes
+  run: |
+    # Check for changes to the cache.
+    if [[ -n "$(git status --porcelain source/.shock/cache)" ]]; then
+      echo "Changes detected in the source cache"
+      echo "changed=true" >> "$GITHUB_OUTPUT"
+    else
+      echo "No changes in the source cache"
+      echo "changed=false" >> "$GITHUB_OUTPUT"
+    fi
+
+- name: Create cache update pull request
+  if: steps.detect_changes.outputs.changed == 'true'
+  uses: peter-evans/create-pull-request@v6
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    base: main
+    branch: cache-updates-${{ github.run_id }}
+    title: "[GitHub] - Update source cache for latest deployment"
+    body: "Auto-generated update to the source cache after the latest public deployment."
+    commit-message: "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})  [skip ci]"
+    committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+    labels: generated
+    reviewers: [your-github-id]
+```
+{% endraw %}
+
+With these new steps, whenever your website is deployed from GitHub actions, GitHub
+will also create a new PR with cache changes. You'll need to explicitly merge each of
+those PRs.
+
+One thing to keep in mind is that you now have GitHub auto-building your website every
+time you merge into `main`, and then also creating PRs that you then merge into `main`.
+This could cause an infinite workflow loop. To prevent this, the above example includes
+"[skip ci]" in the commit message. This is a syntax that's understood by GitHub and will
+cause GitHub to skip any workflows that would otherwise run on that commit. This way, when
+your build generates a PR, your PR won't generate another build.

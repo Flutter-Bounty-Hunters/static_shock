@@ -43,3 +43,17 @@ final site = StaticShock(...)
     reportMissingPagesAtErrorLevel: StaticShockErrorLevel.warning,
   ));
 ```
+
+## Committing the page manifest
+You need to commit your page manifest. The only way for this plugin to compare the current pages
+to your previous set of pages is if you retain the list of those pages.
+
+If you manually run your website build and deployment then all you need to do is make sure
+that you add `[source]/.shock/cache/` to version control.
+
+If you build and deploy with CI, then you need your CI system to watch out for changes to the
+cache every time it builds. When your CI finds changes to the cache, you need to configure CI
+to generate a new PR into your repo, which includes the cache changes.
+
+If you use a GitHub workflow to build and deploy your website, you can find instructions for
+committing cache changes in the [deploy to github pages](/guides/deploy-to-github-pages) guide.

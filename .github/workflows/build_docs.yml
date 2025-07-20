@@ -58,7 +58,7 @@ jobs:
           branch: cache-updates-${{ github.run_id }}
           title: "[GitHub] - Update source cache for latest deployment"
           body: "Auto-generated update to the source cache after the latest public deployment."
-          commit-message: "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})"
+          commit-message: "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }}) [skip ci]"
           committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
           labels: generated
           reviewers: matthew-carroll
