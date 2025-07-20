@@ -68,7 +68,13 @@ jobs:
           git status
           echo ""
           
+          echo "Committing changes to branch"
           git commit -m "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})"
+          
+          echo "Verifying latest commit on new branch"
+          git log -1
+          
+          echo "Pushing branch to origin"
           git push origin HEAD
 
       - name: Create cache update pull request
