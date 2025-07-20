@@ -52,6 +52,8 @@ jobs:
       - name: Commit and push cache changes to new PR branch
         run: |
           git switch -c cache-updates-${{ github.run_id }}
+          git status
+          git diff --stat
           git add source
           git commit -m "[GitHub Deployment] - Push changes to the source cache (run ID: ${{ github.run_id }})"
           git push origin HEAD
