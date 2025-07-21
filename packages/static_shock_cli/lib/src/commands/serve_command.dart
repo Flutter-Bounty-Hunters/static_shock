@@ -55,6 +55,12 @@ class ServeCommand extends Command with PubVersionCheck {
     await super.run();
 
     final buildMode = argResults!.option("build-mode") ?? "dev";
+    final appArguments = [
+      if (argResults != null) ...[
+        ...argResults!.rest,
+        "--build-mode", buildMode, //
+      ],
+    ];
 
     // Run a website build just in case the user has never built, or hasn't built recently.
     log.info("Building website.");
@@ -63,14 +69,7 @@ class ServeCommand extends Command with PubVersionCheck {
         log.detail("Passing extra arguments to the website builder: ${argResults!.rest.join(", ")}");
       }
 
-      final result = await buildWebsite(
-        appArguments: [
-          if (argResults != null) ...[
-            ...argResults!.rest,
-            "--build-mode", buildMode, //
-          ],
-        ],
-      );
+      final result = await buildWebsite(appArguments: appArguments);
       if (result == null) {
         log.err("Failed to build website, therefore not starting the dev server.");
         return;
@@ -94,11 +93,10 @@ class ServeCommand extends Command with PubVersionCheck {
 
     final basePath = argResults!["base-path"];
 
-    StaticShockDevServer(log, buildWebsite).run(
+    StaticShockDevServer(log, buildWebsite, appArguments: appArguments).run(
       port: port,
       findAnOpenPort: isPortSearchingAllowed,
       basePath: basePath,
-      buildMode: buildMode,
     );
   }
 }

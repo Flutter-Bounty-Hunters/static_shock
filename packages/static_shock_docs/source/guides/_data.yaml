@@ -41,6 +41,8 @@ docs_menu:
       items:
         - title: Links
           id: page-links
+        - title: Redirects
+          id: url-redirects
 #        - title: Create a Page Layout
 #          id: create-a-page-layout
 #        - title: Create a Component

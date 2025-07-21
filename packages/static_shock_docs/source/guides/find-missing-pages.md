@@ -6,9 +6,10 @@ now has a public URL that others might depend upon. Users might add a URL to the
 bookmarks, or they might share the URL on social media. Therefore, it's typically
 recommended that you never remove an existing URL - you should only redirect it.
 
-The first step in making sure you don't break a public URL is to make sure that
-URL doesn't disappear from your website build. Another way to say the same thing
-is that you need to make sure pages don't disappear from one deployment to another.
+See how to [setup URL redirects](/guides/url-redirects).
+
+This guide focuses on detecting when a page has disappeared, so that you know you need
+to add a redirect.
 
 The `LinksPlugin` includes support for watching your pages from one deployment to
 the next, and it can alert you when pages disappear.

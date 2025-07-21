@@ -48,4 +48,4 @@ Future<int?> buildWebsite({
   return process.exitCode;
 }
 
-typedef WebsiteBuilder = Future<int?> Function({bool attachBuildProcessToStdIo});
+typedef WebsiteBuilder = Future<int?> Function({bool attachBuildProcessToStdIo, List<String> appArguments});
