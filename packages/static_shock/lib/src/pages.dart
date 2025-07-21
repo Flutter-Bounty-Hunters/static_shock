@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'files.dart';
-import 'pipeline.dart';
+import 'package:static_shock/src/files.dart';
+import 'package:static_shock/src/pipeline.dart';
 
 abstract class PageLoader {
   bool canLoad(FileRelativePath path);

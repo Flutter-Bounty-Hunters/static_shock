@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'files.dart';
-import 'pipeline.dart';
+import 'package:static_shock/src/files.dart';
+import 'package:static_shock/src/pipeline.dart';
 
 /// Loads some number of assets, possibly by loading them from remote sources,
 /// or by generating them locally.

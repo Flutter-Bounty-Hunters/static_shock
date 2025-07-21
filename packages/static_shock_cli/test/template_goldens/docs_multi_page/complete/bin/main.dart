@@ -13,14 +13,11 @@ Future<void> main(List<String> arguments) async {
     ..plugin(const MarkdownPlugin())
     ..plugin(const JinjaPlugin())
     ..plugin(const PrettyUrlsPlugin())
-    ..plugin(const RedirectsPlugin())
+    ..plugin(const LinksPlugin())
     ..plugin(const SassPlugin())
-    
     ..plugin(const PubPackagePlugin({
       "super_editor",
     }))
-    
-    
     ..plugin(
       GitHubContributorsPlugin(
         // To load the contributors for a given GitHub package using credentials,
@@ -28,7 +25,6 @@ Future<void> main(List<String> arguments) async {
         authToken: Platform.environment["github_doc_website_token"],
       ),
     )
-    
     ..plugin(DraftingPlugin(
       showDrafts: arguments.contains("preview"),
     ));
