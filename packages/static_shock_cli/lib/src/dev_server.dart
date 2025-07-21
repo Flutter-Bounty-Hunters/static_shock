@@ -21,13 +21,16 @@ import 'website_builder.dart';
 class StaticShockDevServer {
   StaticShockDevServer(
     this._log,
-    this._buildWebsiteDelegate,
-  );
+    this._buildWebsiteDelegate, {
+    List<String> appArguments = const [],
+  }) : _appArguments = appArguments;
 
   final Logger _log;
 
   /// Delegate that (re)builds the website by running the Static Shock pipeline.
   final WebsiteBuilder _buildWebsiteDelegate;
+
+  final List<String> _appArguments;
 
   /// Whether this server is active.
   bool _isServing = false;
@@ -56,7 +59,6 @@ class StaticShockDevServer {
     required int port,
     bool findAnOpenPort = false,
     String? basePath,
-    String? buildMode,
   }) async {
     if (_isServing) {
       _log.err("Tried to start a dev server, but it's already running!");
@@ -208,7 +210,7 @@ class StaticShockDevServer {
 
       final stopwatch = Stopwatch()..start();
       try {
-        final exitCode = await _buildWebsiteDelegate();
+        final exitCode = await _buildWebsiteDelegate(appArguments: _appArguments);
         isBuilding = false;
         stopwatch.stop();
 

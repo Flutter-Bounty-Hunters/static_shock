@@ -5,7 +5,7 @@ import 'package:static_shock/src/cache.dart';
 import 'package:static_shock/src/pipeline.dart';
 import 'package:static_shock/src/static_shock.dart';
 
-import '../pages.dart';
+import 'package:static_shock/src/pages.dart';
 
 class PrettyUrlsPlugin implements StaticShockPlugin {
   const PrettyUrlsPlugin();

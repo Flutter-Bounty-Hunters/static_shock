@@ -14,11 +14,11 @@ import 'package:static_shock/src/templates/components.dart';
 import 'package:static_shock/src/templates/layouts.dart';
 import 'package:yaml/yaml.dart';
 
-import 'assets.dart';
-import 'files.dart';
-import 'pages.dart';
-import 'pipeline.dart';
-import 'source_files.dart';
+import 'package:static_shock/src/assets.dart';
+import 'package:static_shock/src/files.dart';
+import 'package:static_shock/src/pages.dart';
+import 'package:static_shock/src/pipeline.dart';
+import 'package:static_shock/src/source_files.dart';
 
 final _log = Logger(level: Level.verbose);
 

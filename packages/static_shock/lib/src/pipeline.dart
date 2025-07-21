@@ -8,8 +8,8 @@ import 'package:static_shock/src/finishers.dart';
 import 'package:static_shock/src/templates/components.dart';
 import 'package:static_shock/src/templates/layouts.dart';
 
-import 'assets.dart';
-import 'pages.dart';
+import 'package:static_shock/src/assets.dart';
+import 'package:static_shock/src/pages.dart';
 
 /// A pipeline that runs a series of steps to generate a static website.
 abstract class StaticShockPipeline {
