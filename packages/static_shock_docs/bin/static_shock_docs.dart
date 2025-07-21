@@ -19,7 +19,6 @@ Future<void> main(List<String> arguments) async {
       ],
     ))
     ..plugin(const PrettyUrlsPlugin())
-    ..plugin(const RedirectsPlugin())
     ..plugin(const LinksPlugin())
     ..plugin(const SassPlugin())
     ..plugin(const DraftingPlugin())

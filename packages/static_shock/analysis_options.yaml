@@ -3,6 +3,7 @@ include: package:lints/recommended.yaml
 linter:
   rules:
     - avoid_print
+    - always_use_package_imports
 
 # analyzer:
 #   exclude:
