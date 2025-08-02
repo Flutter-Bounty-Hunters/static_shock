@@ -74,6 +74,7 @@ class SassIndexTransformer implements AssetTransformer {
     }
 
     _log.detail("Adding Sass content to cache: ${asset.sourcePath}");
+    _log.detail("Content:\n${asset.sourceContent!.text}");
     _environment.cache["${asset.destinationPath!.filename}.${asset.destinationPath!.extension}"] =
         asset.sourceContent!.text!;
   }

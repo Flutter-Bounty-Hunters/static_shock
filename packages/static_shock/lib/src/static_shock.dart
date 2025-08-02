@@ -12,6 +12,7 @@ import 'package:static_shock/src/infrastructure/data.dart';
 import 'package:static_shock/src/infrastructure/timer.dart';
 import 'package:static_shock/src/templates/components.dart';
 import 'package:static_shock/src/templates/layouts.dart';
+import 'package:static_shock/src/themes.dart';
 import 'package:yaml/yaml.dart';
 
 import 'package:static_shock/src/assets.dart';
@@ -47,6 +48,7 @@ class StaticShock implements StaticShockPipeline {
     Set<RemoteFile>? remoteDataPickers,
     Set<RemoteFile>? remoteAssetPickers,
     Set<RemoteFile>? remotePagePickers,
+    Set<Theme>? themes,
     Set<DataLoader>? dataLoaders,
     Set<AssetLoader>? assetLoaders,
     Set<AssetTransformer>? assetTransformers,
@@ -68,6 +70,7 @@ class StaticShock implements StaticShockPipeline {
             {
               const FilePrefixExcluder("."),
             },
+        _themeLoaders = themes ?? {},
         _dataLoaders = dataLoaders ?? {},
         _assetLoaders = assetLoaders ?? {},
         _assetTransformers = assetTransformers ?? {},
@@ -178,6 +181,14 @@ class StaticShock implements StaticShockPipeline {
   late Directory _sourceDirectory;
   late SourceFiles _sourceFiles;
 
+  @override
+  void addSourceExtension(SourceFiles extensionFiles) {
+    _context.log.detail("Adding extension source set: ${extensionFiles.directory.absolute.path}");
+    _sourceExtensions.add(extensionFiles);
+  }
+
+  final _sourceExtensions = <SourceFiles>{};
+
   late Directory _destinationDir;
 
   /// Adds the given [picker] to the pipeline, which selects files that will
@@ -212,6 +223,12 @@ class StaticShock implements StaticShockPipeline {
   late final Set<RemoteFileSource> _remoteData;
   late final Set<RemoteFileSource> _remoteAssets;
   late final Set<RemoteFileSource> _remotePages;
+
+  /// Loads the given [theme], which is a collection of pages, assets, layouts,
+  /// and components.
+  @override
+  void loadTheme(Theme theme) => _themeLoaders.add(theme);
+  late final Set<Theme> _themeLoaders;
 
   /// Adds the given [DataLoader] to the pipeline, which loads external data before
   /// any assets or pages are loaded.
@@ -304,7 +321,8 @@ class StaticShock implements StaticShockPipeline {
   late ErrorLog _errorLog;
   late CheckpointTimer _timer;
   late StaticShockPipelineContext _context;
-  final _files = <FileRelativePath>[];
+  // final _files = <FileRelativePath>[];
+  final _files = <SourceFile>[];
 
   /// Generates a static site from content and assets.
   ///
@@ -329,12 +347,20 @@ class StaticShock implements StaticShockPipeline {
 
     _clearDestination();
 
+    // Ensure the build cache directory exists. This is a cache for intermediate
+    // artifacts that are used during build, but which are not meant to be
+    // version controlled, or distributed with the build.
+    final buildCacheDirectory =
+        Directory("${_sourceDirectory.path}${path.separator}..${path.separator}.shock${path.separator}build_cache");
+    buildCacheDirectory.createSync(recursive: true);
+
     //---- Run new pipeline ----
     _errorLog = ErrorLog();
     _context = StaticShockPipelineContext(
       sourceDirectory: _sourceDirectory,
       buildMode: _buildMode ?? StaticShockBuildMode.production,
       cliArguments: _cliArguments,
+      buildCacheDirectory: buildCacheDirectory,
       errorLog: _errorLog,
       log: _log,
     );
@@ -348,6 +374,10 @@ class StaticShock implements StaticShockPipeline {
         "rootUrl": _site.rootUrl!,
       "basePath": _site.basePath,
     });
+
+    // Load all themes. Themes will add source files, so this needs to happen
+    // before picking and/or processing.
+    await _loadThemes();
 
     // Run plugin configuration - we do this first so that plugins can contribute pickers.
     _applyPlugins();
@@ -484,31 +514,36 @@ class StaticShock implements StaticShockPipeline {
 
     // Load local layouts and components. We do this after loading remove values so
     // that local values can overwrite remote values.
-    for (final sourceFile in _sourceFiles.layouts()) {
-      _log.detail("Layout: ${sourceFile.subPath}");
-      _context.putLayout(
-        Layout(
-          FileRelativePath.parse(sourceFile.subPath),
-          sourceFile.file.readAsStringSync(),
-        ),
-      );
-    }
-    for (final sourceFile in _sourceFiles.components()) {
-      _log.detail("Component: ${sourceFile.subPath}");
+    final sourceSets = {_sourceFiles, ..._sourceExtensions};
+    for (final sourceSet in sourceSets) {
+      _log.detail("Processing source set: ${sourceSet.directory}");
+      for (final sourceFile in sourceSet.layouts()) {
+        _log.detail("Layout: ${sourceFile.subPath}");
+        _context.putLayout(
+          Layout(
+            FileRelativePath.parse(sourceFile.subPath),
+            sourceFile.file.readAsStringSync(),
+          ),
+        );
+      }
 
-      final componentContent = front_matter.parse(sourceFile.file.readAsStringSync());
+      for (final sourceFile in sourceSet.components()) {
+        _log.detail("Component: ${sourceFile.subPath}");
 
-      // TODO: process the component data, e.g., pull out CSS imports
-      _context.putComponent(
-        path.basenameWithoutExtension(sourceFile.subPath),
-        Component(
-          FileRelativePath.parse(sourceFile.subPath),
-          Map.from(componentContent.data),
-          // If there's no Front Matter, then `content` will be `null`. In that case, assume
-          // everything is a Jinja template, and pass the full `value`.
-          componentContent.content ?? componentContent.value,
-        ),
-      );
+        final componentContent = front_matter.parse(sourceFile.file.readAsStringSync());
+
+        // TODO: process the component data, e.g., pull out CSS imports
+        _context.putComponent(
+          path.basenameWithoutExtension(sourceFile.subPath),
+          Component(
+            FileRelativePath.parse(sourceFile.subPath),
+            Map.from(componentContent.data),
+            // If there's no Front Matter, then `content` will be `null`. In that case, assume
+            // everything is a Jinja template, and pass the full `value`.
+            componentContent.content ?? componentContent.value,
+          ),
+        );
+      }
     }
 
     _timer.checkpoint("Load layouts & components", "Finds all layout and component files and loads them into memory");
@@ -658,28 +693,46 @@ class StaticShock implements StaticShockPipeline {
 
   void _pickAllSourceFiles() {
     _log.info("⚡ Picking files");
-    for (final sourceFile in _sourceFiles.sourceFiles()) {
-      final relativePath = FileRelativePath.parse(sourceFile.subPath);
+    // Order sources from extensions to main sources so that main sources
+    // overwrite extensions (like themes).
+    final sourceSets = {..._sourceExtensions, _sourceFiles};
+    for (final sourceSet in sourceSets) {
+      _log.detail("Picking from source set: ${sourceSet.directory}");
+      for (final sourceFile in sourceSet.sourceFiles()) {
+        final relativePath = FileRelativePath.parse(sourceFile.subPath);
 
-      pickerLoop:
-      for (final picker in _pickers) {
-        if (picker.shouldPick(relativePath)) {
-          for (final excluder in _excluders) {
-            if (excluder.shouldExclude(relativePath)) {
-              break pickerLoop;
+        pickerLoop:
+        for (final picker in _pickers) {
+          if (picker.shouldPick(relativePath)) {
+            for (final excluder in _excluders) {
+              if (excluder.shouldExclude(relativePath)) {
+                break pickerLoop;
+              }
             }
+
+            _log.detail("Picked: $relativePath");
+            _files.add(sourceFile);
+
+            // We picked the file. No need to check more pickers.
+            break;
           }
-
-          _log.detail("Picked: $relativePath");
-          _files.add(relativePath);
-
-          // We picked the file. No need to check more pickers.
-          break;
         }
       }
     }
 
     _timer.checkpoint("Pick source files", "Loads every desired source file into memory");
+    _log.info("");
+  }
+
+  Future<void> _loadThemes() async {
+    _log.info("⚡ Loading themes");
+
+    for (final theme in _themeLoaders) {
+      _log.detail("Loading theme: ${theme.describe}");
+      await theme.load(this, _context);
+    }
+
+    _timer.checkpoint("Load themes", "Loads all themes, such as from git or the file system");
     _log.info("");
   }
 
@@ -755,7 +808,8 @@ class StaticShock implements StaticShockPipeline {
     for (final pickedFile in _files) {
       late AssetContent content;
 
-      final file = _resolveSourceFile(pickedFile);
+      final file = pickedFile.file;
+      final relativePath = FileRelativePath.parse(pickedFile.subPath);
       try {
         // Try to read as plain text, first.
         final textContent = file.readAsStringSync();
@@ -773,12 +827,12 @@ class StaticShock implements StaticShockPipeline {
 
       // Try to interpret the file as a page. If it is a page, load the page.
       for (final pageLoader in _pageLoaders) {
-        if (!pageLoader.canLoad(pickedFile)) {
+        if (!pageLoader.canLoad(relativePath)) {
           continue;
         }
 
         _log.detail("Loading page: $pickedFile");
-        final page = await pageLoader.loadPage(pickedFile, content.text!);
+        final page = await pageLoader.loadPage(relativePath, content.text!);
 
         final inheritedData = _context.dataIndex.inheritDataForPath(page.sourcePath);
         page.data.addEntries({
@@ -819,11 +873,11 @@ class StaticShock implements StaticShockPipeline {
       // The file isn't a page, therefore it must be an asset.
       _log.detail("Loading asset: $pickedFile");
       _context.addAsset(Asset(
-        sourcePath: pickedFile,
+        sourcePath: relativePath,
         sourceContent: content,
         // By default, we assume a direct copy of each asset. Asset transformers
         // can change this decision later.
-        destinationPath: pickedFile,
+        destinationPath: relativePath,
         destinationContent: content,
       ));
     }
@@ -987,6 +1041,7 @@ class StaticShock implements StaticShockPipeline {
         for (final renderer in _pageRenderers) {
           if (renderer.id == rendererId) {
             _log.detail("Rendering page '${page.title}' content as '$rendererId'");
+            _log.detail(" - page path: ${page.pagePath}");
             didRender = true;
             await renderer.renderContent(_context, page);
           }

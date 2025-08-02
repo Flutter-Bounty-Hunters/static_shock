@@ -1,8 +1,8 @@
 # Build output
 /build
 
-# Shock cache and temp files
-/source/.shock/
+# Build cache
+.shock
 
 # Puppeteer cached output
 .local-chrome

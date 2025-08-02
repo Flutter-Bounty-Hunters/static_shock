@@ -8,6 +8,7 @@ export 'src/pages.dart';
 export 'src/pipeline.dart';
 export 'src/source_files.dart';
 export 'src/static_shock.dart';
+export 'src/themes.dart';
 export 'src/templates/components.dart';
 export 'src/templates/layouts.dart';
 
