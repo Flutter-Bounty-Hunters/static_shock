@@ -11,6 +11,12 @@ Future<void> main(List<String> arguments) async {
     ),
     cliArguments: arguments,
   )
+    ..loadTheme(
+      Theme.fromGit(
+        url: "https://github.com/flutter-bounty-hunters/fbh_docs_theme",
+        path: "theme",
+      ),
+    )
     ..pick(DirectoryPicker.parse("images"))
     ..plugin(const MarkdownPlugin())
     ..plugin(JinjaPlugin(

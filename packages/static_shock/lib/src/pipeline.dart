@@ -5,14 +5,23 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:static_shock/src/data.dart';
 import 'package:static_shock/src/files.dart';
 import 'package:static_shock/src/finishers.dart';
+import 'package:static_shock/src/source_files.dart';
 import 'package:static_shock/src/templates/components.dart';
 import 'package:static_shock/src/templates/layouts.dart';
 
 import 'package:static_shock/src/assets.dart';
 import 'package:static_shock/src/pages.dart';
+import 'package:static_shock/src/themes.dart';
 
 /// A pipeline that runs a series of steps to generate a static website.
 abstract class StaticShockPipeline {
+  /// Adds the given [SourceFiles] to the collection of source files that are
+  /// pushed through the pipeline.
+  ///
+  /// There's only one true source directory, within the project, but users
+  /// can supplement the collection of source files with extensions.
+  void addSourceExtension(SourceFiles extensionFiles);
+
   /// Adds the given [picker] to the pipeline, which selects files that will
   /// be pushed through the pipeline.
   void pick(Picker picker);
@@ -37,6 +46,10 @@ abstract class StaticShockPipeline {
     Set<RemoteFileSource>? assets,
     Set<RemoteFileSource>? pages,
   });
+
+  /// Loads the given [theme], which is a collection of pages, assets, layouts,
+  /// and components.
+  void loadTheme(Theme theme);
 
   /// Adds the given [DataLoader] to the pipeline, which loads external data before
   /// any assets or pages are loaded.
@@ -112,6 +125,7 @@ class StaticShockPipelineContext {
     required Directory sourceDirectory,
     this.buildMode = StaticShockBuildMode.production,
     this.cliArguments = const [],
+    required this.buildCacheDirectory,
     required this.errorLog,
     Logger? log,
   })  : _sourceDirectory = sourceDirectory,
@@ -122,6 +136,8 @@ class StaticShockPipelineContext {
 
   /// {@macro cli_arguments}
   final List<String> cliArguments;
+
+  final Directory buildCacheDirectory;
 
   /// The shared [Logger] for all CLI output.
   ///
@@ -191,6 +207,7 @@ class StaticShockPipelineContext {
 
   /// Returns the [Layout] template from the given file [path].
   Layout? getLayout(FileRelativePath path) => _layouts[path];
+
   final _layouts = <FileRelativePath, Layout>{};
 
   /// Adds the given [layout] to the pipeline.

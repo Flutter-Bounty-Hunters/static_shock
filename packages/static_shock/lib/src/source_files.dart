@@ -57,6 +57,11 @@ class SourceFiles {
               file,
               file.path.substring(directory.path.length),
             )) //
+        .where(
+          (file) =>
+              !file.subPath.startsWith("_includes") && //
+              !file.subPath.startsWith("/_includes"),
+        )
         .where((file) => !_isExcluded(file.subPath))
         .where((file) => filter?.passesFilter(file) ?? true);
   }
